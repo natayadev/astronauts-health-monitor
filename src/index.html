@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Astro Vitals · HUD</title>
+<meta name="description" content="HUD gamificado de salud para tripulación espacial. Datos simulados con capa de datos abstracta lista para fuentes reales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   TOKENS · paleta tomada de la imagen de referencia (azul profundo + cian)
+   Semáforo: verde / amarillo / rojo. Gris = sin datos.
+   ========================================================================== */
+:root{
+  --bg0:#030b1b; --bg1:#061637; --bg2:#0a2250; --bg3:#0e2c66;
+  --panel:rgba(7,26,60,.78); --panel2:rgba(10,36,82,.85);
+  --line:rgba(30,214,255,.35); --line2:rgba(30,214,255,.7);
+  --cyan:#1ed6ff; --cyan2:#6ff0ff; --cyan3:#a8f6ff; --cyan-dim:#0b6f94;
+  --text:#dff6ff; --muted:#8fc3d9; --muted2:#7fb0c8; --focus:#9df3ff;
+  --ok:#2ee89b; --warn:#ffc53d; --crit:#ff4d6a; --none:#6b7f95;
+  --ok-bg:rgba(46,232,155,.12); --warn-bg:rgba(255,197,61,.14); --crit-bg:rgba(255,77,106,.16);
+  --radius:14px; --font-hud:'Orbitron','Rajdhani',system-ui,sans-serif; --font-ui:'Rajdhani','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+html{-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+body{font-variant-numeric:tabular-nums}                         /* números que cambian en vivo no desplazan el layout */
+h1,h2,h3,.status-pill,.chip{text-wrap:balance}                  /* títulos y etiquetas cortas: líneas parejas */
+p,.note,.toast span,.notif span,.alert-row .body span,.mission .md{text-wrap:pretty} /* texto corto: sin palabra huérfana */
+@property --holo{syntax:'<color>'; inherits:true; initial-value:#1ed6ff} /* registrada: el holograma cambia de color en lugar de saltar */
+body{
+  margin:0; font-family:var(--font-ui); color:var(--text); font-size:16px;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, #0e2f6e 0%, transparent 60%),
+    radial-gradient(900px 500px at 50% 110%, #083061 0%, transparent 60%),
+    linear-gradient(180deg,var(--bg0),var(--bg1) 50%,var(--bg0));
+  overflow:hidden;
+}
+body::before{ /* grilla sutil */
+  content:""; position:fixed; inset:0; pointer-events:none; opacity:.25;
+  background-image:linear-gradient(rgba(30,214,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(30,214,255,.08) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+button{font-family:inherit; color:inherit; cursor:pointer}
+input,select{font-family:inherit; color:var(--text); background:rgba(3,15,40,.8); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:15px}
+input:focus,select:focus{border-color:var(--cyan)}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:6px}
+::selection{background:rgba(30,214,255,.35); color:#fff}
+::-webkit-scrollbar{width:8px;height:8px} ::-webkit-scrollbar-thumb{background:var(--cyan-dim);border-radius:8px}
+.num{font-variant-numeric:tabular-nums}
+/* escala al presionar: 0.96 fijo, transición CSS (interrumpible) solo sobre `scale` */
+.btn,.mini-btn,.crew-tab,.dock button,.bell,.block h3 .more{transition-property:scale,background-color,border-color,box-shadow,color; transition-duration:.15s; transition-timing-function:ease-out}
+.btn:active,.mini-btn:active,.crew-tab:active,.dock button:active,.bell:active{scale:.96}
+/* zona táctil mínima 40px en escritorio denso, sin solaparse con vecinos (solo extensión vertical) */
+.mini-btn,.block h3 .more{position:relative}
+.mini-btn::after,.block h3 .more::after{content:""; position:absolute; inset:-5px 0}
+.ic{display:inline-block; width:1em; height:1em; vertical-align:-.15em; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex:none}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.flag{display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:700; letter-spacing:.5px; margin-top:2px}
+.flag.atencion{color:var(--warn)} .flag.cirujano{color:var(--crit)}
+/* movimiento reducido: se conservan los estados finales (color, borde), se quitan los bucles */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important}
+  .astro .sweep{display:none} .rings i{opacity:.5}
+  .card[data-level="cirujano"]::before,.status-pill.cirujano::before{opacity:1}
+}
+@media (pointer:coarse){ .mini-btn,.block h3 .more{min-height:40px} .crew-tab{min-height:44px} .bell{width:46px;height:46px} }
+
+/* ---------- marco HUD con esquinas ---------- */
+#app{position:fixed; inset:12px; display:grid; grid-template-rows:auto 1fr auto; gap:12px; padding:14px 18px; border:1px solid var(--line); border-radius:22px; background:rgba(3,12,32,.35)}
+.corner{position:absolute; width:46px; height:46px; border:3px solid var(--cyan); filter:drop-shadow(0 0 6px var(--cyan)); pointer-events:none}
+.corner.tl{top:-2px;left:-2px;border-right:0;border-bottom:0;border-radius:22px 0 0 0}
+.corner.tr{top:-2px;right:-2px;border-left:0;border-bottom:0;border-radius:0 22px 0 0}
+.corner.bl{bottom:-2px;left:-2px;border-right:0;border-top:0;border-radius:0 0 0 22px}
+.corner.br{bottom:-2px;right:-2px;border-left:0;border-top:0;border-radius:0 0 22px 0}
+.rail{position:absolute; left:50%; transform:translateX(-50%); width:38%; height:4px; background:linear-gradient(90deg,transparent,var(--cyan),transparent); filter:blur(.3px); opacity:.9}
+.rail.top{top:-2px} .rail.bottom{bottom:-2px}
+
+/* ---------- barra superior ---------- */
+.topbar{display:flex; align-items:center; gap:18px; flex-wrap:wrap}
+.brand{display:flex; align-items:center; gap:12px}
+.brand .logo{width:42px;height:42px;border-radius:50%;border:2px solid var(--cyan);display:grid;place-items:center;box-shadow:0 0 14px rgba(30,214,255,.6),inset 0 0 12px rgba(30,214,255,.3)}
+.brand h1{font-family:var(--font-hud); font-size:19px; letter-spacing:3px; margin:0; color:var(--cyan2)}
+.brand small{display:block; font-size:12px; letter-spacing:1px; color:var(--muted); font-family:var(--font-ui)}
+.met{font-family:var(--font-hud); font-size:14px; letter-spacing:2px; color:var(--cyan3); padding:6px 14px; border:1px solid var(--line); border-radius:999px; background:var(--panel)}
+.met b{color:var(--cyan)}
+.badge-source{font-family:var(--font-hud); font-size:12px; letter-spacing:2px; padding:7px 14px; border-radius:999px; border:1px solid var(--warn); color:#1a1200; background:var(--warn); box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.badge-source.real{background:var(--ok); border-color:var(--ok); color:#002a16}
+.badge-source.archivo{background:var(--cyan); border-color:var(--cyan); color:#002233}
+.crew-tabs{display:flex; gap:8px; margin-left:auto}
+.crew-tab{display:flex; align-items:center; gap:8px; padding:5px 12px 5px 5px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--muted)}
+.crew-tab .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-hud);font-size:11px;background:var(--bg3);border:2px solid var(--none)}
+.crew-tab.active{color:var(--text); border-color:var(--cyan); box-shadow:0 0 12px rgba(30,214,255,.45)}
+.crew-tab[data-level="normal"] .av{border-color:var(--ok)} .crew-tab[data-level="atencion"] .av{border-color:var(--warn)} .crew-tab[data-level="cirujano"] .av{border-color:var(--crit); box-shadow:0 0 0 3px rgba(255,77,106,.35)}
+.score .streak .ic{color:var(--warn)}
+.score{display:flex; align-items:center; gap:14px; padding:6px 14px; border:1px solid var(--line); border-radius:12px; background:var(--panel)}
+.score .pts{font-family:var(--font-hud); color:var(--cyan2); font-size:15px}
+.score .streak{color:var(--warn); font-weight:700}
+.score .rank{font-size:12px; color:var(--muted); letter-spacing:1px}
+.bell{position:relative; width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--panel)}
+.bell .count{position:absolute; top:-6px; right:-6px; min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--crit); color:#fff; font-size:12px; font-weight:700; display:grid; place-items:center}
+.bell .count:empty{display:none}
+
+/* ---------- vistas ---------- */
+main{position:relative; min-height:0; min-width:0; overflow:hidden}
+#app{grid-template-columns:minmax(0,1fr)}
+.two>*,.three>*,.panel-grid>*,.page>*{min-width:0}
+.view{position:absolute; inset:0; overflow:auto; padding:4px; display:none}
+.view.active{display:block}
+.panel-grid{display:grid; grid-template-columns:minmax(300px,1fr) minmax(320px,1.1fr) minmax(300px,1fr); gap:16px; height:100%; min-height:0}
+.col{display:flex; flex-direction:column; gap:12px; min-height:0}
+
+/* ---------- tarjetas ---------- */
+.card{position:relative; display:grid; grid-template-columns:70px 1fr; gap:10px; align-items:center; padding:12px 14px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); box-shadow:inset 0 0 30px rgba(30,214,255,.05); transition:box-shadow .3s,border-color .3s}
+.card::after{content:""; position:absolute; left:14px; right:14px; top:-1px; height:2px; background:linear-gradient(90deg,transparent,var(--cyan),transparent); opacity:.7}
+.card[data-level="normal"]{border-color:rgba(46,232,155,.45)}
+.card[data-level="atencion"]{border-color:var(--warn); box-shadow:0 0 18px rgba(255,197,61,.25), inset 0 0 30px rgba(255,197,61,.06)}
+.card[data-level="cirujano"]{border-color:var(--crit); box-shadow:inset 0 0 30px rgba(255,77,106,.08)}
+.card[data-level="cirujano"]::before,.status-pill.cirujano::before{content:""; position:absolute; inset:-1px; border-radius:inherit; box-shadow:0 0 28px rgba(255,77,106,.6); pointer-events:none; animation:pulseOp 1.2s ease-in-out infinite}
+.card[data-level="sindatos"]{border-style:dashed; opacity:.8}
+@keyframes pulseOp{0%,100%{opacity:.35}50%{opacity:1}} /* anima opacidad (compositor), no box-shadow (repintado) */
+.icon-ring{width:60px;height:60px;border-radius:50%;border:2px solid var(--cyan);display:grid;place-items:center;background:radial-gradient(circle,rgba(30,214,255,.25),rgba(3,12,32,.6));box-shadow:0 0 14px rgba(30,214,255,.5), inset 0 0 10px rgba(30,214,255,.3)}
+.icon-ring svg{width:32px;height:32px;fill:none;stroke:var(--cyan2);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px var(--cyan))}
+.card .title{font-family:var(--font-hud); font-size:12px; letter-spacing:1.5px; color:var(--cyan3); display:flex; justify-content:space-between; align-items:center; gap:8px}
+.card .value{font-family:var(--font-hud); font-size:28px; line-height:1.1; color:#fff; font-variant-numeric:tabular-nums}
+.card .value small{font-size:12px; color:var(--muted); margin-left:6px; font-family:var(--font-ui); letter-spacing:1px}
+.card .row{display:flex; align-items:end; justify-content:space-between; gap:10px}
+.card canvas{width:120px;height:36px}
+.led{display:inline-flex; align-items:center; gap:6px; font-size:12px; letter-spacing:1px; text-transform:uppercase; font-weight:700}
+.led::before{content:""; width:9px;height:9px;border-radius:50%; background:currentColor; box-shadow:0 0 8px currentColor}
+.led.normal{color:var(--ok)} .led.atencion{color:var(--warn)} .led.cirujano{color:var(--crit)} .led.sindatos{color:var(--none)}
+.quality{font-size:12px; color:var(--muted2); display:flex; align-items:center; gap:4px}
+.quality .ic{stroke-width:1.5} .flag .ic{stroke-width:2} /* trazo del ícono = peso del texto (400 → 1.5px, 700 → 2px) */
+.quality.bad{color:var(--warn)}
+
+/* ---------- holograma central ---------- */
+.holo{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:space-between; height:100%; min-height:520px; padding:10px 0; border:1px solid var(--line); border-radius:var(--radius); background:linear-gradient(180deg,rgba(10,34,80,.35),rgba(3,12,32,.2)); overflow:hidden}
+.holo .status-pill{font-family:var(--font-hud); font-size:12px; letter-spacing:2px; padding:8px 18px; border-radius:999px; border:1px solid currentColor; background:rgba(3,12,32,.7); text-align:center; max-width:92%}
+.holo .status-pill{position:relative; z-index:1}
+.status-pill.normal{color:var(--ok)} .status-pill.atencion{color:var(--warn); box-shadow:0 0 16px rgba(255,197,61,.35)} .status-pill.cirujano{color:var(--crit)} .status-pill.sindatos{color:var(--none)}
+.holo .beam{position:absolute; top:40px; bottom:70px; left:50%; width:280px; transform:translateX(-50%); background:linear-gradient(180deg,rgba(30,214,255,.0),rgba(30,214,255,.09) 30%,rgba(30,214,255,.16)); clip-path:polygon(30% 0,70% 0,100% 100%,0 100%); pointer-events:none}
+.astro-wrap{position:relative; flex:1; display:flex; align-items:center; justify-content:center; width:100%}
+.astro{--holo:var(--cyan); position:relative; width:190px; height:443px; max-height:60vh; aspect-ratio:320/746;
+  background:linear-gradient(180deg,#eafcff 0%,var(--holo) 35%,color-mix(in srgb,var(--holo) 55%,#021a33) 100%);
+  -webkit-mask:url(assets/astronaut.png) center/contain no-repeat; mask:url(assets/astronaut.png) center/contain no-repeat;
+  -webkit-mask-mode:luminance; mask-mode:luminance; filter:drop-shadow(0 0 16px var(--holo)); transition:--holo .6s ease-out; animation:float 5s ease-in-out infinite}
+.astro .scan{position:absolute; inset:0; background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 3px,rgba(0,30,60,.35) 3px 4px)}
+.astro .sweep{position:absolute; left:0; right:0; top:-40px; height:40px; background:linear-gradient(180deg,transparent,rgba(255,255,255,.75),transparent); animation:sweep 3.2s linear infinite}
+@keyframes sweep{0%{transform:translateY(0)}100%{transform:translateY(calc(100% + 460px))}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.rings{position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:260px; height:70px; pointer-events:none}
+.rings i{position:absolute; left:50%; top:50%; border:2px solid var(--cyan); border-radius:50%; transform:translate(-50%,-50%); opacity:.7; animation:ring 2.4s ease-out infinite}
+.rings i:nth-child(1){width:110px;height:30px} .rings i:nth-child(2){width:170px;height:46px;animation-delay:.8s} .rings i:nth-child(3){width:240px;height:64px;animation-delay:1.6s}
+@keyframes ring{0%{opacity:.9;box-shadow:0 0 0 rgba(30,214,255,.8)}100%{opacity:.25;box-shadow:0 0 18px rgba(30,214,255,0)}}
+.holo .who{text-align:center; z-index:1}
+.holo .who b{font-family:var(--font-hud); font-size:15px; letter-spacing:2px; color:#fff}
+.holo .who span{display:block; color:var(--muted); letter-spacing:1px; font-size:13px}
+.holo .tags{position:absolute; top:60px; left:12px; right:12px; display:flex; justify-content:space-between; pointer-events:none}
+.holo .tag{font-size:12px; letter-spacing:.5px; color:var(--muted); padding:4px 8px; border:1px solid var(--line); border-radius:6px; background:rgba(3,12,32,.6)}
+.holo .tag b{color:var(--cyan2); font-family:var(--font-hud); font-size:12px; font-variant-numeric:tabular-nums}
+.holo .reasons{z-index:1; display:flex; flex-wrap:wrap; gap:6px; justify-content:center; padding:0 10px; min-height:26px}
+.chip{font-size:12px; padding:3px 9px; border-radius:999px; border:1px solid currentColor; letter-spacing:.5px}
+.chip.atencion{color:var(--warn); background:var(--warn-bg)} .chip.cirujano{color:var(--crit); background:var(--crit-bg)} .chip.sindatos{color:var(--none)}
+
+/* ---------- tarjetas de lista (entorno, dispositivos, misiones) ---------- */
+.block{border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); padding:12px 14px; position:relative}
+.block::after{content:""; position:absolute; left:14px; right:14px; top:-1px; height:2px; background:linear-gradient(90deg,transparent,var(--cyan),transparent); opacity:.7}
+.block h3{margin:0 0 10px; font-family:var(--font-hud); font-size:12px; letter-spacing:1.5px; color:var(--cyan3); display:flex; justify-content:space-between; align-items:center; gap:8px}
+.block h3 .more{font-family:var(--font-ui); font-size:13px; color:var(--cyan2); background:none; border:0; letter-spacing:0; padding:4px 8px; min-height:28px; border-radius:6px; text-decoration:underline; text-underline-offset:3px; text-transform:none; font-weight:600}
+.block h3 .more:hover{background:rgba(30,214,255,.12)}
+.kv{display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:8px}
+.kv .k{font-size:12px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase}
+.kv .v{font-family:var(--font-hud); font-size:16px; color:#fff; font-variant-numeric:tabular-nums}
+.kv .v small{font-size:10px; color:var(--muted); font-family:var(--font-ui); margin-left:3px}
+.kv div{padding:6px 8px; border-radius:8px; border:1px solid transparent}
+.kv div[data-level="atencion"]{border-color:var(--warn); background:var(--warn-bg)} .kv div[data-level="cirujano"]{border-color:var(--crit); background:var(--crit-bg)}
+.dev{display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; padding:6px 0; border-bottom:1px dashed rgba(30,214,255,.15); font-size:14px}
+.dev:last-child{border-bottom:0}
+.dev .name{display:flex; align-items:center; gap:8px}
+.dev .st{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.dev .st.desconectado{background:var(--crit);box-shadow:0 0 6px var(--crit)} .dev .st.degradado{background:var(--warn);box-shadow:0 0 6px var(--warn)}
+.bat{display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--muted)}
+.bat i{width:26px;height:12px;border:1px solid var(--muted);border-radius:3px;position:relative;display:inline-block}
+.bat i::after{content:"";position:absolute;left:1px;top:1px;bottom:1px;width:calc(var(--p) * 1%);max-width:22px;background:var(--ok);border-radius:2px}
+.bat.warn i::after{background:var(--warn)} .bat.crit i::after{background:var(--crit)}
+.sig{font-size:12px; color:var(--muted)}
+.mini-btn{font-size:13px; min-height:30px; padding:4px 10px; border-radius:6px; border:1px solid var(--line2); background:rgba(30,214,255,.12); color:var(--cyan2); letter-spacing:.3px; display:inline-flex; align-items:center; gap:5px; transition:background .18s ease,border-color .18s ease}
+.mini-btn:hover{background:rgba(30,214,255,.25)}
+.mini-btn.ok{border-color:var(--ok); color:var(--ok); background:var(--ok-bg)}
+.bars{display:flex; align-items:end; gap:3px; height:40px}
+.bars i{flex:1; background:var(--cyan); opacity:.75; border-radius:2px 2px 0 0; box-shadow:0 0 5px rgba(30,214,255,.5)}
+.bars i.today{background:var(--cyan2); opacity:1}
+.bars i.low{background:var(--warn)}
+.progress{height:8px; border-radius:6px; background:rgba(30,214,255,.12); overflow:hidden; border:1px solid rgba(30,214,255,.25)}
+.progress b{display:block; height:100%; background:linear-gradient(90deg,var(--cyan-dim),var(--cyan)); box-shadow:0 0 8px var(--cyan); transition:width .4s}
+.progress.done b{background:linear-gradient(90deg,#15a56b,var(--ok)); box-shadow:0 0 8px var(--ok)}
+.mission{display:grid; grid-template-columns:34px 1fr auto; gap:10px; align-items:center; padding:8px 0; border-bottom:1px dashed rgba(30,214,255,.15)}
+.mission:last-child{border-bottom:0}
+.mission .mi{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center;background:rgba(30,214,255,.08)}
+.mission .mi svg{width:20px;height:20px;fill:none;stroke:var(--cyan2);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mission.done .mi{border-color:var(--ok); background:var(--ok-bg)} .mission.done .mi svg{stroke:var(--ok)}
+.mission .mt{font-weight:600; font-size:14px} .mission .md{font-size:12px; color:var(--muted)}
+.mission .mp{font-family:var(--font-hud); font-size:12px; color:var(--warn); white-space:nowrap}
+.mission.done .mp{color:var(--ok)}
+
+/* ---------- dock inferior ---------- */
+.dock{display:flex; justify-content:center; gap:14px}
+.dock button{width:62px;height:52px;border-radius:12px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;position:relative;color:var(--cyan2)}
+.dock button svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round} /* un SVG, estados por color */
+.dock button:hover,.dock button.active{border-color:var(--cyan); color:var(--cyan3); box-shadow:0 0 16px rgba(30,214,255,.55), inset 0 0 12px rgba(30,214,255,.2)}
+.dock button span{position:absolute; bottom:-16px; font-size:11px; letter-spacing:.8px; color:var(--muted); text-transform:uppercase}
+.dock button .dot{position:absolute; top:6px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--crit); box-shadow:0 0 6px var(--crit); display:none}
+.dock button.has-alert .dot{display:block}
+
+/* ---------- vistas secundarias ---------- */
+.page{max-width:1200px; margin:0 auto; display:grid; gap:14px}
+.page h2{font-family:var(--font-hud); font-size:16px; letter-spacing:3px; color:var(--cyan2); margin:4px 0 0}
+.page h2 small{display:block; font-family:var(--font-ui); letter-spacing:1px; font-size:13px; color:var(--muted); margin-top:4px}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.three{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+.toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.btn{padding:8px 16px; border-radius:10px; border:1px solid var(--line2); background:rgba(30,214,255,.12); color:var(--cyan2); font-weight:600; letter-spacing:1px}
+.btn:hover{background:rgba(30,214,255,.25); box-shadow:0 0 12px rgba(30,214,255,.4)}
+.btn.warn{border-color:var(--warn); color:var(--warn); background:var(--warn-bg)} .btn.crit{border-color:var(--crit); color:var(--crit); background:var(--crit-bg)} .btn.ok{border-color:var(--ok); color:var(--ok); background:var(--ok-bg)}
+.btn.ghost{background:transparent; color:var(--muted)}
+.chart-big{width:100%; height:320px; display:block; border-radius:10px; background:rgba(3,12,32,.5)}
+.stats{display:flex; gap:18px; flex-wrap:wrap; font-size:14px; color:var(--muted)} .stats b{color:#fff; font-family:var(--font-hud); font-size:14px}
+.alert-row{display:grid; grid-template-columns:12px 1fr auto auto; gap:12px; align-items:center; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:rgba(3,12,32,.5); margin-bottom:8px}
+.alert-row .lvl{width:12px;height:12px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+.alert-row.atencion{border-color:var(--warn); color:var(--warn)} .alert-row.cirujano{border-color:var(--crit); color:var(--crit)} .alert-row.normal{color:var(--ok)} .alert-row.recordatorio{color:var(--cyan)}
+.alert-row .body{color:var(--text)} .alert-row .body b{display:block} .alert-row .body span{font-size:13px; color:var(--muted)}
+.alert-row .when{font-size:12px; color:var(--muted); white-space:nowrap}
+.alert-row.acked{opacity:.55}
+.table{width:100%; border-collapse:collapse; font-size:14px} .table th,.table td{padding:6px 8px; border-bottom:1px solid rgba(30,214,255,.15); text-align:left} .table th{color:var(--muted); font-weight:600; letter-spacing:1px; font-size:12px; text-transform:uppercase}
+.table input{width:80px; padding:3px 6px; font-size:14px}
+.mono{font-family:ui-monospace,Consolas,monospace; font-size:12px; color:var(--cyan3); background:rgba(3,12,32,.7); padding:10px; border-radius:8px; overflow:auto; max-height:260px; white-space:pre}
+.drop{border:2px dashed var(--line2); border-radius:12px; padding:26px; text-align:center; color:var(--muted); transition:background-color .15s ease-out,border-color .15s ease-out}
+.drop.over{background:rgba(30,214,255,.1); border-color:var(--cyan)}
+.report{font-size:14px} .report .ok{color:var(--ok)} .report .err{color:var(--crit)}
+.rank-card{display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center}
+.rank-card .big{font-family:var(--font-hud); font-size:40px; color:var(--cyan2); text-shadow:0 0 16px rgba(30,214,255,.7)}
+.streak-days{display:flex; gap:6px; margin-top:8px} .streak-days i{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--muted)} .streak-days i.on{background:var(--warn);color:#2a1b00;border-color:var(--warn);box-shadow:0 0 8px rgba(255,197,61,.6)}
+.note{font-size:13px; color:var(--muted2); font-style:italic}
+label.f{display:grid; gap:4px; font-size:13px; color:var(--muted)}
+.switch{display:inline-flex; align-items:center; gap:8px; font-size:14px}
+
+/* ---------- toasts y cajón de notificaciones ---------- */
+#toasts{position:fixed; top:80px; right:30px; display:flex; flex-direction:column; gap:10px; z-index:50; width:340px}
+.toast{padding:12px 14px; border-radius:12px; border:1px solid var(--cyan); background:rgba(5,22,55,.95); box-shadow:0 0 18px rgba(30,214,255,.35); animation:slide .3s ease-out; display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:start}
+.toast.atencion{border-color:var(--warn); box-shadow:0 0 18px rgba(255,197,61,.4)} .toast.cirujano{border-color:var(--crit); box-shadow:0 0 22px rgba(255,77,106,.6)} .toast.logro{border-color:var(--ok); box-shadow:0 0 18px rgba(46,232,155,.5)}
+.toast b{display:block; font-size:14px} .toast span{font-size:13px; color:var(--muted)}
+.toast .tic{width:22px;height:22px;margin-top:2px;color:var(--cyan2);font-size:22px;line-height:1} .toast.atencion .tic{color:var(--warn)} .toast.cirujano .tic{color:var(--crit)} .toast.logro .tic{color:var(--ok)}
+@keyframes slide{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+#drawer{position:fixed; top:70px; right:30px; bottom:90px; width:380px; background:rgba(5,22,55,.97); border:1px solid var(--cyan); border-radius:16px; box-shadow:0 0 30px rgba(30,214,255,.35); z-index:40; display:none; flex-direction:column; overflow:hidden}
+#drawer.open{display:flex}
+#drawer header{padding:12px 14px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:12px; letter-spacing:2px; color:var(--cyan2)}
+#drawer .list{overflow:auto; padding:10px 12px; flex:1}
+.notif{padding:10px 12px; border-radius:10px; border:1px solid var(--line); margin-bottom:8px; background:rgba(3,12,32,.5); display:grid; gap:6px}
+.notif.unread{border-color:var(--cyan)} .notif b{font-size:14px} .notif span{font-size:13px; color:var(--muted)} .notif .acts{display:flex; gap:6px; justify-content:flex-end}
+.notif.atencion{border-left:4px solid var(--warn)} .notif.cirujano{border-left:4px solid var(--crit)} .notif.recordatorio{border-left:4px solid var(--cyan)} .notif.logro{border-left:4px solid var(--ok)}
+
+@media (max-width:1100px){ .panel-grid{grid-template-columns:1fr 1fr} .holo{grid-column:1 / -1; order:-1; min-height:420px} .two,.three{grid-template-columns:1fr} }
+@media (max-width:720px){ #app{inset:6px; padding:10px 12px} .topbar{gap:8px 10px} .brand .logo{width:34px;height:34px} .brand h1{font-size:15px; letter-spacing:2px} .badge-source{font-size:11px; padding:5px 10px} .score{padding:4px 10px} #toasts{top:auto; bottom:96px} .panel-grid{grid-template-columns:1fr} .crew-tabs{margin-left:0; width:100%; overflow:auto; padding-bottom:4px} .crew-tab span:last-child{display:none} .crew-tab.active span:last-child{display:inline} .brand small,.score .rank{display:none} .met{font-size:12px; padding:5px 10px} .holo{min-height:380px} .astro{width:min(190px,42vw); height:auto} #toasts,#drawer{right:12px; left:12px; width:auto} .dock{gap:8px} .dock button{width:50px;height:46px} .card{grid-template-columns:56px 1fr} .icon-ring{width:48px;height:48px} .card canvas{width:90px} }
+</style>
+</head>
+<body>
+<div id="app">
+  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+  <i class="rail top"></i><i class="rail bottom"></i>
+
+  <!-- ===================== BARRA SUPERIOR ===================== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6ff0ff" stroke-width="1.8" stroke-linecap="round"><path d="M3 12h4l2-5 3 10 2-6 1 1h6"/></svg></div>
+      <div><h1>ASTRO VITALS</h1><small>CREW HEALTH HUD · v0.3</small></div>
+    </div>
+    <div class="met" id="met">MET <b>---</b></div>
+    <div class="badge-source" id="badge-source">● DATOS SIMULADOS</div>
+    <div class="crew-tabs" id="crew-tabs"></div>
+    <div class="score" title="Puntos de misión y racha de objetivos diarios">
+      <span class="pts num" id="score-pts">0 pts</span>
+      <span class="streak num" title="Racha de días con todos los objetivos"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c4.4 0 7-2.8 7-6.5 0-3.4-2.3-5.3-3.6-7.2-.4 1.6-1.2 2.5-2.1 3-.1-3-1.4-5.7-4.3-8.3.3 2.8-1 4.3-2.4 6C5.2 10.7 5 12.5 5 15.5 5 19.2 7.6 22 12 22z"/><path d="M12 22c-1.7 0-3-1.3-3-3 0-1.6 1.2-2.3 2-3.6.9.8 1.6 1.2 1.6 2.6"/></svg><span id="score-streak">0</span><span class="sr-only"> días de racha</span></span>
+      <span class="rank" id="score-rank">CADETE</span>
+    </div>
+    <button class="bell" id="bell" title="Notificaciones y recordatorios" aria-label="Notificaciones" aria-expanded="false" aria-controls="drawer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6ff0ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+      <span class="count" id="bell-count" aria-hidden="true"></span><span class="sr-only" id="bell-sr"></span>
+    </button>
+  </header>
+
+  <!-- ===================== VISTAS ===================== -->
+  <main>
+    <!-- PANEL PRINCIPAL -->
+    <section class="view active" id="view-panel">
+      <h2 class="sr-only">Panel de tripulación</h2>
+      <div class="panel-grid">
+        <div class="col" id="cards-left"></div>
+        <div class="holo" id="holo">
+          <div class="beam"></div>
+          <div class="status-pill sindatos" id="overall-pill">ESTADO GENERAL · SIN DATOS</div>
+          <div class="tags"><span class="tag">SpO₂ <b id="tag-spo2">--</b></span><span class="tag">FC <b id="tag-hr">--</b></span></div>
+          <div class="astro-wrap">
+            <div class="astro" id="astro"><div class="scan"></div><div class="sweep"></div></div>
+            <div class="rings"><i></i><i></i><i></i></div>
+          </div>
+          <div class="reasons" id="overall-reasons"></div>
+          <div class="who"><b id="who-name">—</b><span id="who-role">—</span></div>
+        </div>
+        <div class="col" id="cards-right">
+          <div class="block" id="env-block"><h3>ENTORNO DE CABINA <button class="more" data-go="historial">módulo</button></h3><div class="kv" id="env-kv"></div></div>
+          <div class="block" id="dev-block"><h3>DISPOSITIVOS <span class="note" id="dev-note"></span></h3><div id="dev-list"></div></div>
+          <div class="block"><h3>ACTIVIDAD DIARIA <button class="more" data-go="misiones">ver misiones</button></h3><div id="activity-block"></div></div>
+          <div class="block"><h3>MISIONES DE HOY <span class="note" id="missions-summary"></span></h3><div id="missions-mini"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORIAL -->
+    <section class="view" id="view-historial">
+      <div class="page">
+        <h2>HISTORIAL DE SIGNOS VITALES <small>Serie temporal de la ventana configurada. Las bandas marcan los umbrales del semáforo; los cortes son datos faltantes.</small></h2>
+        <div class="toolbar">
+          <label class="f">Métrica <select id="hist-metric"></select></label>
+          <label class="f">Ventana <select id="hist-window"><option value="5">5 min</option><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">60 min</option></select></label>
+          <button class="btn ghost" id="hist-pause" aria-pressed="false" style="align-self:end">Pausar</button>
+          <span class="stats num" id="hist-stats" aria-live="polite"></span>
+        </div>
+        <canvas class="chart-big" id="hist-chart" role="img" aria-label="Gráfico de la métrica seleccionada en la ventana elegida; el resumen numérico está arriba"></canvas>
+        <div class="two">
+          <div class="block"><h3>CALIDAD DE SEÑAL (ventana)</h3><div class="kv" id="hist-quality"></div></div>
+          <div class="block"><h3>LÍNEA BASE PERSONAL</h3><div class="kv" id="hist-baseline"></div><p class="note">La línea base alimenta la regla de desviación personal (±<span id="hist-dev">25</span>%).</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MISIONES -->
+    <section class="view" id="view-misiones">
+      <div class="page">
+        <h2>MISIONES Y RECOMPENSAS <small>Objetivos diarios de salud. Completarlos suma puntos; completarlos todos mantiene la racha.</small></h2>
+        <div class="three">
+          <div class="block rank-card"><div class="big" id="rank-pts">0</div><div><div style="font-family:var(--font-hud);letter-spacing:2px" id="rank-name">CADETE</div><div class="note" id="rank-next"></div><div class="progress" style="margin-top:8px"><b id="rank-bar" style="width:0%"></b></div></div></div>
+          <div class="block"><h3>RACHA DE OBJETIVOS</h3><div class="num" style="font-family:var(--font-hud);font-size:28px;color:var(--warn);display:flex;align-items:center;gap:8px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c4.4 0 7-2.8 7-6.5 0-3.4-2.3-5.3-3.6-7.2-.4 1.6-1.2 2.5-2.1 3-.1-3-1.4-5.7-4.3-8.3.3 2.8-1 4.3-2.4 6C5.2 10.7 5 12.5 5 15.5 5 19.2 7.6 22 12 22z"/></svg><span><span id="streak-n">0</span> días</span></div><div class="streak-days" id="streak-days"></div><p class="note">Mejor racha: <span id="streak-best">0</span> · <span id="streak-demo"></span></p></div>
+          <div class="block"><h3>REGISTRO MANUAL</h3><div class="toolbar"><button class="btn" id="log-ex">+15 min ejercicio</button><button class="btn" id="log-hobby">+15 min hobby</button><button class="btn ghost" id="log-water">Registrar hidratación</button></div><p class="note">Los registros manuales entran al proveedor como eventos (pushEvent), igual que lo haría una app de a bordo.</p></div>
+        </div>
+        <div class="block"><h3>MISIONES DE HOY · <span id="missions-day"></span></h3><div id="missions-full"></div></div>
+        <div class="block"><h3>LOGROS RECIENTES</h3><div id="achievements"></div></div>
+      </div>
+    </section>
+
+    <!-- ALERTAS -->
+    <section class="view" id="view-alertas">
+      <div class="page">
+        <h2>ALERTAS Y RECORDATORIOS <small>Niveles: <span style="color:var(--ok)">Normal</span> · <span style="color:var(--warn)">Atención</span> · <span style="color:var(--crit)">Avisar a cirujanos de vuelo</span>. Reconocer una alerta suma puntos de respuesta.</small></h2>
+        <div class="toolbar">
+          <button class="btn ghost" data-filter="todas">Todas</button><button class="btn crit" data-filter="cirujano">Cirujanos</button><button class="btn warn" data-filter="atencion">Atención</button><button class="btn" data-filter="recordatorio">Recordatorios</button>
+          <button class="btn ok" id="ack-all" style="margin-left:auto">Reconocer todas</button>
+        </div>
+        <div id="alerts-list"></div>
+      </div>
+    </section>
+
+    <!-- DATOS -->
+    <section class="view" id="view-datos">
+      <div class="page">
+        <h2>FUENTE DE DATOS <small>La UI nunca lee del simulador: consume la interfaz DataProvider. Acá podés cargar un CSV/JSON real y validarlo contra el esquema.</small></h2>
+        <div class="two">
+          <div class="block">
+            <h3>CARGAR DATOS (CSV / JSON)</h3>
+            <div class="drop" id="drop">Arrastrá un archivo acá o <label style="color:var(--cyan2);cursor:pointer;text-decoration:underline">elegilo<input type="file" id="file-input" accept=".csv,.json,application/json,text/csv" hidden></label><br><span class="note">CSV: una fila por lectura con columnas del esquema VitalReading. JSON: array de lecturas o {crew, vitals, environment, devices, sleepActivity}.</span></div>
+            <div class="toolbar" style="margin-top:10px"><button class="btn ghost" id="dl-template">Descargar plantilla CSV</button><button class="btn ghost" id="dl-export">Exportar historial actual (JSON)</button></div>
+            <div class="report" id="import-report"></div>
+          </div>
+          <div class="block">
+            <h3>ESQUEMA (SCHEMA)</h3>
+            <div class="mono" id="schema-view"></div>
+            <p class="note">Todo dato nuevo se normaliza con adaptadores: adaptRestJson · adaptCsvRow · adaptDbRow (ver código).</p>
+          </div>
+        </div>
+        <div class="block"><h3>PROVEEDOR ACTIVO</h3><div id="provider-info" class="report"></div></div>
+      </div>
+    </section>
+
+    <!-- AJUSTES -->
+    <section class="view" id="view-ajustes">
+      <div class="page">
+        <h2>AJUSTES <small>Configuración centralizada (CONFIG). Los umbrales del semáforo viven en un solo objeto editable.</small></h2>
+        <div class="three">
+          <div class="block"><h3>FUENTE DE DATOS</h3>
+            <label class="f">Fuente <select id="set-source"><option value="simulada">Simulada</option><option value="remota">Remota (API)</option><option value="archivo">Archivo cargado</option></select></label>
+            <label class="f" style="margin-top:8px">Semilla del simulador <input type="number" id="set-seed" min="0"></label>
+            <label class="f" style="margin-top:8px">Intervalo de tick (ms) <input type="number" id="set-tick" min="250" step="250"></label>
+            <div class="toolbar" style="margin-top:10px"><button class="btn" id="apply-sim">Reiniciar simulación</button></div>
+            <label class="switch" style="margin-top:10px"><input type="checkbox" id="set-sound"> Sonido en alertas críticas</label>
+          </div>
+          <div class="block"><h3>INYECTAR EVENTO (tripulante seleccionado)</h3>
+            <div class="toolbar" id="inject-buttons"></div>
+            <p class="note">Los eventos entran por pushEvent() y duran ~90 s con rampa de entrada y salida.</p>
+          </div>
+          <div class="block"><h3>GAMIFICACIÓN</h3>
+            <div class="toolbar"><button class="btn warn" id="reset-gam">Reiniciar progreso</button></div>
+            <p class="note">Puntos, racha y misiones completadas se guardan en este navegador (localStorage).</p>
+          </div>
+        </div>
+        <div class="block"><h3>UMBRALES DEL SEMÁFORO <button class="more" id="reset-thr">restaurar</button></h3>
+          <table class="table" id="thr-table"></table>
+          <p class="note">Atención = fuera de la banda verde. Cirujanos de vuelo = fuera de la banda amarilla. Además, una desviación mayor a <input type="number" id="set-dev" style="width:60px" min="5" max="80">% respecto de la línea base personal eleva al menos a Atención.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== DOCK ===================== -->
+  <nav class="dock" id="dock" aria-label="Secciones">
+    <button data-view="panel" class="active" title="Panel" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Panel</span></button>
+    <button data-view="historial" title="Historial"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M4 16l5-6 4 3 7-8"/></svg><span>Historial</span></button>
+    <button data-view="misiones" title="Misiones"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg><span>Misiones</span></button>
+    <button data-view="alertas" title="Alertas"><svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg><span>Alertas</span><i class="dot"></i></button>
+    <button data-view="datos" title="Datos"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span>Datos</span></button>
+    <button data-view="ajustes" title="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Ajustes</span></button>
+  </nav>
+</div>
+
+<div id="toasts" role="status" aria-live="polite" aria-atomic="false"></div>
+<aside id="drawer" role="dialog" aria-label="Notificaciones y recordatorios"><header>NOTIFICACIONES <span><button class="mini-btn" id="notif-read">marcar leídas</button> <button class="mini-btn" id="notif-close" aria-label="Cerrar notificaciones"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span></header><div class="list" id="notif-list"></div></aside>
+
+<script>
+'use strict';
+/* =============================================================================
+   ASTRO VITALS · HUD gamificado de salud para tripulación
+   -----------------------------------------------------------------------------
+   Capas (en este orden dentro del archivo):
+     (a) SCHEMA y CONFIG            · contrato de datos + configuración centralizada
+     (b) PROVEEDORES DE DATOS       · DataProvider, SimulatedProvider, RemoteProvider, FileProvider, adaptadores
+     (c) MOTOR DE REGLAS / ALERTAS  · lecturas normalizadas -> verde / amarillo / rojo. No sabe de dónde vienen los datos
+     (d) ESTADO DE LA APP           · store, gamificación (misiones, puntos, racha), notificaciones
+     (e) UI                         · render del HUD, gráficos, vistas
+   Al final: "CÓMO CONECTAR DATOS REALES".
+   ============================================================================= */
+
+/* =============================================================================
+   (a) SCHEMA · esquema único y documentado. Unidades y rangos físicos plausibles.
+   Todo dato que entra (simulado, API, CSV, DB) se normaliza a estos objetos.
+   ============================================================================= */
+const SCHEMA = {
+  Astronaut: {
+    id: 'string (único)', name: 'string', role: 'string', avatar: 'string (2 letras)',
+    baseline: 'objeto {hr, spo2, bpSys, bpDia, temp, resp, hrv} con los valores típicos en reposo de ESA persona'
+  },
+  VitalReading: {
+    astronautId: 'string', timestamp: 'ISO-8601 UTC',
+    source: '"simulado" | "real"',
+    quality: '"ok" | "ruidoso" | "retrasado" | "faltante"',
+    hr:    { unit: 'bpm',  range: [30, 220], desc: 'frecuencia cardíaca' },
+    spo2:  { unit: '%',    range: [70, 100], desc: 'saturación de oxígeno' },
+    bpSys: { unit: 'mmHg', range: [70, 220], desc: 'presión sistólica' },
+    bpDia: { unit: 'mmHg', range: [40, 130], desc: 'presión diastólica' },
+    temp:  { unit: '°C',   range: [34, 42],  desc: 'temperatura corporal (central)' },
+    resp:  { unit: 'rpm',  range: [5, 40],   desc: 'frecuencia respiratoria' },
+    hrv:   { unit: 'ms',   range: [10, 200], desc: 'variabilidad cardíaca (RMSSD)' },
+    note: 'Un campo numérico puede ser null (dato faltante). quality describe la lectura completa.'
+  },
+  Environment: {
+    timestamp: 'ISO-8601 UTC', source: '"simulado" | "real"',
+    co2:       { unit: 'ppm',   range: [300, 10000] },
+    temp:      { unit: '°C',    range: [10, 40] },
+    humidity:  { unit: '%',     range: [0, 100] },
+    pressure:  { unit: 'kPa',   range: [60, 110] },
+    radiation: { unit: 'µSv/h', range: [0, 500] }
+  },
+  Device: {
+    id: 'string', astronautId: 'string', name: 'string', type: '"parche" | "pulsera" | "casco"',
+    status: '"conectado" | "degradado" | "desconectado"',
+    battery: { unit: '%', range: [0, 100] }, signal: { unit: '%', range: [0, 100] },
+    lastSeen: 'ISO-8601 UTC', provides: 'array de métricas que aporta (ej. ["hr","resp"])'
+  },
+  SleepActivity: {
+    astronautId: 'string', day: 'YYYY-MM-DD', source: '"simulado" | "real"',
+    sleepHours:   { unit: 'h',   range: [0, 14] },
+    sleepQuality: { unit: '%',   range: [0, 100] },
+    exerciseMin:  { unit: 'min', range: [0, 300] },
+    hobbyMin:     { unit: 'min', range: [0, 600] },
+    steps:        { unit: 'pasos', range: [0, 40000] }
+  },
+  Alert: {
+    id: 'string', timestamp: 'ISO-8601 UTC', astronautId: 'string | null',
+    kind: '"vital" | "entorno" | "dispositivo" | "recordatorio" | "logro"',
+    level: '"normal" | "atencion" | "cirujano"', metric: 'string', message: 'string', acknowledged: 'boolean'
+  },
+  Event: {
+    type: '"taquicardia" | "hipoxia" | "fiebre" | "hipertension" | "ejercicio" | "hobby" | "desconexion" | "recarga" | "co2" | "hidratacion"',
+    astronautId: 'string | null', durationMs: 'number (opcional)', params: 'objeto libre (opcional)'
+  }
+};
+
+/* =============================================================================
+   CONFIG · configuración centralizada. Nada de esto está esparcido por el código.
+   Las claves API van vacías: se cargan en runtime (Ajustes / variables de entorno del servidor proxy).
+   ============================================================================= */
+const CONFIG = {
+  dataSource: 'simulada',          // 'simulada' | 'remota' | 'archivo'
+  seed: 2026,                      // semilla del simulador (reproducible)
+  tickMs: 2000,                    // intervalo de lectura en vivo
+  historyWindowMin: 30,            // ventana de historial que se precarga y grafica
+  missionStart: '2026-10-04T00:00:00Z', // T0 para el reloj MET (Mission Elapsed Time)
+  api: {
+    baseUrl: '',                   // ej. 'https://mi-proxy.example.com/api' (el proxy resuelve CORS y guarda la key)
+    nasaApiKey: '',                // NUNCA hardcodear; ver sección final
+    timeoutMs: 8000, retries: 2, retryBackoffMs: 800, cacheTtlMs: 30000
+  },
+  thresholds: {
+    // [min, max] de la banda. Dentro de "atencion" => verde. Fuera de "atencion" pero dentro de "cirujano" => amarillo. Fuera => rojo.
+    hr:    { atencion: [50, 100],   cirujano: [40, 130] },
+    spo2:  { atencion: [94, 100],   cirujano: [90, 100] },
+    bpSys: { atencion: [95, 140],   cirujano: [85, 170] },
+    bpDia: { atencion: [55, 90],    cirujano: [45, 110] },
+    temp:  { atencion: [36.0, 37.6],cirujano: [35.0, 38.5] },
+    resp:  { atencion: [10, 20],    cirujano: [8, 28] },
+    hrv:   { atencion: [25, 200],   cirujano: [12, 250] },
+    baselineDeviationPct: 25,      // desvío % respecto de la línea base personal que eleva a Atención
+    env: {
+      co2:       { atencion: [0, 2500],  cirujano: [0, 5000] },
+      temp:      { atencion: [18, 27],   cirujano: [15, 32] },
+      humidity:  { atencion: [30, 70],   cirujano: [20, 85] },
+      pressure:  { atencion: [97, 104],  cirujano: [90, 108] },
+      radiation: { atencion: [0, 30],    cirujano: [0, 80] }
+    },
+    device: { batteryWarn: 20, batteryCrit: 8, signalWarn: 40 },
+    alertCooldownMs: 45000,        // no repetir la misma alerta antes de este tiempo
+    reminderCooldownMs: 10 * 60000
+  },
+  gamification: {
+    ranks: [ ['CADETE', 0], ['OFICIAL', 500], ['TENIENTE', 1500], ['COMANDANTE', 3000], ['LEYENDA', 6000] ],
+    ackPoints: 15, ackCritPoints: 30, waterPoints: 10,
+    goals: { exerciseMin: 60, sleepHours: 7, hobbyMin: 30, batteryMin: 50 }
+  },
+  storageKey: 'astrovitals.v1'
+};
+const DEFAULT_THRESHOLDS = JSON.parse(JSON.stringify(CONFIG.thresholds));
+
+const METRICS = {
+  hr:    { label: 'FRECUENCIA CARDÍACA', short: 'FC',   unit: 'bpm',  dec: 0, icon: 'heart' },
+  spo2:  { label: 'NIVEL DE OXÍGENO',    short: 'SpO₂', unit: '%',    dec: 0, icon: 'o2' },
+  bp:    { label: 'PRESIÓN ARTERIAL',    short: 'PA',   unit: 'mmHg', dec: 0, icon: 'bp', composite: ['bpSys', 'bpDia'] },
+  temp:  { label: 'TEMPERATURA',         short: 'T°',   unit: '°C',   dec: 1, icon: 'temp' },
+  resp:  { label: 'RESPIRACIÓN',         short: 'FR',   unit: 'rpm',  dec: 0, icon: 'lungs' },
+  hrv:   { label: 'VARIABILIDAD HRV',    short: 'HRV',  unit: 'ms',   dec: 0, icon: 'brain' }
+};
+const LEVELS = {
+  normal:   { order: 1, label: 'Normal',                      short: 'NORMAL' },
+  atencion: { order: 2, label: 'Atención',                    short: 'ATENCIÓN' },
+  cirujano: { order: 3, label: 'Avisar a cirujanos de vuelo', short: 'AVISAR A CIRUJANOS DE VUELO' },
+  sindatos: { order: 0, label: 'Sin datos',                   short: 'SIN DATOS' }
+};
+const SOURCE_LABEL = { simulado: 'DATOS SIMULADOS', real: 'DATOS REALES' };
+
+/* ---------- utilidades ---------- */
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const round = (v, d = 0) => v == null ? null : Math.round(v * 10 ** d) / 10 ** d;
+const pad = n => String(n).padStart(2, '0');
+const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
+const uid = () => Math.random().toString(36).slice(2, 10);
+const fmtTime = iso => { const d = new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function makeRng(seed) { // mulberry32: PRNG determinista
+  let a = seed >>> 0;
+  const rnd = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  rnd.gauss = () => { const u = 1 - rnd(), v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  rnd.pick = arr => arr[Math.floor(rnd() * arr.length)];
+  return rnd;
+}
+
+/* =============================================================================
+   (b) PROVEEDORES DE DATOS
+   DataProvider es el contrato. La UI SOLO habla con este contrato.
+   ============================================================================= */
+class DataProvider {
+  constructor() { this.kind = 'abstract'; this.sourceTag = 'simulado'; }
+  async getCrew() { throw new Error('getCrew no implementado'); }
+  async getVitals(astronautId, from, to) { throw new Error('getVitals no implementado'); }
+  subscribeVitals(astronautId, callback) { throw new Error('subscribeVitals no implementado'); } // devuelve unsubscribe()
+  async getEnvironment() { throw new Error('getEnvironment no implementado'); }
+  async getDevices(astronautId) { throw new Error('getDevices no implementado'); }
+  async getSleepActivity(astronautId, day) { throw new Error('getSleepActivity no implementado'); }
+  async getAlerts() { return []; }                      // alertas que ya vienen del origen (ej. sistema de a bordo)
+  async pushEvent(event) { /* opcional */ }             // eventos hacia el origen (registro manual, recarga, etc.)
+  destroy() {}
+  describe() { return { kind: this.kind, source: this.sourceTag }; }
+}
+
+/* -----------------------------------------------------------------------------
+   SimulatedProvider · datos con ruido, ritmo circadiano, línea base personal,
+   eventos inyectables, huecos y dispositivos desconectados. Semilla configurable.
+   ----------------------------------------------------------------------------- */
+const CREW_SEED = [
+  { id: 'ast-01', name: 'Valentina Ruiz', role: 'Comandante',             avatar: 'VR', baseline: { hr: 62, spo2: 98, bpSys: 118, bpDia: 76, temp: 36.6, resp: 14, hrv: 62 } },
+  { id: 'ast-02', name: 'Marcus Chen',    role: 'Ingeniero de vuelo',     avatar: 'MC', baseline: { hr: 57, spo2: 97, bpSys: 122, bpDia: 79, temp: 36.4, resp: 13, hrv: 74 } },
+  { id: 'ast-03', name: 'Amara Okafor',   role: 'Oficial médica',         avatar: 'AO', baseline: { hr: 66, spo2: 98, bpSys: 112, bpDia: 72, temp: 36.8, resp: 15, hrv: 55 } },
+  { id: 'ast-04', name: 'Luca Moretti',   role: 'Especialista de misión', avatar: 'LM', baseline: { hr: 71, spo2: 96, bpSys: 128, bpDia: 82, temp: 36.5, resp: 16, hrv: 48 } }
+];
+const EVENT_EFFECTS = {
+  taquicardia:  { hr: +48, resp: +6, hrv: -25 },
+  hipoxia:      { spo2: -9, hr: +16, resp: +7 },
+  fiebre:       { temp: +1.9, hr: +14, hrv: -12 },
+  hipertension: { bpSys: +42, bpDia: +22 },
+  ejercicio:    { hr: +55, resp: +12, temp: +0.5, bpSys: +18, hrv: -20 },
+  co2:          { env: { co2: +2800 } }
+};
+class SimulatedProvider extends DataProvider {
+  constructor({ seed = CONFIG.seed, tickMs = CONFIG.tickMs } = {}) {
+    super(); this.kind = 'SimulatedProvider'; this.sourceTag = 'simulado';
+    this.seed = seed; this.tickMs = tickMs; this.rng = makeRng(seed);
+    this.crew = CREW_SEED.map(c => ({ ...c, baseline: { ...c.baseline } }));
+    this.sim = {}; this.events = []; this.subs = new Map(); this.timer = null;
+    this.manual = {}; // registros manuales por astronauta y día
+    const r = this.rng;
+    for (const c of this.crew) {
+      this.sim[c.id] = {
+        phase: r() * Math.PI * 2, ar: { hr: 0, spo2: 0, bpSys: 0, bpDia: 0, temp: 0, resp: 0, hrv: 0 },
+        devices: [
+          { id: `${c.id}-parche`,  astronautId: c.id, name: 'Parche biométrico', type: 'parche',  status: 'conectado', battery: 40 + r() * 60, signal: 80 + r() * 20, provides: ['hr', 'resp', 'hrv', 'temp'] },
+          { id: `${c.id}-pulsera`, astronautId: c.id, name: 'Pulsera SpO₂/PA',   type: 'pulsera', status: 'conectado', battery: 20 + r() * 80, signal: 70 + r() * 30, provides: ['spo2', 'bpSys', 'bpDia'] },
+          { id: `${c.id}-casco`,   astronautId: c.id, name: 'Sensor de casco',   type: 'casco',   status: 'conectado', battery: 60 + r() * 40, signal: 85 + r() * 15, provides: [] }
+        ],
+        disconnectUntil: {}
+      };
+    }
+    // un dispositivo arranca con batería baja para disparar el recordatorio de recarga
+    this.sim['ast-02'].devices[1].battery = 14;
+    this.env = { co2: 1800 + r() * 500, temp: 22.5, humidity: 45, pressure: 101.2, radiation: 12 };
+    this.envAr = { co2: 0, temp: 0, humidity: 0, pressure: 0, radiation: 0 };
+    this.history = {}; this._preloadHistory();
+    this._startLoop();
+  }
+  describe() { return { kind: this.kind, source: this.sourceTag, seed: this.seed, tickMs: this.tickMs, crew: this.crew.length }; }
+  /* --- modelo --- */
+  _circadian(t) { const h = new Date(t).getUTCHours() + new Date(t).getUTCMinutes() / 60; return Math.sin((h - 9) / 24 * Math.PI * 2); } // pico ~15h, valle ~3h
+  _eventEffect(astronautId, key, t) {
+    let eff = 0;
+    for (const ev of this.events) {
+      if (ev.astronautId && ev.astronautId !== astronautId) continue;
+      const def = EVENT_EFFECTS[ev.type]; if (!def || def[key] == null) continue;
+      const p = (t - ev.start) / ev.durationMs; if (p < 0 || p > 1) continue;
+      const ramp = p < 0.15 ? p / 0.15 : p > 0.8 ? (1 - p) / 0.2 : 1; // rampa de entrada y salida
+      eff += def[key] * ramp;
+    }
+    return eff;
+  }
+  _reading(astronautId, t, { noiseBoost = 1 } = {}) {
+    const c = this.crew.find(x => x.id === astronautId), s = this.sim[astronautId], r = this.rng, b = c.baseline;
+    const circ = this._circadian(t);
+    const step = (k, sd) => { s.ar[k] = s.ar[k] * 0.9 + r.gauss() * sd * noiseBoost; return s.ar[k]; }; // AR(1): ruido suave y correlacionado
+    const v = {
+      hr:    b.hr * (1 + 0.05 * circ) + step('hr', 1.6) + this._eventEffect(astronautId, 'hr', t) + Math.sin(t / 9000 + s.phase) * 1.5,
+      spo2:  b.spo2 - 0.4 * Math.max(0, -circ) + step('spo2', 0.25) + this._eventEffect(astronautId, 'spo2', t),
+      bpSys: b.bpSys * (1 + 0.04 * circ) + step('bpSys', 1.8) + this._eventEffect(astronautId, 'bpSys', t),
+      bpDia: b.bpDia * (1 + 0.03 * circ) + step('bpDia', 1.2) + this._eventEffect(astronautId, 'bpDia', t),
+      temp:  b.temp + 0.3 * circ + step('temp', 0.04) + this._eventEffect(astronautId, 'temp', t),
+      resp:  b.resp * (1 + 0.05 * circ) + step('resp', 0.5) + this._eventEffect(astronautId, 'resp', t),
+      hrv:   b.hrv * (1 - 0.15 * circ) + step('hrv', 2.5) + this._eventEffect(astronautId, 'hrv', t)
+    };
+    // dispositivos: si uno está desconectado, sus métricas faltan
+    let quality = 'ok';
+    const devs = this._devicesAt(astronautId, t);
+    for (const d of devs) if (d.status === 'desconectado') for (const k of d.provides) v[k] = null;
+    const missingAll = devs.filter(d => d.provides.length).every(d => d.status === 'desconectado');
+    // huecos y ruido aleatorios (con datos reales también va a pasar)
+    const u = r();
+    if (missingAll || u < 0.02) { quality = 'faltante'; for (const k in v) v[k] = null; }
+    else if (u < 0.06) { quality = 'ruidoso'; for (const k in v) if (v[k] != null) v[k] += r.gauss() * (k === 'temp' ? 0.4 : k === 'spo2' ? 1.5 : 6); }
+    else if (u < 0.09) { quality = 'retrasado'; t -= 4000 + r() * 6000; }
+    else if (Object.values(v).some(x => x == null)) quality = 'faltante';
+    const out = { astronautId, timestamp: new Date(t).toISOString(), source: this.sourceTag, quality };
+    for (const k in v) out[k] = v[k] == null ? null : round(clamp(v[k], SCHEMA.VitalReading[k].range[0], SCHEMA.VitalReading[k].range[1]), k === 'temp' ? 1 : 0);
+    return out;
+  }
+  _devicesAt(astronautId, t) {
+    const s = this.sim[astronautId], r = this.rng;
+    for (const d of s.devices) {
+      const until = s.disconnectUntil[d.id] || 0;
+      if (until > t) { d.status = 'desconectado'; d.signal = 0; continue; }
+      d.baseSignal ??= d.signal;
+      d.signal = clamp(d.signal + (d.baseSignal - d.signal) * 0.15 + r.gauss() * 2.5, 10, 100); // ruido con reversión a la media
+      if (r() < 0.0006) s.disconnectUntil[d.id] = t + 30000 + r() * 60000; // desconexión espontánea
+      d.status = d.signal < CONFIG.thresholds.device.signalWarn ? 'degradado' : 'conectado';
+      d.lastSeen = new Date(t).toISOString();
+    }
+    return s.devices;
+  }
+  _tickDevices() { for (const id in this.sim) for (const d of this.sim[id].devices) { d.battery = clamp(d.battery - 0.03 - (d.type === 'parche' ? 0.02 : 0), 0, 100); if (d.battery <= 0) this.sim[id].disconnectUntil[d.id] = Date.now() + 3600000; } }
+  _envAt(t) {
+    const r = this.rng, a = this.envAr, base = this.env;
+    const st = (k, sd) => { a[k] = a[k] * 0.92 + r.gauss() * sd; return a[k]; };
+    return {
+      timestamp: new Date(t).toISOString(), source: this.sourceTag,
+      co2: round(base.co2 + st('co2', 25) + this._eventEffectEnv('co2', t) + 150 * Math.sin(t / 60000)),
+      temp: round(base.temp + st('temp', 0.08), 1), humidity: round(base.humidity + st('humidity', 0.6)),
+      pressure: round(base.pressure + st('pressure', 0.02), 2), radiation: round(Math.max(0, base.radiation + st('radiation', 0.5) + (r() < 0.01 ? 25 : 0)), 1)
+    };
+  }
+  _eventEffectEnv(key, t) { let e = 0; for (const ev of this.events) { const d = EVENT_EFFECTS[ev.type]?.env; if (!d || d[key] == null) continue; const p = (t - ev.start) / ev.durationMs; if (p < 0 || p > 1) continue; e += d[key] * (p < 0.2 ? p / 0.2 : p > 0.75 ? (1 - p) / 0.25 : 1); } return e; }
+  _preloadHistory() {
+    const now = Date.now(), n = Math.floor(CONFIG.historyWindowMin * 60000 / this.tickMs);
+    for (const c of this.crew) { this.history[c.id] = []; for (let i = n; i > 0; i--) this.history[c.id].push(this._reading(c.id, now - i * this.tickMs)); }
+  }
+  _startLoop() {
+    clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      const t = Date.now(); this._tickDevices();
+      this.events = this.events.filter(e => t < e.start + e.durationMs);
+      for (const c of this.crew) {
+        const rd = this._reading(c.id, t); const h = this.history[c.id]; h.push(rd);
+        const cut = t - 3 * 3600000; while (h.length && new Date(h[0].timestamp).getTime() < cut) h.shift();
+        for (const cb of (this.subs.get(c.id) || [])) cb(rd);
+      }
+      for (const cb of (this.subs.get('*') || [])) cb(t);
+    }, this.tickMs);
+  }
+  /* --- contrato --- */
+  async getCrew() { return this.crew.map(c => ({ ...c })); }
+  async getVitals(id, from, to) { const f = +new Date(from || 0), tt = +new Date(to || Date.now()); return (this.history[id] || []).filter(r => { const x = +new Date(r.timestamp); return x >= f && x <= tt; }); }
+  subscribeVitals(id, cb) { if (!this.subs.has(id)) this.subs.set(id, new Set()); this.subs.get(id).add(cb); return () => this.subs.get(id)?.delete(cb); }
+  async getEnvironment() { return this._envAt(Date.now()); }
+  async getDevices(id) { return this._devicesAt(id, Date.now()).map(d => ({ ...d, battery: round(d.battery), signal: round(d.signal) })); }
+  async getSleepActivity(id, day = dayKey()) {
+    // determinista por (semilla, astronauta, día); hoy acumula con el tiempo de sesión + registros manuales
+    const h = [...(id + day + this.seed)].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7), r = makeRng(h);
+    const isToday = day === dayKey(); const m = (this.manual[id] || {})[day] || {};
+    const minutesToday = (Date.now() - this.sessionStart) / 60000;
+    const exEvent = this.events.filter(e => e.type === 'ejercicio' && e.astronautId === id).reduce((a, e) => a + Math.min(Date.now() - e.start, e.durationMs) / 60000 * 10, 0);
+    return {
+      astronautId: id, day, source: this.sourceTag,
+      sleepHours: round(5.6 + r() * 3, 1), sleepQuality: round(55 + r() * 40),
+      exerciseMin: round(isToday ? Math.min(180, 12 + minutesToday * 0.8 + (m.exerciseMin || 0) + exEvent) : 35 + r() * 50),
+      hobbyMin: round(isToday ? (m.hobbyMin || 0) + Math.min(40, minutesToday * 0.3) : 10 + r() * 60),
+      steps: round(isToday ? 2000 + minutesToday * 40 : 4000 + r() * 6000)
+    };
+  }
+  async pushEvent(ev) {
+    const t = Date.now(), id = ev.astronautId || null;
+    if (ev.type === 'recarga') { for (const aid in this.sim) for (const d of this.sim[aid].devices) if (d.id === ev.params?.deviceId) { d.battery = 100; delete this.sim[aid].disconnectUntil[d.id]; } return { ok: true }; }
+    if (ev.type === 'reconectar') { for (const aid in this.sim) if (this.sim[aid].disconnectUntil[ev.params?.deviceId]) delete this.sim[aid].disconnectUntil[ev.params.deviceId]; return { ok: true }; }
+    if (ev.type === 'desconexion') { const s = this.sim[id]; const d = ev.params?.deviceId ? s.devices.find(x => x.id === ev.params.deviceId) : this.rng.pick(s.devices.filter(x => x.provides.length)); s.disconnectUntil[d.id] = t + (ev.durationMs || 60000); return { ok: true }; }
+    if (ev.type === 'hobby' || ev.type === 'ejercicio_manual' || ev.type === 'hidratacion') {
+      const key = ev.type === 'hobby' ? 'hobbyMin' : 'exerciseMin'; const m = (this.manual[id] ||= {}); const d = (m[dayKey()] ||= {});
+      if (ev.type !== 'hidratacion') d[key] = (d[key] || 0) + (ev.params?.minutes || 15); return { ok: true };
+    }
+    this.events.push({ type: ev.type, astronautId: id, start: t, durationMs: ev.durationMs || 90000, params: ev.params || {} });
+    return { ok: true };
+  }
+  destroy() { clearInterval(this.timer); this.subs.clear(); }
+}
+SimulatedProvider.prototype.sessionStart = Date.now();
+
+/* -----------------------------------------------------------------------------
+   RemoteProvider · ESQUELETO. Preparado para fetch con timeout, reintentos y caché.
+   No rompe nada: cada método lanza NotImplementedError que la app captura y muestra.
+   Ver "CÓMO CONECTAR DATOS REALES" al final del archivo.
+   ----------------------------------------------------------------------------- */
+class NotImplementedError extends Error { constructor(m) { super(m); this.name = 'NotImplementedError'; } }
+class RemoteProvider extends DataProvider {
+  constructor(api = CONFIG.api) { super(); this.kind = 'RemoteProvider'; this.sourceTag = 'real'; this.api = api; this.cache = new Map(); this.loading = new Set(); this.lastError = null; }
+  describe() { return { kind: this.kind, source: this.sourceTag, baseUrl: this.api.baseUrl || '(sin configurar)', implemented: false, lastError: this.lastError?.message || null }; }
+  // Helper genérico: GET JSON con timeout, reintentos exponenciales y caché TTL.
+  async fetchJson(path, { params = {}, ttl = this.api.cacheTtlMs } = {}) {
+    if (!this.api.baseUrl) throw new NotImplementedError('CONFIG.api.baseUrl vacío: configurá el endpoint o proxy.');
+    const url = new URL(path, this.api.baseUrl); Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    const key = url.toString(); const hit = this.cache.get(key); if (hit && Date.now() - hit.t < ttl) return hit.data;
+    let err; for (let i = 0; i <= this.api.retries; i++) {
+      const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), this.api.timeoutMs); this.loading.add(key);
+      try {
+        const res = await fetch(key, { signal: ctrl.signal, headers: this.api.nasaApiKey ? { 'x-api-key': this.api.nasaApiKey } : {} });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json(); this.cache.set(key, { t: Date.now(), data }); return data;
+      } catch (e) { err = e; await new Promise(r => setTimeout(r, this.api.retryBackoffMs * 2 ** i)); }
+      finally { clearTimeout(to); this.loading.delete(key); }
+    }
+    this.lastError = err; throw err;
+  }
+  // TODO: cada método hace fetchJson(...) y pasa el resultado por el adaptador correspondiente.
+  async getCrew()                 { throw new NotImplementedError('RemoteProvider.getCrew: TODO → fetchJson("/crew") + adaptRestJson.crew'); }
+  async getVitals(id, from, to)   { throw new NotImplementedError('RemoteProvider.getVitals: TODO → fetchJson(`/vitals/${id}`, {params:{from,to}}) + adaptRestJson.vitals'); }
+  subscribeVitals(id, cb)         { console.warn('RemoteProvider.subscribeVitals: TODO → polling con setInterval(getVitals) o WebSocket/SSE'); return () => {}; }
+  async getEnvironment()          { throw new NotImplementedError('RemoteProvider.getEnvironment: TODO → fetchJson("/environment") + adaptRestJson.environment'); }
+  async getDevices(id)            { throw new NotImplementedError('RemoteProvider.getDevices: TODO → fetchJson(`/devices/${id}`) + adaptRestJson.devices'); }
+  async getSleepActivity(id, day) { throw new NotImplementedError('RemoteProvider.getSleepActivity: TODO → fetchJson(`/activity/${id}`, {params:{day}}) + adaptRestJson.sleepActivity'); }
+  async pushEvent(ev)             { console.warn('RemoteProvider.pushEvent: TODO → POST /events', ev); return { ok: false, reason: 'no implementado' }; }
+}
+
+/* -----------------------------------------------------------------------------
+   ADAPTADORES · normalizan datos crudos de cada tipo de fuente al SCHEMA.
+   Dejados como ejemplo/esqueleto: completar el mapeo de campos cuando se conozca la fuente.
+   ----------------------------------------------------------------------------- */
+const Adapters = {
+  // API REST JSON (ej. respuesta de un endpoint propio o de api.nasa.gov pasado por proxy)
+  adaptRestJson: {
+    crew(raw)          { /* TODO: mapear raw.members[] → SCHEMA.Astronaut */ return (raw?.members || []).map(m => ({ id: String(m.id), name: m.name, role: m.role || '', avatar: (m.name || '??').split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase(), baseline: m.baseline || {} })); },
+    vitals(raw, source = 'real') { /* TODO: mapear campos crudos (p. ej. heart_rate → hr) */ return (raw?.readings || raw || []).map(r => Normalizer.vital({ astronautId: r.astronaut_id ?? r.astronautId, timestamp: r.ts ?? r.timestamp, hr: r.heart_rate ?? r.hr, spo2: r.spo2, bpSys: r.systolic ?? r.bpSys, bpDia: r.diastolic ?? r.bpDia, temp: r.temperature ?? r.temp, resp: r.respiration ?? r.resp, hrv: r.hrv, quality: r.quality }, source)); },
+    environment(raw)   { /* TODO */ return Normalizer.environment(raw, 'real'); },
+    devices(raw)       { /* TODO */ return (raw || []).map(d => Normalizer.device(d)); },
+    sleepActivity(raw) { /* TODO */ return Normalizer.sleepActivity(raw, 'real'); }
+  },
+  // Fila de CSV (objeto cabecera→valor, strings). Acepta sinónimos de columnas habituales.
+  adaptCsvRow(row, source = 'real') {
+    const g = (...keys) => { for (const k of keys) { const kk = Object.keys(row).find(x => x.trim().toLowerCase() === k); if (kk != null && row[kk] !== '') return row[kk]; } return null; };
+    return Normalizer.vital({
+      astronautId: g('astronautid', 'astronaut_id', 'crew_id', 'id', 'subject'), timestamp: g('timestamp', 'ts', 'time', 'datetime', 'date'),
+      hr: g('hr', 'heart_rate', 'heartrate', 'fc'), spo2: g('spo2', 'oxygen', 'sao2'), bpSys: g('bpsys', 'systolic', 'sys', 'bp_sys'), bpDia: g('bpdia', 'diastolic', 'dia', 'bp_dia'),
+      temp: g('temp', 'temperature', 'temp_c'), resp: g('resp', 'respiration', 'rr', 'breathing_rate'), hrv: g('hrv', 'rmssd'), quality: g('quality') || 'ok'
+    }, source);
+  },
+  // Fila de base de datos (ej. resultado de SELECT vía backend). Mismo patrón.
+  adaptDbRow(row, source = 'real') { /* TODO: ajustar a las columnas reales de la tabla */ return Adapters.adaptCsvRow(row, source); }
+};
+const Normalizer = {
+  num(v, [lo, hi]) { if (v == null || v === '') return null; const n = Number(v); if (!Number.isFinite(n)) return null; return n < lo || n > hi ? null : n; },
+  vital(o, source) {
+    const S = SCHEMA.VitalReading, out = { astronautId: String(o.astronautId ?? ''), timestamp: new Date(o.timestamp).toISOString(), source, quality: ['ok', 'ruidoso', 'retrasado', 'faltante'].includes(o.quality) ? o.quality : 'ok' };
+    for (const k of ['hr', 'spo2', 'bpSys', 'bpDia', 'temp', 'resp', 'hrv']) out[k] = this.num(o[k], S[k].range);
+    if (['hr', 'spo2', 'bpSys', 'bpDia', 'temp', 'resp', 'hrv'].every(k => out[k] == null)) out.quality = 'faltante';
+    return out;
+  },
+  environment(o, source) { const S = SCHEMA.Environment; return { timestamp: new Date(o?.timestamp || Date.now()).toISOString(), source, co2: this.num(o?.co2, S.co2.range), temp: this.num(o?.temp, S.temp.range), humidity: this.num(o?.humidity, S.humidity.range), pressure: this.num(o?.pressure, S.pressure.range), radiation: this.num(o?.radiation, S.radiation.range) }; },
+  device(o) { return { id: String(o.id), astronautId: String(o.astronautId ?? ''), name: o.name || o.id, type: o.type || 'parche', status: ['conectado', 'degradado', 'desconectado'].includes(o.status) ? o.status : 'conectado', battery: this.num(o.battery, [0, 100]), signal: this.num(o.signal, [0, 100]), lastSeen: o.lastSeen || new Date().toISOString(), provides: Array.isArray(o.provides) ? o.provides : [] }; },
+  sleepActivity(o, source) { const S = SCHEMA.SleepActivity; return { astronautId: String(o?.astronautId ?? ''), day: o?.day || dayKey(), source, sleepHours: this.num(o?.sleepHours, S.sleepHours.range), sleepQuality: this.num(o?.sleepQuality, S.sleepQuality.range), exerciseMin: this.num(o?.exerciseMin, S.exerciseMin.range), hobbyMin: this.num(o?.hobbyMin, S.hobbyMin.range), steps: this.num(o?.steps, S.steps.range) }; }
+};
+// Validación contra el esquema: devuelve {ok, errors[], warnings[]}
+function validateVital(r, i) {
+  const errors = [], warnings = [];
+  if (!r.astronautId) errors.push(`fila ${i}: falta astronautId`);
+  if (isNaN(new Date(r.timestamp))) errors.push(`fila ${i}: timestamp inválido`);
+  const keys = ['hr', 'spo2', 'bpSys', 'bpDia', 'temp', 'resp', 'hrv'];
+  if (keys.every(k => r[k] == null)) warnings.push(`fila ${i}: sin métricas numéricas (quality=faltante)`);
+  return { ok: !errors.length, errors, warnings };
+}
+function parseCsv(text) {
+  const lines = text.replace(/\r/g, '').split('\n').filter(l => l.trim()); if (!lines.length) return [];
+  const sep = (lines[0].match(/;/g) || []).length > (lines[0].match(/,/g) || []).length ? ';' : ',';
+  const head = lines[0].split(sep).map(s => s.trim().replace(/^"|"$/g, ''));
+  return lines.slice(1).map(l => { const cells = l.split(sep).map(s => s.trim().replace(/^"|"$/g, '')); const o = {}; head.forEach((h, i) => o[h] = cells[i]); return o; });
+}
+
+/* -----------------------------------------------------------------------------
+   FileProvider · usa un CSV/JSON cargado localmente como fuente (datos "real").
+   Reproduce las lecturas en orden temporal al ritmo del tick.
+   ----------------------------------------------------------------------------- */
+class FileProvider extends DataProvider {
+  constructor(bundle, { tickMs = CONFIG.tickMs, fileName = 'archivo' } = {}) {
+    super(); this.kind = 'FileProvider'; this.sourceTag = 'real'; this.fileName = fileName; this.tickMs = tickMs;
+    this.vitals = [...bundle.vitals].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    const ids = [...new Set(this.vitals.map(v => v.astronautId))];
+    this.crew = bundle.crew?.length ? bundle.crew : ids.map((id, i) => ({ id, name: `Tripulante ${id}`, role: 'Sin rol en archivo', avatar: `T${i + 1}`, baseline: this._baselineFrom(id) }));
+    this.env = bundle.environment || null; this.devices = bundle.devices || []; this.sleep = bundle.sleepActivity || [];
+    this.cursor = {}; this.played = {}; ids.forEach(id => { this.cursor[id] = 0; this.played[id] = []; });
+    this.subs = new Map(); this.timer = setInterval(() => this._tick(), tickMs);
+  }
+  _baselineFrom(id) { const rows = this.vitals.filter(v => v.astronautId === id); const avg = k => { const xs = rows.map(r => r[k]).filter(x => x != null); return xs.length ? round(xs.reduce((a, b) => a + b, 0) / xs.length, k === 'temp' ? 1 : 0) : null; }; return { hr: avg('hr'), spo2: avg('spo2'), bpSys: avg('bpSys'), bpDia: avg('bpDia'), temp: avg('temp'), resp: avg('resp'), hrv: avg('hrv') }; }
+  _tick() {
+    for (const id in this.cursor) {
+      const rows = this.vitals.filter(v => v.astronautId === id); if (!rows.length) continue;
+      const r = rows[this.cursor[id] % rows.length]; this.cursor[id]++;
+      const rd = { ...r, timestamp: new Date().toISOString() }; // se reproduce "en vivo": sello temporal actual, origen real
+      this.played[id].push(rd); if (this.played[id].length > 2000) this.played[id].shift();
+      for (const cb of (this.subs.get(id) || [])) cb(rd);
+    }
+    for (const cb of (this.subs.get('*') || [])) cb(Date.now());
+  }
+  describe() { return { kind: this.kind, source: this.sourceTag, file: this.fileName, readings: this.vitals.length, crew: this.crew.length, hasEnvironment: !!this.env, devices: this.devices.length }; }
+  async getCrew() { return this.crew; }
+  async getVitals(id, from, to) { const f = +new Date(from || 0), tt = +new Date(to || Date.now()); return this.played[id].filter(r => { const x = +new Date(r.timestamp); return x >= f && x <= tt; }); }
+  subscribeVitals(id, cb) { if (!this.subs.has(id)) this.subs.set(id, new Set()); this.subs.get(id).add(cb); return () => this.subs.get(id)?.delete(cb); }
+  async getEnvironment() { return this.env; }
+  async getDevices(id) { return this.devices.filter(d => d.astronautId === id); }
+  async getSleepActivity(id, day) { return this.sleep.find(s => s.astronautId === id && (!day || s.day === day)) || null; }
+  destroy() { clearInterval(this.timer); }
+}
+
+/* =============================================================================
+   (c) MOTOR DE REGLAS / ALERTAS
+   Recibe lecturas normalizadas y devuelve el estado verde / amarillo / rojo.
+   No sabe de dónde vienen los datos.
+   ============================================================================= */
+const RulesEngine = {
+  maxLevel(a, b) { return LEVELS[a].order >= LEVELS[b].order ? a : b; },
+  band(value, th) {
+    if (value == null) return 'sindatos';
+    const [a1, a2] = th.atencion, [c1, c2] = th.cirujano;
+    if (value < c1 || value > c2) return 'cirujano';
+    if (value < a1 || value > a2) return 'atencion';
+    return 'normal';
+  },
+  evaluateMetric(key, value, baseline) {
+    const th = CONFIG.thresholds[key]; if (!th) return { level: 'sindatos', reason: '' };
+    const name = { bpSys: 'PA sistólica', bpDia: 'PA diastólica' }[key] || METRICS[key]?.short || key, unit = SCHEMA.VitalReading[key]?.unit || '';
+    let level = this.band(value, th), reason = '';
+    if (level === 'atencion') reason = `${name} fuera de rango (${value} ${unit})`;
+    if (level === 'cirujano') reason = `${name} crítica (${value} ${unit})`;
+    // desviación respecto de la línea base personal (HRV se excluye: su variabilidad natural es muy alta)
+    if (value != null && baseline?.[key] != null && level === 'normal' && key !== 'hrv') {
+      const dev = Math.abs(value - baseline[key]) / baseline[key] * 100;
+      if (dev > CONFIG.thresholds.baselineDeviationPct) { level = 'atencion'; reason = `${name} se desvía ${round(dev)}% de la línea base`; }
+    }
+    return { level, reason };
+  },
+  // Lectura completa → { overall, metrics:{hr:{level,reason}, ..., bp:{level}}, reasons[], quality }
+  evaluateReading(r, baseline) {
+    const out = { overall: 'sindatos', metrics: {}, reasons: [], quality: r?.quality || 'faltante' };
+    if (!r) return out;
+    let any = false;
+    for (const k of ['hr', 'spo2', 'bpSys', 'bpDia', 'temp', 'resp', 'hrv']) {
+      const m = this.evaluateMetric(k, r[k], baseline); out.metrics[k] = m;
+      if (m.level !== 'sindatos') { any = true; out.overall = any && out.overall === 'sindatos' ? m.level : this.maxLevel(out.overall, m.level); }
+      if (m.reason) out.reasons.push({ level: m.level, text: m.reason });
+    }
+    out.metrics.bp = { level: out.metrics.bpSys.level === 'sindatos' ? out.metrics.bpDia.level : this.maxLevel(out.metrics.bpSys.level, out.metrics.bpDia.level === 'sindatos' ? 'normal' : out.metrics.bpDia.level) };
+    if (!any) out.overall = 'sindatos';
+    return out;
+  },
+  evaluateEnvironment(env) {
+    const out = { overall: 'normal', metrics: {}, reasons: [] }; if (!env) { out.overall = 'sindatos'; return out; }
+    const names = { co2: 'CO₂', temp: 'T° cabina', humidity: 'Humedad', pressure: 'Presión', radiation: 'Radiación' };
+    for (const k in CONFIG.thresholds.env) {
+      const lvl = this.band(env[k], CONFIG.thresholds.env[k]); out.metrics[k] = lvl;
+      if (lvl === 'atencion' || lvl === 'cirujano') { out.overall = this.maxLevel(out.overall, lvl); out.reasons.push({ level: lvl, text: `${names[k]} ${lvl === 'cirujano' ? 'crítico' : 'elevado'}: ${env[k]} ${SCHEMA.Environment[k].unit}` }); }
+    }
+    return out;
+  },
+  evaluateDevice(d) {
+    const t = CONFIG.thresholds.device;
+    if (d.status === 'desconectado') return { level: 'atencion', reason: `${d.name} desconectado` };
+    if (d.battery != null && d.battery <= t.batteryCrit) return { level: 'cirujano', reason: `${d.name}: batería crítica ${d.battery}%` };
+    if (d.battery != null && d.battery <= t.batteryWarn) return { level: 'atencion', reason: `${d.name}: batería baja ${d.battery}%` };
+    if (d.status === 'degradado') return { level: 'atencion', reason: `${d.name}: señal débil ${d.signal}%` };
+    return { level: 'normal', reason: '' };
+  }
+};
+
+/* =============================================================================
+   (d) ESTADO DE LA APP · store + gamificación + notificaciones
+   ============================================================================= */
+const MISSION_DEFS = [
+  { id: 'ejercicio', title: 'Entrenamiento diario', desc: 'Completar 60 min de ejercicio (ARED / T2)', goal: () => CONFIG.gamification.goals.exerciseMin, unit: 'min', points: 150, icon: 'run', progress: s => s.sleep?.exerciseMin ?? 0 },
+  { id: 'sueno', title: 'Descanso óptimo', desc: 'Dormir al menos 7 h', goal: () => CONFIG.gamification.goals.sleepHours, unit: 'h', points: 120, icon: 'moon', progress: s => s.sleep?.sleepHours ?? 0 },
+  { id: 'hobby', title: 'Tiempo libre', desc: '30 min de hobby o recreación', goal: () => CONFIG.gamification.goals.hobbyMin, unit: 'min', points: 60, icon: 'music', progress: s => s.sleep?.hobbyMin ?? 0 },
+  { id: 'baterias', title: 'Sensores cargados', desc: 'Todos tus dispositivos arriba del 50%', goal: () => 3, unit: '', points: 80, icon: 'battery', progress: s => s.devices.filter(d => d.battery >= CONFIG.gamification.goals.batteryMin).length },
+  { id: 'revision', title: 'Chequeo de tripulación', desc: 'Revisar el historial de cada tripulante', goal: s => s.crew.length || 4, unit: '', points: 100, icon: 'eye', progress: s => s.gam.reviewed[dayKey()]?.length || 0 },
+  { id: 'alertas', title: 'Respuesta rápida', desc: 'Sin alertas pendientes de reconocer', goal: () => 1, unit: '', points: 50, icon: 'check', progress: s => (s.alerts.some(a => a.kind !== 'logro' && !a.acknowledged) || !s.alerts.length) ? 0 : 1 }
+];
+const defaultGam = () => ({ points: 0, streak: 4, bestStreak: 9, demo: true, completed: {}, streakDays: {}, reviewed: {}, achievements: [], lastStreakCheck: null });
+const State = {
+  provider: null, crew: [], selectedId: null, latest: {}, history: {}, evals: {}, env: null, envEval: null,
+  devices: [], sleep: null, alerts: [], notifications: [], view: 'panel', alertFilter: 'todas', sound: false,
+  gam: defaultGam(), lastAlertAt: {}, lastReminderAt: {}, unsub: [], envTimer: null, startedAt: Date.now(),
+  save() { try { localStorage.setItem(CONFIG.storageKey, JSON.stringify({ gam: this.gam, sound: this.sound, thresholds: CONFIG.thresholds, seed: CONFIG.seed, tickMs: CONFIG.tickMs, dataSource: CONFIG.dataSource })); } catch (e) { } },
+  load() { try { const s = JSON.parse(localStorage.getItem(CONFIG.storageKey) || 'null'); if (!s) return; if (s.gam) this.gam = { ...defaultGam(), ...s.gam }; this.sound = !!s.sound; if (s.thresholds) Object.assign(CONFIG.thresholds, s.thresholds); if (s.seed) CONFIG.seed = s.seed; if (s.tickMs) CONFIG.tickMs = s.tickMs; if (s.dataSource && s.dataSource !== 'archivo') CONFIG.dataSource = s.dataSource; } catch (e) { } }
+};
+
+/* ---------- notificaciones, alertas y logros ---------- */
+function notify({ kind = 'recordatorio', level = 'normal', title, message, astronautId = null, metric = '', action = null, dedupeKey = null, cooldown = CONFIG.thresholds.reminderCooldownMs, toast = true }) {
+  const key = dedupeKey || `${kind}:${astronautId}:${metric}:${title}`; const now = Date.now();
+  if (State.lastReminderAt[key] && now - State.lastReminderAt[key] < cooldown) return null;
+  State.lastReminderAt[key] = now;
+  const n = { id: uid(), timestamp: new Date().toISOString(), kind, level, title, message, astronautId, metric, action, read: false, acknowledged: false };
+  State.notifications.unshift(n); if (State.notifications.length > 80) State.notifications.pop();
+  if (kind !== 'logro') { State.alerts.unshift(n); if (State.alerts.length > 200) State.alerts.pop(); }
+  // en los primeros segundos tras arrancar, los recordatorios van al cajón sin toast (evita la avalancha inicial)
+  const warming = Date.now() - State.startedAt < 6000 && level !== 'cirujano' && kind !== 'logro';
+  if (toast && !warming) showToast(n);
+  if (State.sound && level === 'cirujano') beep();
+  UI.renderBell(); UI.renderDock();
+  return n;
+}
+function raiseAlerts(astronaut, ev) { // alertas por flanco: solo cuando el nivel sube, con cooldown por métrica
+  for (const k of ['hr', 'spo2', 'bpSys', 'bpDia', 'temp', 'resp', 'hrv']) {
+    const m = ev.metrics[k]; if (!m || m.level === 'normal' || m.level === 'sindatos') continue;
+    const key = `${astronaut.id}:${k}:${m.level}`; const now = Date.now();
+    if (State.lastAlertAt[key] && now - State.lastAlertAt[key] < CONFIG.thresholds.alertCooldownMs) continue;
+    State.lastAlertAt[key] = now;
+    notify({ kind: 'vital', level: m.level, title: `${LEVELS[m.level].label} · ${astronaut.name}`, message: m.reason, astronautId: astronaut.id, metric: k, cooldown: 0, dedupeKey: key + now });
+  }
+}
+function checkEnvironmentAlerts() {
+  if (!State.envEval) return;
+  for (const r of State.envEval.reasons) notify({ kind: 'entorno', level: r.level, title: `Entorno · ${LEVELS[r.level].label}`, message: r.text, metric: 'env', cooldown: CONFIG.thresholds.alertCooldownMs * 2, dedupeKey: 'env:' + r.text.split(':')[0] + r.level });
+}
+function checkReminders() {
+  const a = State.crew.find(c => c.id === State.selectedId); if (!a) return;
+  for (const d of State.devices) {
+    const e = RulesEngine.evaluateDevice(d); if (e.level === 'normal') continue;
+    const isBat = /batería/.test(e.reason);
+    notify({ kind: 'dispositivo', level: e.level, title: isBat ? 'Recargar batería' : d.status === 'desconectado' ? 'Dispositivo desconectado' : 'Señal débil', message: `${e.reason} (${a.name})`, astronautId: a.id, metric: d.id,
+      action: isBat ? { label: 'Recargar', type: 'recarga', deviceId: d.id } : d.status === 'desconectado' ? { label: 'Reconectar', type: 'reconectar', deviceId: d.id } : null, dedupeKey: `dev:${d.id}:${isBat ? 'bat' : d.status}` });
+  }
+  const s = State.sleep; if (!s) return;
+  const h = new Date().getHours();
+  if (h >= 14 && s.exerciseMin < CONFIG.gamification.goals.exerciseMin) notify({ kind: 'recordatorio', title: 'Hora de ejercitar', message: `${a.name}: faltan ${round(CONFIG.gamification.goals.exerciseMin - s.exerciseMin)} min de ejercicio para la misión diaria.`, astronautId: a.id, metric: 'ejercicio', action: { label: '+15 min', type: 'ejercicio_manual' }, dedupeKey: 'rem:ex:' + a.id, cooldown: 15 * 60000 });
+  if (s.sleepHours != null && s.sleepHours < 6) notify({ kind: 'recordatorio', level: 'atencion', title: 'Descanso insuficiente', message: `${a.name} durmió ${s.sleepHours} h. Priorizá una siesta corta y revisá carga de trabajo.`, astronautId: a.id, metric: 'sueno', dedupeKey: 'rem:sleep:' + a.id + dayKey(), cooldown: 6 * 3600000 });
+  if (h % 2 === 0 && new Date().getMinutes() < 2) notify({ kind: 'recordatorio', title: 'Hidratación', message: 'Tomá agua: objetivo 2 L/día en microgravedad.', astronautId: a.id, metric: 'agua', action: { label: 'Listo', type: 'hidratacion' }, dedupeKey: 'rem:water:' + h, cooldown: 3600000 });
+}
+function addPoints(n, why) {
+  State.gam.points += n;
+  State.gam.achievements.unshift({ t: new Date().toISOString(), text: why, pts: n }); if (State.gam.achievements.length > 30) State.gam.achievements.pop();
+  showToast({ kind: 'logro', level: 'normal', title: `+${n} pts`, message: why }); State.save(); UI.renderScore();
+}
+function missionState(def) { const goal = typeof def.goal === 'function' ? def.goal(State) : def.goal; const prog = def.progress(State) || 0; return { goal, prog, pct: clamp(prog / goal * 100, 0, 100), done: prog >= goal }; }
+function checkMissions() {
+  const day = dayKey(); const done = (State.gam.completed[day] ||= {});
+  let all = true;
+  for (const def of MISSION_DEFS) {
+    const ms = missionState(def);
+    if (ms.done && !done[def.id]) { done[def.id] = new Date().toISOString(); addPoints(def.points, `Misión completada: ${def.title}`); }
+    if (!done[def.id]) all = false;
+  }
+  if (all && !State.gam.streakDays[day]) { State.gam.streakDays[day] = true; State.gam.streak += 1; State.gam.bestStreak = Math.max(State.gam.bestStreak, State.gam.streak); notify({ kind: 'logro', title: `Racha de ${State.gam.streak} días`, message: 'Todos los objetivos de hoy completados.', cooldown: 0 }); addPoints(200, 'Bonus de racha diaria'); }
+  State.save();
+}
+function markReviewed(id) { const day = dayKey(); const arr = (State.gam.reviewed[day] ||= []); if (!arr.includes(id)) { arr.push(id); State.save(); } }
+
+/* ---------- bootstrap del proveedor ---------- */
+let fileBundle = null, fileName = '';
+async function createProvider(kind) {
+  if (kind === 'remota') return new RemoteProvider();
+  if (kind === 'archivo') { if (!fileBundle) throw new Error('No hay archivo cargado. Usá "Cargar datos" en la vista Datos.'); return new FileProvider(fileBundle, { fileName }); }
+  return new SimulatedProvider({ seed: CONFIG.seed, tickMs: CONFIG.tickMs });
+}
+async function startProvider(kind = CONFIG.dataSource) {
+  State.unsub.forEach(u => u()); State.unsub = []; clearInterval(State.envTimer);
+  State.provider?.destroy?.();
+  let p;
+  try {
+    p = await createProvider(kind); State.crew = await p.getCrew();
+    if (!State.crew.length) throw new Error('El proveedor no devolvió tripulación.');
+  } catch (e) {
+    console.warn('[Astro Vitals] fuente no disponible:', e);
+    showToast({ kind: 'recordatorio', level: 'atencion', title: `Fuente "${kind}" no disponible`, message: `${e.message} · Volviendo a datos simulados.` });
+    kind = 'simulada'; p?.destroy?.(); p = await createProvider('simulada'); State.crew = await p.getCrew();
+  }
+  CONFIG.dataSource = kind; State.provider = p; State.startedAt = Date.now(); State.save();
+  State.latest = {}; State.history = {}; State.evals = {}; State.lastAlertAt = {};
+  if (!State.crew.find(c => c.id === State.selectedId)) State.selectedId = State.crew[0].id;
+  for (const c of State.crew) {
+    State.history[c.id] = await p.getVitals(c.id, new Date(Date.now() - CONFIG.historyWindowMin * 60000).toISOString());
+    State.latest[c.id] = State.history[c.id].at(-1) || null;
+    State.evals[c.id] = RulesEngine.evaluateReading(State.latest[c.id], c.baseline);
+    State.unsub.push(p.subscribeVitals(c.id, rd => onReading(c, rd)));
+  }
+  State.unsub.push(p.subscribeVitals('*', () => onTick()));
+  await refreshSecondary(); UI.renderAll();
+}
+function onReading(c, rd) {
+  State.latest[c.id] = rd; (State.history[c.id] ||= []).push(rd);
+  const cut = Date.now() - 65 * 60000; while (State.history[c.id].length && +new Date(State.history[c.id][0].timestamp) < cut) State.history[c.id].shift();
+  State.evals[c.id] = RulesEngine.evaluateReading(rd, c.baseline);
+  raiseAlerts(c, State.evals[c.id]);
+}
+let tickCount = 0;
+async function onTick() {
+  tickCount++;
+  if (tickCount % 3 === 0) await refreshSecondary();
+  checkReminders(); checkMissions();
+  UI.renderLive();
+}
+async function refreshSecondary() {
+  const p = State.provider, id = State.selectedId;
+  try { State.env = await p.getEnvironment(); } catch (e) { State.env = null; }
+  State.envEval = RulesEngine.evaluateEnvironment(State.env); checkEnvironmentAlerts();
+  try { State.devices = (await p.getDevices(id)) || []; } catch (e) { State.devices = []; }
+  try { State.sleep = await p.getSleepActivity(id, dayKey()); } catch (e) { State.sleep = null; }
+  State.sleepHistory = [];
+  for (let i = 6; i >= 1; i--) { const d = new Date(Date.now() - i * 86400000); try { State.sleepHistory.push(await p.getSleepActivity(id, dayKey(d))); } catch (e) { State.sleepHistory.push(null); } }
+}
+
+/* =============================================================================
+   (e) UI
+   ============================================================================= */
+const ICONS = {
+  heart: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9A5.3 5.3 0 0 1 12 6.4 5.3 5.3 0 0 1 21.3 12C19 16.4 12 21 12 21z"/><path d="M3 12h4l2-3 2 6 2-4 1 1h7"/></svg>',
+  o2: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/><path d="M13.5 10h2.5l-2.5 3h2.5"/></svg>',
+  bp: '<svg viewBox="0 0 24 24"><path d="M12 3.5c3 3.5 5.5 6.5 5.5 9.5a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-9.5z"/><path d="M9.5 13.5a2.5 2.5 0 0 0 2.5 2.5"/></svg>',
+  temp: '<svg viewBox="0 0 24 24"><path d="M10 14.5V5a2 2 0 1 1 4 0v9.5a3.5 3.5 0 1 1-4 0z"/><path d="M12 10v6"/></svg>',
+  lungs: '<svg viewBox="0 0 24 24"><path d="M12 4v8"/><path d="M12 12c-1 3-3 4-6 6-1.5 1-3-.5-2.5-2L6 8c.5-1.5 2.5-1.5 3 0l1 2"/><path d="M12 12c1 3 3 4 6 6 1.5 1 3-.5 2.5-2L18 8c-.5-1.5-2.5-1.5-3 0l-1 2"/></svg>',
+  brain: '<svg viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V6a2 2 0 0 0-3-2z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1V6a2 2 0 0 1 3-2z"/></svg>',
+  run: '<svg viewBox="0 0 24 24"><circle cx="15" cy="4.5" r="1.8"/><path d="M13 8l-3 3 3 2.5-2 5"/><path d="M13 8l3 2 3-1"/><path d="M10 11l-3 1-1.5 3"/><path d="M13 13.5l3 2 1 4"/></svg>',
+  moon: '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',
+  music: '<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>',
+  battery: '<svg viewBox="0 0 24 24"><rect x="3" y="8" width="15" height="9" rx="2"/><path d="M21 11v3"/><path d="M11 10l-2 3h3l-2 3"/></svg>',
+  eye: '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>',
+  // íconos de estado (toasts, calidad, celdas de entorno)
+  warn: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>',
+  crit: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><path d="M12 16.5h.01"/></svg>',
+  bell: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>',
+  medal: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M8.5 9L6 2h4l2 5 2-5h4l-2.5 7"/><path d="M10.5 14l1 1 2-2"/></svg>',
+  flame: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c4.4 0 7-2.8 7-6.5 0-3.4-2.3-5.3-3.6-7.2-.4 1.6-1.2 2.5-2.1 3-.1-3-1.4-5.7-4.3-8.3.3 2.8-1 4.3-2.4 6C5.2 10.7 5 12.5 5 15.5 5 19.2 7.6 22 12 22z"/></svg>',
+  batt: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="15" height="9" rx="2"/><path d="M21 11v3"/><path d="M11 10l-2 3h3l-2 3"/></svg>',
+  tick: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>'
+};
+const $ = s => document.querySelector(s);
+const levelOf = id => State.evals[id]?.overall || 'sindatos';
+function fmtVal(v, dec) { return v == null ? '--' : Number(v).toFixed(dec); }
+
+function drawSpark(canvas, values, color, band) {
+  const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth || 120, h = canvas.clientHeight || 36;
+  canvas.width = w * dpr; canvas.height = h * dpr; const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
+  const xs = values.filter(v => v != null); if (xs.length < 2) { ctx.fillStyle = 'rgba(143,195,217,.6)'; ctx.font = '10px Rajdhani'; ctx.fillText('sin datos', 4, h / 2 + 3); return; }
+  let lo = Math.min(...xs), hi = Math.max(...xs); if (band) { lo = Math.min(lo, band[0]); hi = Math.max(hi, band[1]); } if (hi - lo < 1e-6) { hi += 1; lo -= 1; } const pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
+  const y = v => h - (v - lo) / (hi - lo) * h, x = i => i / (values.length - 1) * w;
+  if (band) { ctx.fillStyle = 'rgba(46,232,155,.08)'; ctx.fillRect(0, y(band[1]), w, y(band[0]) - y(band[1])); }
+  ctx.strokeStyle = color; ctx.lineWidth = 1.6; ctx.shadowColor = color; ctx.shadowBlur = 6; ctx.beginPath(); let pen = false;
+  values.forEach((v, i) => { if (v == null) { pen = false; return; } if (!pen) { ctx.moveTo(x(i), y(v)); pen = true; } else ctx.lineTo(x(i), y(v)); }); ctx.stroke();
+  const last = values.at(-1); if (last != null) { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(w - 1, y(last), 2.2, 0, 7); ctx.fill(); }
+}
+function levelColor(l) { return l === 'normal' ? '#2ee89b' : l === 'atencion' ? '#ffc53d' : l === 'cirujano' ? '#ff4d6a' : '#6b7f95'; }
+
+const UI = {
+  cardEls: {},
+  init() {
+    // tarjetas de vitales (izquierda)
+    const left = $('#cards-left'); left.innerHTML = '';
+    for (const k in METRICS) {
+      const m = METRICS[k]; const el = document.createElement('div'); el.className = 'card'; el.dataset.metric = k;
+      el.innerHTML = `<div class="icon-ring">${ICONS[m.icon]}</div><div><div class="title"><span>${m.label}</span><span class="led sindatos">sin datos</span></div><div class="row"><div class="value">--<small>${m.unit}</small></div><canvas></canvas></div><div class="quality"></div></div>`;
+      left.appendChild(el); this.cardEls[k] = el;
+    }
+    // historial: selector de métricas
+    $('#hist-metric').innerHTML = Object.entries(METRICS).filter(([k]) => k !== 'bp').map(([k, m]) => `<option value="${k}">${m.label}</option>`).join('') + '<option value="bpSys">PRESIÓN SISTÓLICA</option><option value="bpDia">PRESIÓN DIASTÓLICA</option>';
+    $('#hist-metric').onchange = () => this.renderHistory(); $('#hist-window').onchange = () => this.renderHistory();
+    // dock y navegación
+    document.querySelectorAll('#dock button').forEach(b => b.onclick = () => this.go(b.dataset.view));
+    document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => this.go(b.dataset.go));
+    // campana / cajón
+    $('#bell').onclick = () => { const open = $('#drawer').classList.toggle('open'); $('#bell').setAttribute('aria-expanded', String(open)); this.renderNotifs(); };
+    $('#notif-close').onclick = () => { $('#drawer').classList.remove('open'); $('#bell').setAttribute('aria-expanded', 'false'); $('#bell').focus(); };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#drawer').classList.contains('open')) $('#notif-close').click(); });
+    $('#hist-pause').onclick = () => { State.histPaused = !State.histPaused; $('#hist-pause').textContent = State.histPaused ? 'Reanudar' : 'Pausar'; $('#hist-pause').setAttribute('aria-pressed', String(State.histPaused)); if (!State.histPaused) this.renderHistory(); };
+    $('#notif-read').onclick = () => { State.notifications.forEach(n => n.read = true); this.renderBell(); this.renderNotifs(); };
+    // alertas
+    document.querySelectorAll('#view-alertas [data-filter]').forEach(b => b.onclick = () => { State.alertFilter = b.dataset.filter; this.renderAlerts(); });
+    $('#ack-all').onclick = () => { let n = 0; State.alerts.forEach(a => { if (!a.acknowledged) { a.acknowledged = true; n++; } }); if (n) addPoints(n * 5, `Reconociste ${n} alertas`); this.renderAlerts(); this.renderDock(); };
+    // misiones: registro manual
+    $('#log-ex').onclick = async () => { await State.provider.pushEvent({ type: 'ejercicio_manual', astronautId: State.selectedId, params: { minutes: 15 } }); await refreshSecondary(); checkMissions(); this.renderLive(); showToast({ kind: 'logro', title: 'Registrado', message: '+15 min de ejercicio en el proveedor.' }); };
+    $('#log-hobby').onclick = async () => { await State.provider.pushEvent({ type: 'hobby', astronautId: State.selectedId, params: { minutes: 15 } }); await refreshSecondary(); checkMissions(); this.renderLive(); };
+    $('#log-water').onclick = () => addPoints(CONFIG.gamification.waterPoints, 'Hidratación registrada');
+    // datos
+    this.initDataView();
+    // ajustes
+    this.initSettings();
+    window.addEventListener('resize', () => { this.renderLive(); if (State.view === 'historial') this.renderHistory(); });
+  },
+  go(view) {
+    State.view = view; document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+    document.querySelectorAll('#dock button').forEach(b => { const on = b.dataset.view === view; b.classList.toggle('active', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    if (view === 'historial') { markReviewed(State.selectedId); this.renderHistory(); }
+    if (view === 'misiones') this.renderMissions(); if (view === 'alertas') this.renderAlerts(); if (view === 'datos') this.renderDataView(); if (view === 'ajustes') this.renderSettings();
+  },
+  renderAll() { this.renderSourceBadge(); this.renderCrewTabs(); this.renderLive(); this.renderScore(); this.renderBell(); this.renderDock(); this.renderSettings(); this.renderDataView(); },
+  renderLive() {
+    this.renderMet(); this.renderCrewTabs(); this.renderCards(); this.renderHolo(); this.renderEnv(); this.renderDevices(); this.renderActivity(); this.renderMissionsMini(); this.renderScore();
+    if (State.view === 'historial' && !State.histPaused) this.renderHistory(); if (State.view === 'misiones') this.renderMissions(); if (State.view === 'alertas') this.renderAlerts();
+    if ($('#drawer').classList.contains('open')) this.renderNotifs();
+  },
+  renderMet() { const ms = Date.now() - new Date(CONFIG.missionStart); const d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000) % 24, m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60; $('#met').innerHTML = `MET <b>${String(d).padStart(3, '0')}</b> · ${pad(h)}:${pad(m)}:${pad(s)} UTC`; },
+  renderSourceBadge() {
+    const b = $('#badge-source'); const d = State.provider?.describe() || {};
+    b.className = 'badge-source'; if (d.source === 'real') { b.classList.add(d.kind === 'FileProvider' ? 'archivo' : 'real'); b.textContent = d.kind === 'FileProvider' ? `● DATOS REALES · ARCHIVO ${d.file || ''}` : '● DATOS REALES · API'; }
+    else b.textContent = '● DATOS SIMULADOS';
+  },
+  renderCrewTabs() {
+    const el = $('#crew-tabs'); const html = State.crew.map(c => `<button class="crew-tab ${c.id === State.selectedId ? 'active' : ''}" data-level="${levelOf(c.id)}" data-id="${c.id}"><span class="av">${esc(c.avatar || '?')}</span><span>${esc(c.name.split(' ')[0])}</span></button>`).join('');
+    if (el.innerHTML !== html) { el.innerHTML = html; el.querySelectorAll('.crew-tab').forEach(b => b.onclick = async () => { State.selectedId = b.dataset.id; await refreshSecondary(); if (State.view === 'historial') markReviewed(State.selectedId); this.renderLive(); }); }
+  },
+  renderCards() {
+    const id = State.selectedId, r = State.latest[id], ev = State.evals[id] || { metrics: {} }, hist = State.history[id] || [];
+    const q = r?.quality || 'faltante';
+    for (const k in METRICS) {
+      const m = METRICS[k], el = this.cardEls[k]; let lvl, text;
+      if (m.composite) { lvl = ev.metrics.bp?.level || 'sindatos'; text = `${fmtVal(r?.bpSys, 0)}/${fmtVal(r?.bpDia, 0)}`; }
+      else { lvl = ev.metrics[k]?.level || 'sindatos'; text = fmtVal(r?.[k], m.dec); }
+      el.dataset.level = lvl; el.querySelector('.value').innerHTML = `${text}<small>${m.unit}</small>`;
+      const led = el.querySelector('.led'); led.className = 'led ' + lvl; led.textContent = lvl === 'cirujano' ? 'CIRUJANOS' : LEVELS[lvl].short;
+      const qel = el.querySelector('.quality'); qel.innerHTML = q === 'ok' ? `fuente: ${esc(r?.source || '—')} · ${r ? fmtTime(r.timestamp) : ''}` : `${ICONS.warn} lectura ${q} · ${r ? fmtTime(r.timestamp) : ''}`; qel.className = 'quality' + (q === 'ok' ? '' : ' bad');
+      const key = m.composite ? 'bpSys' : k; const vals = hist.slice(-45).map(x => x[key]); const th = CONFIG.thresholds[key];
+      const cv = el.querySelector('canvas'); cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', `Tendencia ${m.short}: último valor ${text} ${m.unit}`);
+      drawSpark(cv, vals, levelColor(lvl), th?.atencion);
+    }
+  },
+  renderHolo() {
+    const id = State.selectedId, c = State.crew.find(x => x.id === id), ev = State.evals[id] || { overall: 'sindatos', reasons: [] }, r = State.latest[id];
+    const lvl = ev.overall; const pill = $('#overall-pill'); pill.className = 'status-pill ' + lvl; pill.textContent = 'ESTADO GENERAL · ' + LEVELS[lvl].short;
+    $('#astro').style.setProperty('--holo', levelColor(lvl === 'sindatos' ? 'sindatos' : lvl === 'normal' ? 'normal' : lvl));
+    if (lvl === 'normal') $('#astro').style.setProperty('--holo', '#1ed6ff');
+    $('#who-name').textContent = c?.name || '—'; $('#who-role').textContent = (c?.role || '') + (r ? ` · ${fmtTime(r.timestamp)}` : '');
+    $('#tag-spo2').textContent = r?.spo2 == null ? '--' : r.spo2 + '%'; $('#tag-hr').textContent = r?.hr == null ? '--' : r.hr + ' bpm';
+    const reasons = ev.reasons.filter(x => x.level !== 'normal').slice(0, 4);
+    $('#overall-reasons').innerHTML = reasons.length ? reasons.map(x => `<span class="chip ${x.level}">${esc(x.text)}</span>`).join('') : (lvl === 'sindatos' ? '<span class="chip sindatos">sin lecturas válidas</span>' : '<span class="chip" style="color:var(--ok);border-color:var(--ok)">todos los parámetros en rango</span>');
+  },
+  renderEnv() {
+    const e = State.env, ev = State.envEval || { metrics: {} }; const names = { co2: 'CO₂', temp: 'Temp.', humidity: 'Humedad', pressure: 'Presión', radiation: 'Radiación' };
+    const flag = l => l === 'cirujano' ? `<div class="flag cirujano">${ICONS.crit}CRÍTICO</div>` : l === 'atencion' ? `<div class="flag atencion">${ICONS.warn}ATENCIÓN</div>` : '';
+    $('#env-kv').innerHTML = e ? Object.keys(names).map(k => `<div data-level="${ev.metrics[k] || 'sindatos'}"><div class="k">${names[k]}</div><div class="v">${e[k] == null ? '--' : e[k]}<small>${SCHEMA.Environment[k].unit}</small></div>${flag(ev.metrics[k])}</div>`).join('') : '<div class="note">Sin datos de entorno en esta fuente.</div>';
+  },
+  renderDevices() {
+    const ds = State.devices; $('#dev-note').textContent = ds.length ? `${ds.filter(d => d.status === 'conectado').length}/${ds.length} conectados` : '';
+    $('#dev-list').innerHTML = ds.length ? ds.map(d => { const bl = d.battery <= CONFIG.thresholds.device.batteryCrit ? 'crit' : d.battery <= CONFIG.thresholds.device.batteryWarn ? 'warn' : ''; return `<div class="dev"><div class="name"><i class="st ${d.status}"></i>${esc(d.name)}<span class="sig">${d.status === 'desconectado' ? 'sin señal' : 'señal ' + d.signal + '%'}</span></div><span class="bat ${bl}"><i style="--p:${d.battery}"></i>${d.battery}%</span>${d.status === 'desconectado' ? `<button class="mini-btn" data-act="reconectar" data-dev="${d.id}">Reconectar</button>` : d.battery < 50 ? `<button class="mini-btn ${bl ? '' : 'ok'}" data-act="recarga" data-dev="${d.id}">Recargar</button>` : '<span class="sig">ok</span>'}</div>`; }).join('') : '<div class="note">Sin dispositivos en esta fuente.</div>';
+    $('#dev-list').querySelectorAll('[data-act]').forEach(b => b.onclick = () => this.deviceAction(b.dataset.act, b.dataset.dev));
+  },
+  async deviceAction(type, deviceId) { await State.provider.pushEvent({ type, astronautId: State.selectedId, params: { deviceId } }); await refreshSecondary(); addPoints(type === 'recarga' ? 20 : 10, type === 'recarga' ? 'Batería recargada' : 'Dispositivo reconectado'); checkMissions(); this.renderLive(); },
+  renderActivity() {
+    const s = State.sleep, g = CONFIG.gamification.goals; const el = $('#activity-block');
+    if (!s) { el.innerHTML = '<div class="note">Sin datos de sueño/actividad en esta fuente.</div>'; return; }
+    const hist = [...(State.sleepHistory || []), s];
+    el.innerHTML = `<div class="kv"><div><div class="k">Sueño</div><div class="v">${s.sleepHours ?? '--'}<small>h</small></div></div><div><div class="k">Calidad</div><div class="v">${s.sleepQuality ?? '--'}<small>%</small></div></div><div><div class="k">Ejercicio</div><div class="v">${s.exerciseMin ?? '--'}<small>/${g.exerciseMin} min</small></div></div><div><div class="k">Hobby</div><div class="v">${s.hobbyMin ?? '--'}<small>min</small></div></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:end;margin-top:8px"><div class="bars" style="flex:1">${hist.map((d, i) => `<i title="${d?.day || ''}: ${d?.exerciseMin ?? '--'} min" class="${i === hist.length - 1 ? 'today' : ''} ${d && d.exerciseMin < g.exerciseMin * 0.5 ? 'low' : ''}" style="height:${clamp((d?.exerciseMin || 0) / 120 * 100, 4, 100)}%"></i>`).join('')}</div><span class="note" style="margin-left:10px">ejercicio 7 días</span></div>`;
+  },
+  missionRow(def, full) {
+    const ms = missionState(def);
+    return `<div class="mission ${ms.done ? 'done' : ''}"><div class="mi">${ICONS[def.icon]}</div><div><div class="mt">${def.title}</div>${full ? `<div class="md">${def.desc}</div>` : ''}<div class="progress ${ms.done ? 'done' : ''}" style="margin-top:4px"><b style="width:${ms.pct}%"></b></div></div><div class="mp">${ms.done ? '✓ ' : ''}${def.points} pts<br><span style="color:var(--muted);font-family:var(--font-ui);font-size:12px">${round(ms.prog, def.unit === 'h' ? 1 : 0)}/${ms.goal}${def.unit ? ' ' + def.unit : ''}</span></div></div>`;
+  },
+  renderMissionsMini() { const done = MISSION_DEFS.filter(d => missionState(d).done).length; $('#missions-summary').textContent = `${done}/${MISSION_DEFS.length} completadas`; $('#missions-mini').innerHTML = MISSION_DEFS.slice(0, 4).map(d => this.missionRow(d, false)).join(''); },
+  renderMissions() {
+    $('#missions-day').textContent = dayKey(); $('#missions-full').innerHTML = MISSION_DEFS.map(d => this.missionRow(d, true)).join('');
+    $('#achievements').innerHTML = State.gam.achievements.length ? State.gam.achievements.slice(0, 8).map(a => `<div class="dev"><span>${esc(a.text)}</span><span class="sig">${fmtTime(a.t)}</span><span style="color:var(--ok);font-family:var(--font-hud);font-size:12px">+${a.pts}</span></div>`).join('') : '<div class="note">Todavía no hay logros. Completá una misión o reconocé una alerta.</div>';
+    const days = []; for (let i = 6; i >= 0; i--) { const d = new Date(Date.now() - i * 86400000); const k = dayKey(d); const on = State.gam.streakDays[k] || (State.gam.demo && i > 0 && i <= State.gam.streak); days.push(`<i class="${on ? 'on' : ''}" title="${k}">${['D', 'L', 'M', 'X', 'J', 'V', 'S'][d.getDay()]}</i>`); }
+    $('#streak-days').innerHTML = days.join(''); $('#streak-n').textContent = State.gam.streak; $('#streak-best').textContent = State.gam.bestStreak; $('#streak-demo').textContent = State.gam.demo ? 'racha inicial de demostración (simulada)' : '';
+    this.renderScore();
+  },
+  renderScore() {
+    const g = State.gam, ranks = CONFIG.gamification.ranks; let ri = 0; ranks.forEach((r, i) => { if (g.points >= r[1]) ri = i; }); const next = ranks[ri + 1];
+    $('#score-pts').textContent = `${g.points} pts`; $('#score-streak').textContent = g.streak; $('#score-rank').textContent = ranks[ri][0];
+    $('#rank-pts').textContent = g.points; $('#rank-name').textContent = ranks[ri][0]; $('#rank-next').textContent = next ? `${next[1] - g.points} pts para ${next[0]}` : 'Rango máximo alcanzado'; $('#rank-bar').style.width = (next ? (g.points - ranks[ri][1]) / (next[1] - ranks[ri][1]) * 100 : 100) + '%';
+  },
+  renderBell() { const n = State.notifications.filter(x => !x.read).length; $('#bell-count').textContent = n || ''; $('#bell-sr').textContent = n ? `${n} sin leer` : ''; },
+  renderDock() { $('#dock [data-view="alertas"]').classList.toggle('has-alert', State.alerts.some(a => !a.acknowledged && (a.level === 'cirujano' || a.level === 'atencion'))); },
+  renderNotifs() {
+    const el = $('#notif-list'); el.innerHTML = State.notifications.length ? State.notifications.slice(0, 40).map(n => `<div class="notif ${n.kind === 'logro' ? 'logro' : n.level === 'normal' ? 'recordatorio' : n.level} ${n.read ? '' : 'unread'}"><b>${esc(n.title)}</b><span>${esc(n.message)} · ${fmtTime(n.timestamp)}</span><div class="acts">${n.action ? `<button class="mini-btn ok" data-nid="${n.id}" data-act="action">${esc(n.action.label)}</button>` : ''}<button class="mini-btn" data-nid="${n.id}" data-act="dismiss">descartar</button></div></div>`).join('') : '<div class="note">Sin notificaciones.</div>';
+    el.querySelectorAll('[data-nid]').forEach(b => b.onclick = () => this.notifAction(b.dataset.nid, b.dataset.act));
+    State.notifications.forEach(n => n.read = true); this.renderBell();
+  },
+  async notifAction(id, act) {
+    const n = State.notifications.find(x => x.id === id); if (!n) return;
+    if (act === 'action' && n.action) {
+      if (n.action.type === 'hidratacion') addPoints(CONFIG.gamification.waterPoints, 'Hidratación registrada');
+      else { await State.provider.pushEvent({ type: n.action.type, astronautId: n.astronautId || State.selectedId, params: { deviceId: n.action.deviceId, minutes: 15 } }); await refreshSecondary(); addPoints(15, `Recordatorio resuelto: ${n.title}`); }
+      n.acknowledged = true;
+    }
+    State.notifications = State.notifications.filter(x => x.id !== id); n.acknowledged = true; checkMissions(); this.renderNotifs(); this.renderLive(); this.renderDock();
+  },
+  renderAlerts() {
+    const f = State.alertFilter; const list = State.alerts.filter(a => f === 'todas' || (f === 'recordatorio' ? (a.kind === 'recordatorio' || a.kind === 'dispositivo') : a.level === f));
+    $('#alerts-list').innerHTML = list.length ? list.slice(0, 60).map(a => { const who = State.crew.find(c => c.id === a.astronautId)?.name || 'Sistema'; return `<div class="alert-row ${a.level === 'normal' ? 'recordatorio' : a.level} ${a.acknowledged ? 'acked' : ''}"><i class="lvl"></i><div class="body"><b>${esc(a.title)}</b><span>${esc(a.message)} · ${esc(who)}</span></div><span class="when">${fmtTime(a.timestamp)}</span>${a.acknowledged ? '<span class="sig">reconocida</span>' : `<button class="mini-btn ok" data-ack="${a.id}">Reconocer</button>`}</div>`; }).join('') : '<div class="note">Sin alertas para este filtro.</div>';
+    $('#alerts-list').querySelectorAll('[data-ack]').forEach(b => b.onclick = () => { const a = State.alerts.find(x => x.id === b.dataset.ack); a.acknowledged = true; addPoints(a.level === 'cirujano' ? CONFIG.gamification.ackCritPoints : CONFIG.gamification.ackPoints, `Alerta reconocida: ${a.title}`); checkMissions(); this.renderAlerts(); this.renderDock(); });
+  },
+  renderHistory() {
+    const id = State.selectedId, key = $('#hist-metric').value, win = +$('#hist-window').value, hist = (State.history[id] || []).filter(r => +new Date(r.timestamp) > Date.now() - win * 60000);
+    const c = State.crew.find(x => x.id === id), th = CONFIG.thresholds[key]; const cv = $('#hist-chart'); const dpr = devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight; cv.width = w * dpr; cv.height = h * dpr; const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
+    const vals = hist.map(r => r[key]), xs = vals.filter(v => v != null);
+    const unit = SCHEMA.VitalReading[key]?.unit || '';
+    if (xs.length < 2) { ctx.fillStyle = '#8fc3d9'; ctx.font = '16px Rajdhani'; ctx.fillText('Sin datos suficientes en la ventana.', 20, 40); $('#hist-stats').innerHTML = ''; return; }
+    let lo = Math.min(...xs, th.cirujano[0]), hi = Math.max(...xs, th.cirujano[1] === 100 && key === 'spo2' ? 100 : th.cirujano[1]); const p = (hi - lo) * 0.08; lo -= p; hi += p;
+    const L = 46, R = 12, T = 12, B = 26; const y = v => T + (1 - (v - lo) / (hi - lo)) * (h - T - B), x = i => L + i / (vals.length - 1) * (w - L - R);
+    // bandas semáforo
+    ctx.fillStyle = 'rgba(255,77,106,.10)'; ctx.fillRect(L, T, w - L - R, h - T - B);
+    ctx.fillStyle = 'rgba(255,197,61,.14)'; ctx.fillRect(L, y(th.cirujano[1]), w - L - R, y(th.cirujano[0]) - y(th.cirujano[1]));
+    ctx.fillStyle = 'rgba(46,232,155,.14)'; ctx.fillRect(L, y(th.atencion[1]), w - L - R, y(th.atencion[0]) - y(th.atencion[1]));
+    // grilla y ejes
+    ctx.strokeStyle = 'rgba(30,214,255,.15)'; ctx.fillStyle = '#8fc3d9'; ctx.font = '11px Rajdhani'; ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) { const v = lo + (hi - lo) * i / 5; ctx.beginPath(); ctx.moveTo(L, y(v)); ctx.lineTo(w - R, y(v)); ctx.stroke(); ctx.fillText(v.toFixed(key === 'temp' ? 1 : 0), 6, y(v) + 4); }
+    for (let i = 0; i <= 6; i++) { const idx = Math.round(i / 6 * (hist.length - 1)); ctx.fillText(fmtTime(hist[idx].timestamp).slice(0, 5), x(idx) - 14, h - 8); }
+    // línea base
+    if (c?.baseline?.[key] != null) { ctx.setLineDash([4, 4]); ctx.strokeStyle = 'rgba(111,240,255,.6)'; ctx.beginPath(); ctx.moveTo(L, y(c.baseline[key])); ctx.lineTo(w - R, y(c.baseline[key])); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#6ff0ff'; ctx.fillText('línea base', w - R - 60, y(c.baseline[key]) - 4); }
+    // serie (cortes en faltantes, puntos ruidosos marcados)
+    ctx.strokeStyle = '#1ed6ff'; ctx.lineWidth = 2; ctx.shadowColor = '#1ed6ff'; ctx.shadowBlur = 8; ctx.beginPath(); let pen = false;
+    vals.forEach((v, i) => { if (v == null) { pen = false; return; } if (!pen) { ctx.moveTo(x(i), y(v)); pen = true; } else ctx.lineTo(x(i), y(v)); }); ctx.stroke(); ctx.shadowBlur = 0;
+    hist.forEach((r, i) => { if (r[key] == null) return; const lvl = RulesEngine.evaluateMetric(key, r[key], c?.baseline).level; if (lvl !== 'normal' || r.quality !== 'ok') { ctx.fillStyle = r.quality !== 'ok' ? '#ffffff' : levelColor(lvl); ctx.beginPath(); ctx.arc(x(i), y(r[key]), r.quality !== 'ok' ? 2 : 3, 0, 7); ctx.fill(); } });
+    const avg = xs.reduce((a, b) => a + b, 0) / xs.length;
+    $('#hist-stats').innerHTML = `<span>mín <b>${Math.min(...xs)}</b></span><span>prom <b>${avg.toFixed(key === 'temp' ? 1 : 0)}</b></span><span>máx <b>${Math.max(...xs)}</b></span><span>n <b>${xs.length}</b> ${unit}</span>`;
+    const q = { ok: 0, ruidoso: 0, retrasado: 0, faltante: 0 }; hist.forEach(r => q[r.quality] = (q[r.quality] || 0) + 1);
+    $('#hist-quality').innerHTML = Object.entries(q).map(([k, v]) => `<div data-level="${k !== 'ok' && v > hist.length * 0.1 ? 'atencion' : ''}"><div class="k">${k}</div><div class="v">${v}<small>${hist.length ? round(v / hist.length * 100) : 0}%</small></div></div>`).join('');
+    $('#hist-baseline').innerHTML = c?.baseline ? Object.entries(c.baseline).map(([k, v]) => `<div><div class="k">${METRICS[k]?.short || k}</div><div class="v">${v ?? '--'}<small>${SCHEMA.VitalReading[k]?.unit || ''}</small></div></div>`).join('') : '<div class="note">Sin línea base.</div>';
+    $('#hist-dev').textContent = CONFIG.thresholds.baselineDeviationPct;
+  },
+  /* ---- vista Datos ---- */
+  initDataView() {
+    $('#schema-view').textContent = JSON.stringify(SCHEMA, null, 2);
+    const drop = $('#drop'); drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); }; drop.ondragleave = () => drop.classList.remove('over');
+    drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) this.importFile(e.dataTransfer.files[0]); };
+    $('#file-input').onchange = e => { if (e.target.files[0]) this.importFile(e.target.files[0]); e.target.value = ''; };
+    $('#dl-template').onclick = () => download('astro-vitals-plantilla.csv', 'astronautId,timestamp,hr,spo2,bpSys,bpDia,temp,resp,hrv,quality\nast-01,2026-01-01T12:00:00Z,64,98,118,76,36.6,14,60,ok\nast-01,2026-01-01T12:00:02Z,66,97,119,77,36.6,15,58,ok\nast-01,2026-01-01T12:00:04Z,,,,,,,,faltante\n', 'text/csv');
+    $('#dl-export').onclick = () => download(`astro-vitals-export-${Date.now()}.json`, JSON.stringify({ crew: State.crew, vitals: Object.values(State.history).flat(), environment: State.env, devices: State.devices, sleepActivity: State.sleep ? [State.sleep] : [] }, null, 1), 'application/json');
+  },
+  async importFile(file) {
+    const rep = $('#import-report'); rep.innerHTML = `Leyendo <b>${esc(file.name)}</b>…`;
+    try {
+      const text = await file.text(); let bundle = { vitals: [] }, rawRows;
+      if (/\.json$/i.test(file.name) || text.trim().startsWith('{') || text.trim().startsWith('[')) {
+        const j = JSON.parse(text);
+        if (Array.isArray(j)) rawRows = j; else { rawRows = j.vitals || j.readings || []; bundle.crew = j.crew; bundle.environment = j.environment ? Normalizer.environment(j.environment, 'real') : null; bundle.devices = (j.devices || []).map(d => Normalizer.device(d)); bundle.sleepActivity = (j.sleepActivity || []).map(s => Normalizer.sleepActivity(s, 'real')); }
+        bundle.vitals = rawRows.map(r => Adapters.adaptRestJson.vitals([r])[0]);
+      } else { rawRows = parseCsv(text); bundle.vitals = rawRows.map(r => Adapters.adaptCsvRow(r)); }
+      const errors = [], warnings = []; bundle.vitals.forEach((v, i) => { const r = validateVital(v, i + 1); errors.push(...r.errors); warnings.push(...r.warnings); });
+      const valid = bundle.vitals.filter((v, i) => validateVital(v, i).ok);
+      rep.innerHTML = `<p><span class="ok">${ICONS.tick} ${valid.length}</span> lecturas válidas de ${bundle.vitals.length} · <span class="err">${errors.length} errores</span> · ${warnings.length} avisos · tripulantes: ${[...new Set(valid.map(v => v.astronautId))].join(', ') || '—'}</p>` + (errors.length ? `<div class="mono">${esc(errors.slice(0, 12).join('\n'))}${errors.length > 12 ? '\n…' : ''}</div>` : '');
+      if (!valid.length) { rep.innerHTML += '<p class="err">No se pudo usar el archivo como fuente.</p>'; return; }
+      bundle.vitals = valid; fileBundle = bundle; fileName = file.name;
+      rep.innerHTML += `<p><button class="btn ok" id="use-file">Usar como fuente de datos</button></p>`;
+      $('#use-file').onclick = async () => { await startProvider('archivo'); $('#set-source').value = 'archivo'; this.renderSourceBadge(); this.go('panel'); showToast({ kind: 'logro', title: 'Fuente cambiada', message: `Reproduciendo ${valid.length} lecturas reales de ${file.name}.` }); };
+    } catch (e) { rep.innerHTML = `<p class="err">Error al leer el archivo: ${esc(e.message)}</p>`; }
+  },
+  renderDataView() { const d = State.provider?.describe() || {}; $('#provider-info').innerHTML = `<div class="mono">${esc(JSON.stringify(d, null, 2))}</div><p class="note">Proveedores disponibles: SimulatedProvider (activo por defecto) · RemoteProvider (esqueleto, lanza NotImplementedError) · FileProvider (CSV/JSON local).</p>`; },
+  /* ---- vista Ajustes ---- */
+  initSettings() {
+    $('#set-source').onchange = async e => { await startProvider(e.target.value); $('#set-source').value = CONFIG.dataSource; this.renderSourceBadge(); };
+    $('#apply-sim').onclick = async () => { CONFIG.seed = +$('#set-seed').value || CONFIG.seed; CONFIG.tickMs = clamp(+$('#set-tick').value || CONFIG.tickMs, 250, 60000); await startProvider('simulada'); $('#set-source').value = 'simulada'; this.renderSourceBadge(); showToast({ kind: 'logro', title: 'Simulación reiniciada', message: `semilla ${CONFIG.seed} · tick ${CONFIG.tickMs} ms` }); };
+    $('#set-sound').onchange = e => { State.sound = e.target.checked; State.save(); };
+    $('#reset-gam').onclick = () => { if (!confirm('¿Reiniciar puntos, racha y misiones?')) return; State.gam = defaultGam(); State.gam.streak = 0; State.gam.bestStreak = 0; State.gam.demo = false; State.save(); this.renderLive(); };
+    $('#reset-thr').onclick = () => { Object.assign(CONFIG.thresholds, JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS))); State.save(); this.renderSettings(); this.renderLive(); };
+    $('#set-dev').onchange = e => { CONFIG.thresholds.baselineDeviationPct = clamp(+e.target.value || 25, 5, 80); State.save(); };
+    const inj = [['taquicardia', 'Taquicardia'], ['hipoxia', 'Hipoxia'], ['fiebre', 'Fiebre'], ['hipertension', 'Hipertensión'], ['ejercicio', 'Sesión de ejercicio'], ['desconexion', 'Desconectar sensor'], ['co2', 'Pico de CO₂']];
+    $('#inject-buttons').innerHTML = inj.map(([k, l]) => `<button class="btn ${['taquicardia', 'hipoxia', 'hipertension'].includes(k) ? 'crit' : ['fiebre', 'co2', 'desconexion'].includes(k) ? 'warn' : ''}" data-inj="${k}">${l}</button>`).join('');
+    $('#inject-buttons').querySelectorAll('[data-inj]').forEach(b => b.onclick = async () => { const r = await State.provider.pushEvent({ type: b.dataset.inj, astronautId: b.dataset.inj === 'co2' ? null : State.selectedId }); showToast({ kind: 'recordatorio', title: r?.ok ? 'Evento inyectado' : 'Evento no aceptado', message: `${b.textContent} → ${State.crew.find(c => c.id === State.selectedId)?.name}` }); });
+  },
+  renderSettings() {
+    $('#set-source').value = CONFIG.dataSource; $('#set-seed').value = CONFIG.seed; $('#set-tick').value = CONFIG.tickMs; $('#set-sound').checked = State.sound; $('#set-dev').value = CONFIG.thresholds.baselineDeviationPct;
+    const rows = [['hr', 'FC (bpm)'], ['spo2', 'SpO₂ (%)'], ['bpSys', 'PA sistólica'], ['bpDia', 'PA diastólica'], ['temp', 'Temperatura (°C)'], ['resp', 'Respiración (rpm)'], ['hrv', 'HRV (ms)']];
+    const envRows = Object.keys(CONFIG.thresholds.env).map(k => [k, `Entorno · ${k} (${SCHEMA.Environment[k].unit})`]);
+    const cell = (obj, k, lvl, i) => `<td><input type="number" step="any" value="${obj[k][lvl][i]}" data-obj="${obj === CONFIG.thresholds ? 'v' : 'e'}" data-k="${k}" data-lvl="${lvl}" data-i="${i}"></td>`;
+    $('#thr-table').innerHTML = `<tr><th>Métrica</th><th colspan="2" style="color:var(--ok)">Banda normal (mín · máx)</th><th colspan="2" style="color:var(--warn)">Banda atención (mín · máx)</th></tr>` +
+      rows.map(([k, l]) => `<tr><td>${l}</td>${cell(CONFIG.thresholds, k, 'atencion', 0)}${cell(CONFIG.thresholds, k, 'atencion', 1)}${cell(CONFIG.thresholds, k, 'cirujano', 0)}${cell(CONFIG.thresholds, k, 'cirujano', 1)}</tr>`).join('') +
+      envRows.map(([k, l]) => `<tr><td>${l}</td>${cell(CONFIG.thresholds.env, k, 'atencion', 0)}${cell(CONFIG.thresholds.env, k, 'atencion', 1)}${cell(CONFIG.thresholds.env, k, 'cirujano', 0)}${cell(CONFIG.thresholds.env, k, 'cirujano', 1)}</tr>`).join('');
+    $('#thr-table').querySelectorAll('input').forEach(inp => inp.onchange = () => { const o = inp.dataset.obj === 'v' ? CONFIG.thresholds : CONFIG.thresholds.env; o[inp.dataset.k][inp.dataset.lvl][+inp.dataset.i] = +inp.value; State.save(); this.renderLive(); });
+  }
+};
+function showToast(n) {
+  const el = document.createElement('div'); el.className = `toast ${n.kind === 'logro' ? 'logro' : n.level || ''}`; el.setAttribute('role', n.level === 'cirujano' ? 'alert' : 'status');
+  const ic = n.kind === 'logro' ? ICONS.medal : n.level === 'cirujano' ? ICONS.crit : n.level === 'atencion' ? ICONS.warn : n.kind === 'dispositivo' ? ICONS.batt : ICONS.bell;
+  el.innerHTML = `<span class="tic">${ic.replace('class="ic"', 'class="ic tic"')}</span><div><b>${esc(n.title)}</b><span>${esc(n.message || '')}</span></div>`; const box = $('#toasts'); box.appendChild(el);
+  while (box.children.length > 4) box.firstChild.remove(); // nunca más de 4 toasts visibles
+  // salida más suave que la entrada: fundido + desplazamiento fijo pequeño (ease-out), sin recorrido completo
+  setTimeout(() => { el.style.transition = 'opacity .2s ease-out, transform .2s ease-out'; el.style.opacity = '0'; el.style.transform = 'translateY(-8px)'; setTimeout(() => el.remove(), 220); }, n.level === 'cirujano' ? 9000 : 5500);
+}
+function download(name, content, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+let audioCtx; function beep() { try { audioCtx ||= new (window.AudioContext || window.webkitAudioContext)(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; g.gain.value = 0.05; o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.18); } catch (e) { } }
+
+/* ---------- arranque ---------- */
+(async function main() {
+  State.load(); UI.init();
+  await startProvider(CONFIG.dataSource);
+  setInterval(() => UI.renderMet(), 1000);
+  setTimeout(() => showToast({ kind: 'recordatorio', level: 'atencion', title: 'Modo demostración', message: 'Todos los datos son simulados (semilla ' + CONFIG.seed + '). Ninguna lectura es de una persona real.' }), 800);
+})();
+</script>
+
+<!--
+=====================================================================================
+  CÓMO CONECTAR DATOS REALES
+=====================================================================================
+La UI solo llama a la interfaz DataProvider. Para pasar de simulado a real NO se toca la UI
+ni el motor de reglas: se implementa RemoteProvider (o se carga un archivo con FileProvider).
+
+1) Elegir y configurar la fuente
+   - CONFIG.api.baseUrl  → URL base de tu API o de un proxy propio.
+   - CONFIG.api.nasaApiKey → vacía en el código. Cargarla en runtime (campo en Ajustes o
+     variable de entorno del proxy). Nunca commitearla.
+   - CONFIG.dataSource = 'remota' (o selector "Fuente de datos" en Ajustes).
+
+2) Implementar RemoteProvider (cada función reemplaza a una del simulador)
+   getCrew()                 ← GET /crew                      → Adapters.adaptRestJson.crew(raw)
+   getVitals(id, from, to)   ← GET /vitals/:id?from=&to=      → Adapters.adaptRestJson.vitals(raw)
+   subscribeVitals(id, cb)   ← polling (setInterval + getVitals desde el último timestamp) o WebSocket/SSE.
+                               Debe devolver una función unsubscribe().
+   getEnvironment()          ← GET /environment               → Adapters.adaptRestJson.environment(raw)
+   getDevices(id)            ← GET /devices/:id               → Adapters.adaptRestJson.devices(raw)
+   getSleepActivity(id, day) ← GET /activity/:id?day=         → Adapters.adaptRestJson.sleepActivity(raw)
+   getAlerts()               ← GET /alerts (opcional: alertas que ya calcula el sistema de a bordo)
+   pushEvent(event)          ← POST /events (registro manual, recarga, reconexión)
+   fetchJson() ya implementa: timeout (AbortController), reintentos con backoff, caché TTL en memoria,
+   header x-api-key. Falta: refresco en background y persistencia de caché si se necesita offline.
+
+3) Completar los adaptadores (Adapters.*)
+   - adaptRestJson.*: mapear los nombres de campo de la API al SCHEMA (ej. heart_rate → hr).
+   - adaptCsvRow: ya reconoce sinónimos comunes; agregar los de tu dataset.
+   - adaptDbRow: mapear columnas de la tabla (si hay backend con SQL/NoSQL).
+   Todo pasa por Normalizer.* que valida tipos y rangos y deja null lo que no cumple.
+   Marcar source: "real" en todo lo que venga de afuera. La insignia de la barra superior cambia sola.
+
+4) Probar sin servidor
+   Vista Datos → "Cargar datos": CSV o JSON locales se validan contra SCHEMA y se usan como fuente
+   (FileProvider). Plantilla CSV descargable desde la misma vista. Exportar historial genera un JSON
+   con el formato completo {crew, vitals, environment, devices, sleepActivity}.
+
+5) Calidad de señal
+   Las lecturas pueden traer quality = "ruidoso" | "retrasado" | "faltante" y campos null. El motor
+   de reglas ignora los null (nivel "sindatos" por métrica) y la UI los marca. Si tu fuente no informa
+   calidad, calculala en el adaptador (ej. timestamp con > 10 s de atraso → "retrasado").
+
+6) Fuentes candidatas a investigar y verificar (NO implementadas)
+   - NASA Open Data Portal (data.nasa.gov): datasets abiertos (CSV/JSON vía Socrata API).
+   - NASA Open APIs (api.nasa.gov): requiere api_key; límites de uso por hora (plan DEMO_KEY muy bajo).
+   - NASA OSDR / GeneLab: datos ómicos y fisiológicos de experimentos, no en vivo.
+   - NASA Life Sciences Data Archive (LSDA): datos de estudios con tripulación, acceso por solicitud.
+   IMPORTANTE: no existen datos fisiológicos EN VIVO de astronautas de acceso público. Lo probable es
+   combinar datos públicos agregados (telemetría ambiental de la ISS, datasets históricos) con simulación
+   para las series por persona, siempre etiquetando source correctamente.
+   CORS: la mayoría de estas APIs no habilitan llamadas desde el navegador → usar un proxy propio
+   (serverless o pequeño servidor) que además guarda la API key y cachea respuestas para respetar
+   los límites de uso.
+=====================================================================================
+-->
+</body>
+</html>
