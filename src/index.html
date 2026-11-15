@@ -1663,6 +1663,7 @@ const ES_DICT = {
 "Open a link to read the original and confirm any number before quoting it.": "Abrí el enlace para leer el original y confirmá cualquier número antes de citarlo.",
 "Bob, an AI assistant by IBM, was also used on this project.": "En este proyecto también se usó Bob, un asistente de IA de IBM.",
 "AI tools used": "IA utilizada",
+"The team used several Claude models (Fable, Opus and Sonnet), not just one.": "El equipo usó varios modelos de Claude (Fable, Opus y Sonnet), no solo uno.",
 "All vital signs for the selected person, their recent trend and the quality of each reading. Tap a card to open its detail.": "Todos los signos vitales de la persona elegida, su tendencia reciente y la calidad de cada lectura. Tocá una tarjeta para abrir el detalle.",
 "All your devices above 50%": "Todos tus dispositivos arriba del 50%",
 "All your vital signs, their recent trend and the quality of each reading. Tap a card to open its detail.": "Todos tus signos vitales, su tendencia reciente y la calidad de cada lectura. Tocá una tarjeta para abrir el detalle.",
@@ -3566,6 +3567,7 @@ Object.assign(UI, {
         <section class="panel" aria-labelledby="h-team"><h3 id="h-team"><span class="grow">Team ${esc(C.team)}</span></h3><div class="alist">${C.members.map(m => `<div class="member"><span class="avatar">${esc(ini(m))}</span><b>${esc(m)}</b></div>`).join('')}</div></section>
         <section class="panel" aria-labelledby="h-claude"><h3 id="h-claude"><span class="grow">AI tools used</span></h3>
           <p>${esc(C.app)} was made with Claude, an AI assistant by Anthropic. The visual design comes from Claude Design, and Claude Code helped write, review and test the code. Team ${esc(C.team)} chose what to build, directed the work and made the product decisions.</p>
+          <p>The team used several Claude models (Fable, Opus and Sonnet), not just one.</p>
           <p>Bob, an AI assistant by IBM, was also used on this project.</p></section>
       </div>
       <section class="panel" aria-labelledby="h-evid"><h3 id="h-evid"><span class="grow">Evidence by data point</span></h3>
