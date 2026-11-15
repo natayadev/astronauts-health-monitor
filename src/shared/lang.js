@@ -6,7 +6,10 @@
   function clean(v) { return v === 'es' ? 'es' : 'en'; }
   function read() {
     var v = null;
-    try { var q = new URLSearchParams(location.search).get('lang'); if (q === 'es' || q === 'en') v = q; } catch (e) {}
+    try {   /* an old link with ?lang=es still works once; the address is cleaned afterwards */
+      var u = new URL(location.href), q = u.searchParams.get('lang');
+      if (q === 'es' || q === 'en') { v = q; try { localStorage.setItem(KEY, q); } catch (e2) {} u.searchParams.delete('lang'); history.replaceState(null, '', u.pathname + u.search + u.hash); }
+    } catch (e) {}
     try { v = v || localStorage.getItem(KEY) || localStorage.getItem('higia.lang') || localStorage.getItem('pulso-lang'); } catch (e) {}
     return clean(v);
   }

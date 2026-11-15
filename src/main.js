@@ -12,11 +12,6 @@
     document.querySelectorAll('.pin[data-l-es]').forEach(function (p) { p.setAttribute('aria-label', p.getAttribute('data-l-' + l)); });
     document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === l)); });
     document.title = l === 'en' ? 'Tesai · A second doctor inside your visor' : 'Tesai · Un segundo médico dentro de tu visor';
-    /* la simulación hereda el idioma: por almacenamiento compartido y, de respaldo, por ?lang= */
-    document.querySelectorAll('a[href^="simulacion/"]').forEach(function (a) {
-      if (!a.dataset.base) a.dataset.base = a.getAttribute('href').split('?')[0];
-      a.setAttribute('href', a.dataset.base + '?lang=' + l);
-    });
   }
   TesaiLang.on(setLang);   /* the switch lives in the site bar (shared/site-bar.js); English by default */
 
