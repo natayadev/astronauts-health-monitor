@@ -1,0 +1,63 @@
+/* ==========================================================================
+   EVIDENCE POPUP · .evbtn, .evscrim, .evpop, .evrow, .apa
+   ========================================================================== */
+
+/* ===== "!" evidence button ===== */
+.evbtn {
+  display: inline-grid; place-items: center;
+  width: 22px; height: 22px; margin-left: 6px; padding: 0; flex: none;
+  border-radius: 50%; border: 1.5px solid var(--eb, var(--color-deep));
+  background: var(--color-white); color: var(--eb, var(--color-deep));
+  font: 700 13px/1 var(--font-ui); vertical-align: middle;
+  position: relative;
+  transition: background-color .15s var(--ease), color .15s var(--ease), scale .12s var(--ease);
+}
+.evbtn::after { content: ""; position: absolute; inset: -8px }
+.evbtn:hover  { background: var(--eb, var(--color-deep)); color: var(--color-white) }
+.evbtn:active { scale: .92 }
+.evbtn[data-basis="source"]  { --eb: var(--color-teal-ink) }
+.evbtn[data-basis="adapted"] { --eb: var(--color-sensor-ink) }
+.evbtn[data-basis="design"],
+.evbtn[data-basis="none"]    { --eb: var(--color-warn-ink) }
+
+/* Evidence button in specific containers */
+.vwrap { position: relative }
+.vwrap .evbtn { position: absolute; top: 16px; right: 16px; margin: 0 }
+.vwrap .vcard .top { padding-right: 34px }
+.ecard .top .evbtn { margin-left: 0 }
+.mission .mt .evbtn { width: 20px; height: 20px; font-size: 12px }
+
+/* ===== Scrim ===== */
+.evscrim { display: none; position: fixed; inset: 0; z-index: 70; background: color-mix(in srgb, var(--color-ink) 35%, transparent) }
+.evscrim.on { display: block }
+
+/* ===== Evidence popup ===== */
+.evpop {
+  position: fixed; z-index: 71; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(620px, calc(100vw - 24px)); max-height: calc(100vh - 40px); overflow: auto;
+  padding: 22px; border-radius: var(--r-xl);
+  background: var(--glass-3);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-white); box-shadow: var(--shadow-l);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.evpop[hidden] { display: none }
+.evpop .evh { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px }
+.evpop h2 { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -.01em }
+.evpop .eyebrow { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted) }
+.evpop h3 { font-size: var(--fs-lg); font-weight: 700; margin-top: 4px }
+.evnote { line-height: 1.55; color: var(--color-ink) }
+
+/* ===== APA reference list ===== */
+.apa { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: var(--fs-sm); line-height: 1.5; overflow-wrap: anywhere }
+.apa li  { padding-left: 2em; text-indent: -2em }
+.apa a   { color: var(--color-teal-ink); text-decoration: underline; text-underline-offset: 2px }
+
+/* ===== Evidence row ===== */
+.evrow { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 16px; background: color-mix(in srgb, var(--color-white) 62%, transparent) }
+.evrow .top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px }
+.evrow .top b { font-weight: 600; font-size: var(--fs-md) }
+.evrow p { font-size: var(--fs-sm); line-height: 1.5 }
+.evrow .cites { font-size: var(--fs-xs); color: var(--color-muted) }
+
+@media (max-width: 760px) { .evpop { padding: 16px } }

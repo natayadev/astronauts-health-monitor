@@ -1,0 +1,66 @@
+/* ==========================================================================
+   BADGES & PILLS · .pill, .lvdot, .ttl, .tag, .key, .status-chip, .prio
+   ========================================================================== */
+
+/* ===== Level pills ===== */
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: var(--r-pill);
+  font-size: var(--fs-xs); font-weight: 600; line-height: 1.4; white-space: nowrap;
+  color: var(--lv-ink, var(--color-deep));
+  background: var(--lv-bg, color-mix(in srgb, var(--color-teal) 10%, transparent));
+}
+.pill .ic  { width: 13px; height: 13px; stroke-width: 2.4 }
+.pill.solid  { color: var(--color-white); background: var(--grad-brand) }
+.pill.dashed { border: 1px dashed var(--lv) }
+
+/* ===== Traffic-light dot ===== */
+.lvdot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--lv, var(--color-none));
+  box-shadow: 0 0 0 3px var(--lv-bg, transparent);
+  flex: none; vertical-align: middle;
+}
+.lvdot[data-level="surgeon"],
+[data-level="surgeon"] > .lvdot,
+[data-level="surgeon"] .ttl .lvdot { animation: dotPulse 1.8s ease-in-out infinite }
+@keyframes dotPulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--lv-bg) }
+  50%       { box-shadow: 0 0 0 7px color-mix(in srgb, var(--lv) 14%, transparent) }
+}
+
+/* ===== Title row (lvdot + text) ===== */
+.ttl { display: flex; align-items: center; gap: 8px }
+
+/* ===== Legend key ===== */
+.key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--fs-xs); color: var(--color-muted) }
+.key span { display: inline-flex; align-items: center; gap: 7px }
+
+/* ===== Tag / monospace label ===== */
+.tag { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-muted); letter-spacing: 0 }
+
+/* ===== Status chip (alerts list) ===== */
+.status-chip {
+  font-size: var(--fs-xs); font-weight: 600; padding: 3px 10px; border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--color-deep) 8%, transparent); color: var(--color-deep);
+  white-space: nowrap;
+}
+.status-chip[data-s="active"]   { background: var(--lv-bg);  color: var(--lv-ink) }
+.status-chip[data-s="resolved"] { background: color-mix(in srgb, var(--color-teal) 12%, transparent); color: var(--color-teal-ink) }
+.status-chip[data-s="snoozed"]  { background: var(--lv-bg);  color: var(--lv-ink) }
+
+/* ===== Priority mono label ===== */
+.prio {
+  font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600;
+  padding: 2px 8px; border-radius: 8px;
+  background: color-mix(in srgb, var(--color-deep) 10%, transparent); color: var(--color-deep);
+}
+
+/* ===== Group title ===== */
+.group-title {
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--color-muted); margin: 6px 2px 8px;
+}
+
+/* ===== Note / caption ===== */
+.note { color: var(--color-muted); font-size: var(--fs-sm) }

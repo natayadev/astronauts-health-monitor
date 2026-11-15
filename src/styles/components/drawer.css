@@ -1,0 +1,58 @@
+/* ==========================================================================
+   DRAWER · glass side panel / bottom sheet (detail view)
+   ========================================================================== */
+
+.drawer {
+  position: fixed; top: 16px; right: 16px; bottom: 16px;
+  width: 400px; max-width: calc(100vw - 32px); z-index: 40;
+  border-radius: 28px;
+  background: var(--glass-2);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid color-mix(in srgb, var(--color-white) 90%, transparent);
+  box-shadow: var(--shadow-l);
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 20px; padding: 24px;
+  transform: translateX(calc(100% + 40px)); visibility: hidden;
+  transition: transform .45s var(--ease), visibility 0s .45s;
+}
+.drawer.open { transform: none; visibility: visible; transition: transform .45s var(--ease), visibility 0s }
+
+/* Header */
+.drawer .dh { display: flex; align-items: flex-start; gap: 12px }
+.drawer .dh .ico {
+  width: 40px; height: 40px; border-radius: 14px;
+  background: var(--grad-brand); color: var(--color-white);
+  display: grid; place-items: center; flex: none;
+}
+.drawer .dh .ico .ic { width: 19px; height: 19px }
+.drawer .dh h2 { font-size: var(--fs-xl); font-weight: 700 }
+.drawer .dh p  { font-size: var(--fs-sm); color: var(--color-muted) }
+
+/* Large value display */
+.drawer .big { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px }
+.drawer .big b     { font-size: var(--fs-hero); font-weight: 600; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums }
+.drawer .big small { font-size: var(--fs-xl); font-weight: 600; color: var(--color-teal-ink); margin-left: 6px }
+
+/* Row & section heading */
+.drawer .row { display: flex; align-items: center; justify-content: space-between; gap: 8px }
+.drawer h3   { font-size: var(--fs-lg); font-weight: 600 }
+
+/* Stats grid */
+.drawer .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px }
+.drawer .stats div { padding: 12px 14px; border-radius: var(--r-md); background: color-mix(in srgb, var(--color-white) 60%, transparent); display: flex; flex-direction: column; gap: 3px }
+.drawer .stats span { font-size: var(--fs-xs); color: var(--color-muted) }
+.drawer .stats b    { font-size: var(--fs-xl); font-weight: 600; font-variant-numeric: tabular-nums }
+
+/* Reference bar */
+.refbar { position: relative; height: 8px; border-radius: 8px; background: color-mix(in srgb, var(--color-deep) 10%, transparent) }
+.refbar .band { position: absolute; top: 0; bottom: 0; border-radius: 8px; background: var(--grad-accent); opacity: .55 }
+.refbar .mark {
+  position: absolute; top: -4px; width: 16px; height: 16px; margin-left: -8px;
+  border-radius: 50%; background: var(--color-deep);
+  border: 3px solid var(--color-white);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-deep) 30%, transparent);
+  transition: left .4s var(--ease);
+}
+
+/* Scrim (mobile only — shown via media query in layout.css) */
+.scrim { display: none }
