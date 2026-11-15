@@ -3,8 +3,8 @@
  * DOM helpers, HTML builders, chart renderer.
  */
 import { ICONS, LV_ICON } from './icons.js';
-import { LEVELS, METRICS, CONFIG, SCHEMA } from '../config.js';
-import { esc, fmtTime, pad, clamp } from '../utils.js';
+import { LEVELS } from '../config.js';
+import { esc, fmtTime } from '../utils.js';
 import { State } from '../state.js';
 
 /* ===== DOM helpers ===== */
@@ -85,13 +85,3 @@ export function download(name, content, type) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-let audioCtx;
-export function beep() {
-  try {
-    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.frequency.value = 880; g.gain.value = 0.05;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + 0.18);
-  } catch (e) { /* audio not available */ }
-}

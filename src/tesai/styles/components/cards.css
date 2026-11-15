@@ -131,7 +131,6 @@
 .ecard .v { font-size: var(--fs-num); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums }
 .ecard .v small { font-size: var(--fs-lg); color: var(--color-teal-ink); margin-left: 5px }
 .ecard .q   { font-size: var(--fs-sm); color: var(--color-ink) }
-.ecard .ref { font-size: var(--fs-xs); color: var(--color-muted) }
 
 /* ===== Bottom dock bar ===== */
 .dockbar {

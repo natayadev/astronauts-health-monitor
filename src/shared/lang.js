@@ -10,7 +10,7 @@
       var u = new URL(location.href), q = u.searchParams.get('lang');
       if (q === 'es' || q === 'en') { v = q; try { localStorage.setItem(KEY, q); } catch (e2) {} u.searchParams.delete('lang'); history.replaceState(null, '', u.pathname + u.search + u.hash); }
     } catch (e) {}
-    try { v = v || localStorage.getItem(KEY) || localStorage.getItem('higia.lang') || localStorage.getItem('pulso-lang'); } catch (e) {}
+    try { v = v || localStorage.getItem(KEY) || localStorage.getItem('higia.lang'); } catch (e) {}
     return clean(v);
   }
   var current = read();

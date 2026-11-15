@@ -9,7 +9,8 @@ src/
 │                                       lang.js (un solo idioma, inglés por defecto) y site-bar.js/.css (logo e idioma de la barra superior)
 ├─ assets/                              Imágenes, tipografías (una sola carpeta), logos y capturas de Tesai (assets/tesai/)
 ├─ simulacion/                          Simulación inmersiva en primera persona (3 escenarios, con voz)
-│  ├─ index.html                        Un solo archivo
+│  ├─ index.html · styles.css           Estructura y estilos
+│  ├─ js/                               i18n.js (textos ES/EN), scene.js (escena 3D), sim.js (bucle, escenarios y HUD)
 │  ├─ vendor/                           three.js 0.170.0 (licencia MIT), incluido para que funcione sin conexión
 │  └─ img/
 └─ tesai/                               Prototipo Tesai: panel de la tripulación, Visor en primera persona,
@@ -27,7 +28,7 @@ src/
 
 ```bash
 cd src
-python -m http.server 8765
+python3 -m http.server 8765
 # http://localhost:8765/          web central
 # http://localhost:8765/simulacion/
 # http://localhost:8765/tesai/
@@ -35,6 +36,8 @@ python -m http.server 8765
 
 ## Desplegar
 
-Cualquier hosting estático sirve apuntando a `src/` (por ejemplo, Cloudflare Pages o Vercel). `vercel.json` usa `trailingSlash: true` para que `/tesai/` y `/simulacion/` resuelvan bien sus rutas relativas.
+`vercel.json` (en la raíz del repo) publica solo `src/`, agrega las cabeceras de seguridad (CSP incluida) y usa `trailingSlash: true` para que `/tesai/` y `/simulacion/` resuelvan bien sus rutas relativas. En otro hosting estático (por ejemplo, Cloudflare Pages) alcanza con publicar `src/` sin paso de build.
+
+Ninguna página tiene `<script>` inline: todo el código está en archivos `.js` del propio sitio.
 
 La simulación y Tesai son simulaciones educativas con datos simulados: no diagnostican y no reemplazan al cirujano de vuelo. La guía de RCP es simplificada y no reemplaza un curso certificado.

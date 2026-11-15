@@ -4,7 +4,7 @@
  */
 import { CONFIG, LEVELS, METRICS } from './config.js';
 import { uid, dayKey, round } from './utils.js';
-import { RulesEngine, GROUPS } from './rules.js';
+import { GROUPS } from './rules.js';
 
 /* ===== Mission definitions ===== */
 export const MISSION_DEFS = [

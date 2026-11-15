@@ -97,7 +97,6 @@ export const BASIS_LEVEL  = { source: 'normal', adapted: 'sensor', design: 'part
 /* ===== Rendering helpers ===== */
 export const citeText    = key => (EVIDENCE[key]?.refs || []).map(id => SOURCES[id].cite).join('; ');
 export const apaItems    = ids => [...new Set(ids)].sort((a, b) => SOURCES[a].sort.localeCompare(SOURCES[b].sort)).map(id => `<li>${SOURCES[id].apa}</li>`).join('');
-export const hasUnverified = ids => ids.some(id => SOURCES[id]?.unverified);
 
 export const basisPill   = (pillHtml, b) => pillHtml(BASIS_LEVEL[b], BASIS_LABEL[b]);
 

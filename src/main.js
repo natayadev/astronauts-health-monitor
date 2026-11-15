@@ -1,8 +1,6 @@
 /* Tesai · interacciones mínimas: idioma ES/EN, guía de sensores y video del Visor. */
 (function () {
   var root = document.documentElement;
-  function save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
   /* ---- idioma: cada texto trae data-es / data-en ---- */
   function setLang(l) {
@@ -10,7 +8,6 @@
     document.querySelectorAll('[data-es][data-en]').forEach(function (el) { el.textContent = el.getAttribute('data-' + l); });
     document.querySelectorAll('[data-es-alt]').forEach(function (el) { el.alt = el.getAttribute('data-' + l + '-alt'); });
     document.querySelectorAll('.pin[data-l-es]').forEach(function (p) { p.setAttribute('aria-label', p.getAttribute('data-l-' + l)); });
-    document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === l)); });
     document.title = l === 'en' ? 'Tesai · A second doctor inside your visor' : 'Tesai · Un segundo médico dentro de tu visor';
     document.querySelectorAll('[data-es-label]').forEach(function (el) { el.setAttribute('aria-label', el.getAttribute('data-' + l + '-label')); });
     /* capturas de Tesai en el idioma elegido */

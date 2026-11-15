@@ -4,7 +4,7 @@ Made by **Team Higía** (Ezequiel Alfaro, Sebastian Garay, Nataya Flores, Mateo 
 
 Web prototype for monitoring astronaut health. It uses a "digital twin" look (mint and teal, glass surfaces, mono numbers) taken from the Claude Design mockup, with a traffic-light scale: **Normal / Attention / Alert flight surgeons**, plus separate states for partial data, missing data and sensor problems.
 
-> **All data is simulated.** The About page and the startup notice say so. Imported file or API data shows an "unverified" badge in the top bar.
+> **All data is simulated.** The About page says so and every reading is labeled "source: simulated". Imported file or API data shows an "unverified" badge in the top bar.
 
 ## Run
 
@@ -12,7 +12,7 @@ There is no build step: plain HTML, CSS and native ES modules. ES modules need t
 
 ```bash
 cd src            # sirve el sitio completo; Tesai queda en /tesai/
-python -m http.server 8765
+python3 -m http.server 8765
 ```
 
 Open `http://localhost:8765/tesai/`. The fonts live in `../assets/fonts/` (loaded by `../shared/fonts.css`), so it also works offline.
@@ -21,8 +21,8 @@ Open `http://localhost:8765/tesai/`. The fonts live in `../assets/fonts/` (loade
 
 ```
 src/tesai/
-├─ index.html            # semantic HTML only (no inline styles or scripts)
-├─ styles/               # tokens → base → layout → components/*.css
+├─ index.html            # semantic HTML only (no inline scripts)
+├─ styles/               # base → layout → components/*.css → responsive.css (tokens come from ../shared/)
 ├─ js/
 │  ├─ app.js             # entry point, main loop, alert processing
 │  ├─ config.js          # schema, thresholds, levels, credits
@@ -34,10 +34,12 @@ src/tesai/
 │  ├─ audio.js           # built-in audio: alert tones and spoken alerts (Web Audio + speech synthesis)
 │  ├─ guidance.js        # second doctor: step-by-step guides per alert, EN/ES
 │  ├─ providers/         # simulated, file and remote data providers + normalizer
-│  ├─ twin/              # astronaut: twin.js (component), figure/plate/spin/scan.js, overlays/ (one per metric), art.js (generated)
-│  └─ ui/                # UI controller, Visor, check-in view, helpers, icons, toasts
+│  ├─ twin/              # astronaut: twin.js (component), astronaut.js (figure in use), plate/spin/scan.js
+│  └─ ui/                # UI controller, Visor, check-in view, wearables, helpers, icons, toasts
 └─ assets/
-   └─ visor/             # first-person backgrounds for the Visor (ship, rover)
+   ├─ human.png          # the astronaut in Overview
+   ├─ visor/             # first-person backgrounds for the Visor (ship, rover)
+   └─ wearables/         # isometric device drawings shown in Biometrics
 ```
 
 The full module map, data flow and alert system are in [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md).
@@ -52,17 +54,15 @@ The full module map, data flow and alert system are in [`../../ARCHITECTURE.md`]
 | Check-in | Private daily check-in: five 0–10 scales (sleep quality, mood, calm, mental sharpness, connection with the crew), optional tension and symptoms, "who sees this", a 14-day comparison with your own history, and symptoms shown next to recent cabin CO₂ |
 | Alerts (from the bell) | Alerts with a lifecycle and priority, sensors separate from health, simulated ground link |
 | History | Chart with traffic-light bands and baseline, signal quality, missions and streak |
-| About | Team credits, the NASA challenge, how Claude was used, evidence by data point, references and notices |
+| About | Team credits, the NASA challenge, the AI tools used, evidence by data point with its references, data provenance and notices |
 | Advanced (hidden) | Data source, import/export, demo mode, appearance, thresholds (read-only), schema. Not in the navigation: open `#/advanced` |
 
 ## Astronaut twin
 
-The figure in the middle of Overview is an isometric SVG drawing with live, data-driven overlays. It lives in `js/twin/` and is built like a component: `createTwin(root)` fills the `#twin` element with the plate, the figure, the 360° view and the scan sweep, and returns `update(props)`, `scan()` and `destroy()`. It never reads app state. `UI.syncTwin()` passes it `{ metrics, focus, pinned, motion }` on every render, and the 360° button passes `{ spin }`.
+The figure in the middle of Overview is the original astronaut illustration (`assets/human.png`) with the six vital signs connected to the body. It lives in `js/twin/` and is built like a component: `createTwin(root)` fills the `#twin` element and returns `update(props)`, `scan()` and `destroy()`. It never reads app state; everything it shows comes from its props, so it can move to React later without changing its contract.
 
-- **Parts.** `twin.js` puts the pieces together; `figure.js` draws the figure and runs the overlays; `plate.js` is the frame and its readout; `spin.js` turns the figure for the 360° view; `scan.js` runs the scan sweep. All of it is styled in `styles/components/twin.css`.
-
-- **Overlays** are registered per metric in `js/twin/overlays/index.js`. Heart rate is the first: the console dial reads beats per minute, the lamp and the chest display follow each beat, and hovering or selecting the Heart rate card opens the chest port on the beating heart. With no trusted reading nothing beats.
-- **The drawing** is static markup in `js/twin/art.js`, generated from the geometry in `../../tools/twin/` (`stand.mjs`, `suit.mjs`, `overlays/heart.mjs`). The app still has no build step: `art.js` is committed. Regenerate it only when the drawing or the heart-rate limits in `config.js` change:
+- **Parts.** `twin.js` puts the pieces together; `astronaut.js` mounts the picture and the layers for future overlays; `plate.js` is the frame and its readout; `spin.js` turns the figure for the 360° view; `scan.js` runs the scan sweep. All of it is styled in `styles/components/twin.css`.
+- **Alternative figure, not in use.** An isometric SVG drawing with a live heart-rate overlay is kept in `figure.js`, `art.js` (generated) and `overlays/`. It exports the same `mountFigure` / `anchorOf` / `FIGURE` as `astronaut.js`, so switching is one import in `twin.js`. `art.js` is generated from `../../tools/twin/`; regenerate it only if that drawing changes:
 
 ```bash
 node tools/twin/build.mjs            # write src/tesai/js/twin/art.js (run from the repo root; tested on Node 22)
@@ -104,9 +104,9 @@ Every number, goal and alert rule has a basis and sources:
 | No real data source | Simulated data |
 
 - A **"!" button** sits next to each metric, goal, check-in panel and alert rule. It opens the basis, a short note and the references in APA format.
-- The **About** page lists the evidence by data point, the data provenance and the full reference list.
+- The **About** page lists the evidence by data point, each with its references, and the data provenance.
 - Sources live in `js/evidence.js` (`SOURCES` and `EVIDENCE`). To add or fix a source, edit those two objects.
-- Entries marked † have a title or date that could not be confirmed against the original. Confirm a value in the original source before quoting it elsewhere.
+- Sources whose title or date could not be confirmed against the original are flagged in `js/evidence.js` (`unverified: true`) for the team to check. The app does not mark them, so confirm a value in the original source before quoting it elsewhere.
 - Not backed by a published source: HRV limits, core-temperature limits, the outer heart-rate limits, the sleep goal, the hobby goal, battery levels, hydration, the personal-baseline deviation, escalation timing, the ground-link delay profile and the check-in comparison rule.
 
 ## Alerts

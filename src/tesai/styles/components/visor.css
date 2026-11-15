@@ -1,6 +1,6 @@
 /* ==========================================================================
-   VISOR · crew vitals always in view, situation notice, second doctor
-   Uses the Tesai tokens only (mint + teal glass, traffic-light levels).
+   VISOR · crew vitals always in view, situation notice, second doctor.
+   Page chrome uses the Tesai tokens; the first-person HUD below copies the simulation's glass look.
    ========================================================================== */
 
 .vz-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
@@ -15,37 +15,8 @@
 .vz-chip[aria-pressed="true"] { background: var(--grad-brand); color: var(--color-white); border-color: transparent }
 .vz-chip.static { cursor: default; background: var(--glass); color: var(--color-muted); font-weight: 500 }
 .vz-chip.static:hover { background: var(--glass) }
-.vz-pick .vz-chip[data-level][aria-pressed="true"] { background: var(--lv-bg); color: var(--lv-ink); border-color: var(--lv) }
 
-/* ----- Situation notice + second doctor ----- */
-#vz-sim { margin-top: 16px }
-.vz-sit {
-  position: relative; padding: 20px 22px; border-radius: var(--r-xl, 24px);
-  background: var(--glass-3); border: 1px solid var(--line-2);
-  box-shadow: var(--shadow-m);
-}
-.vz-sit[data-level="attention"] { box-shadow: 0 0 0 1.5px var(--lv), var(--shadow-m) }
-.vz-sit[data-level="surgeon"]   { box-shadow: 0 0 0 2px var(--lv), 0 16px 40px color-mix(in srgb, var(--color-crit) 18%, transparent) }
-.vz-sit-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px }
-.vz-sit .eyebrow { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted) }
-.vz-ok { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: 600; color: var(--color-ok-ink) }
-.vz-ok .ic { width: 14px; height: 14px }
-.vz-sit h3 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-top: 10px }
-.vz-reason { color: var(--color-muted); margin-top: 4px }
-.vz-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px }
-
-.vz-calm { display: flex; gap: 14px; align-items: flex-start }
-.vz-calm .ic { width: 30px; height: 30px; color: var(--color-ok); flex: none }
-.vz-calm p { color: var(--color-muted); margin-top: 2px; max-width: 64ch }
-.vz-sit.calm { box-shadow: var(--shadow-s, none) }
-
-.vz-doc {
-  margin-top: 16px; padding: 16px; border-radius: 18px;
-  background: var(--tint-soft); border: 1px solid var(--line);
-}
-.vz-doc-h { display: flex; align-items: center; gap: 8px; color: var(--color-teal-ink) }
-.vz-doc-h .ic { width: 18px; height: 18px }
-.vz-doc-h span { margin-left: auto; font-size: var(--fs-xs); color: var(--color-muted) }
+/* ----- Second-doctor steps (base; the glass HUD below restyles them) ----- */
 .vz-steps { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px }
 .vz-steps button {
   display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left;
@@ -67,31 +38,9 @@
 .vz-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px }
 .vz-actions .grow { flex: 1 }
 .vz-actions .btn .ic { width: 16px; height: 16px; margin-right: 6px }
-.vz-doc .note { margin-top: 12px }
-
-/* ----- Crew cards ----- */
-#vz-crew { display: flex; flex-direction: column; gap: 10px }
-.vz-card {
-  padding: 16px; border-radius: 22px;
-  background: var(--glass-2); border: 1px solid var(--line-2); box-shadow: var(--shadow-s, none);
-}
-.vz-card[data-level="attention"] { box-shadow: 0 0 0 1px var(--lv), var(--shadow-m) }
-.vz-card[data-level="surgeon"]   { box-shadow: 0 0 0 1.5px var(--lv), 0 10px 28px color-mix(in srgb, var(--color-crit) 16%, transparent) }
-.vz-card header { display: flex; align-items: center; gap: 12px }
-.vz-card .who { flex: 1; min-width: 0; display: flex; flex-direction: column }
-.vz-card .who b { font-weight: 700 }
-.vz-card .who span { color: var(--color-muted); font-size: var(--fs-sm) }
-.vz-vitals { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 14px }
-.vz-v {
-  padding: 8px 6px; border-radius: 14px; text-align: center;
-  background: var(--lv-bg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lv) 35%, transparent);
-}
-.vz-v small { display: block; font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--color-muted) }
-.vz-v b { display: block; font-family: var(--font-mono); font-size: 17px; font-weight: 600; color: var(--color-ink); margin-top: 2px; white-space: nowrap }
-.vz-v i { display: block; font-style: normal; font-size: 10px; color: var(--color-muted) }
-.vz-q { display: inline-block; margin-top: 10px; font-size: var(--fs-xs); color: var(--color-warn-ink) }
 
 /* ----- Demo panel ----- */
+#vz-sim { margin-top: 16px }
 .vz-simrow { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end }
 .vz-simrow label { display: grid; gap: 4px; font-size: var(--fs-sm); color: var(--color-muted) }
 .vz-simrow select { padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--color-white); font: inherit; color: var(--color-ink) }
@@ -101,12 +50,6 @@
 #btn-audio[aria-pressed="false"] { color: var(--color-muted) }
 #btn-audio[aria-pressed="true"]  { color: var(--color-teal-ink) }
 #btn-audio .ic { width: 18px; height: 18px }
-
-@media (max-width: 1000px) {
-  .vz-vitals { grid-template-columns: repeat(3, minmax(0, 1fr)) }
-  .vz-sit { padding: 16px }
-}
-
 
 .vz-scenes { display: inline-flex; gap: 6px }
 

@@ -5,10 +5,10 @@
  * opens, guides the crew step by step, by voice and on screen.
  * The glass HUD uses the same visual language as the immersive simulation.
  */
-import { $, $$, setHtml, pillHtml, fmtVal } from './helpers.js';
+import { $, setHtml, fmtVal } from './helpers.js';
 import { ICONS } from './icons.js';
 import { showToast, closeToastFor } from './toasts.js';
-import { CONFIG, METRICS, LEVELS } from '../config.js';
+import { CONFIG, METRICS } from '../config.js';
 import { esc, uid, pad } from '../utils.js';
 import { State, ackAlert, personName } from '../state.js';
 import { Sound } from '../audio.js';

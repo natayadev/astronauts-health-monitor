@@ -5,7 +5,7 @@
  */
 import { DataProvider } from './base.js';
 import { CONFIG } from '../config.js';
-import { round, dayKey } from '../utils.js';
+import { round } from '../utils.js';
 
 export class FileProvider extends DataProvider {
   constructor(bundle, { tickMs = CONFIG.tickMs, fileName = 'file' } = {}) {

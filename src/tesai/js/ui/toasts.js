@@ -3,7 +3,7 @@
  * Critical ones stay pinned until acknowledged.
  */
 import { ICONS, LV_ICON } from './icons.js';
-import { $, setHtml, setText } from './helpers.js';
+import { $ } from './helpers.js';
 import { State } from '../state.js';
 import { esc } from '../utils.js';
 

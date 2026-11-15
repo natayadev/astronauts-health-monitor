@@ -26,7 +26,6 @@
   .strip-wrap { padding: 8px 12px 0 }
   .dockbar { width: calc(100% - 24px) }
   .today { padding: 0 12px 120px }
-  .g3 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
   .drawer {
     top: auto; left: 8px; right: 8px; bottom: 8px;
     width: auto; max-width: none; max-height: 78vh;
@@ -45,14 +44,13 @@
 }
 
 @media (max-width: 760px) {
-  .g2, .g3 { grid-template-columns: minmax(0, 1fr) }
+  .g2 { grid-template-columns: minmax(0, 1fr) }
   .page-head h2 { font-size: 22px }
   .arow { grid-template-columns: auto minmax(0, 1fr) }
   .arow .side { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center }
   .dockbar .sep { display: none }
   .dockbar .acts { width: 100% }
   .dockbar .acts .btn { flex: 1 }
-  .brand-name { font-size: var(--fs-lg) }
 }
 
 @media (max-width: 560px) {
