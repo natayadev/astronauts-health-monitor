@@ -1,0 +1,1589 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Higía — Simulaciones</title>
+<style>
+:root{--ink:#f5f5f7;--dim:rgba(245,245,247,.64);--faint:rgba(245,245,247,.42);--glass:rgba(22,24,28,.42);--line:rgba(255,255,255,.14);--blue:#0a84ff;--red:#ff453a;--green:#30d158}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#050608;color:var(--ink);font-family:"Geist",-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;user-select:none}
+canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block}
+.mono{font-family:"Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+kbd{font-family:"Geist Mono",ui-monospace,monospace;font-size:11px;padding:1px 6px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--ink)}
+.label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+
+#dust{position:fixed;inset:0;pointer-events:none;opacity:0;background-size:cover;mix-blend-mode:multiply}
+#tint{position:fixed;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,200,140,.05),rgba(0,0,0,.08))}
+#glare{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 40% 22% at 30% 16%,rgba(255,255,255,.08),transparent 70%)}
+#helmet{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 84% 90% at 50% 50%,transparent 62%,rgba(4,5,7,.75) 80%,#040507 92%)}
+#alertGlow{position:fixed;inset:0;pointer-events:none;opacity:0;box-shadow:inset 0 0 140px rgba(255,69,58,.55);transition:opacity .4s}
+#alertGlow.on{animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.35}50%{opacity:1}}
+#flash{position:fixed;inset:0;background:#f5f5f7;opacity:0;pointer-events:none;transition:opacity .7s}
+#flash.on{opacity:.85;transition:none}
+body.ar #dust,body.ar #dustWarn{display:none}
+body.ar #helmet{background:radial-gradient(ellipse 96% 96% at 50% 50%,transparent 72%,rgba(4,5,7,.55) 100%)}
+body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0,.04))}
+
+#hud{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .6s}
+#hud.on{opacity:1}
+.card{background:var(--glass);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.big{font-size:22px;font-weight:600;letter-spacing:-.02em}
+#top{position:absolute;top:5.5vh;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:8px 18px;border-radius:999px;white-space:nowrap}
+#top .sep{width:1px;height:16px;background:var(--line)}
+#top .v{font-size:15px}
+.col{position:absolute;top:13vh;display:flex;flex-direction:column;gap:10px;width:236px}
+#left{left:11vw}#right{right:11vw}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-top:8px}
+.kv{display:flex;flex-direction:column;gap:1px;min-width:0}
+.kv .label{font-size:10px}
+.kv b{font:500 14px "Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kv b.big{font-size:20px;font-weight:600}
+#ai{border-color:rgba(10,132,255,.35)}
+#ai .msg{font-size:13px;line-height:1.45;margin-top:6px;text-wrap:pretty}
+#aiSteps{list-style:none;display:flex;flex-direction:column;gap:5px;margin-top:10px}
+#aiSteps:empty{display:none}
+#aiSteps li{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--faint)}
+#aiSteps li::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;flex:none}
+#aiSteps li.done{color:var(--dim)}
+#aiSteps li.done::before{background:var(--ink);border-color:var(--ink)}
+#aiSteps li.active{color:var(--ink);font-weight:500}
+#aiSteps li.active::before{border-color:var(--blue);background:var(--blue);box-shadow:0 0 0 3px rgba(10,132,255,.28)}
+#crew.crit{border-color:rgba(255,69,58,.6);background:rgba(60,12,12,.45)}
+#crewRhythm{margin-top:2px}
+#crewRhythm.crit{color:var(--red)}
+#ecg{width:100%;height:54px;margin-top:6px;display:block}
+.pk{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:5px 0;border-top:1px solid var(--line)}
+.pk span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--dim)}
+.pk span:last-child{white-space:nowrap}
+.pk .ok{color:var(--green)}
+
+#banner{position:absolute;top:21vh;left:50%;transform:translate(-50%,-8px);width:min(400px,34vw);opacity:0;transition:opacity .35s,transform .35s;border-color:rgba(10,132,255,.5)}
+#banner.on{opacity:1;transform:translate(-50%,0)}
+#banner.crit{border-color:rgba(255,69,58,.65);background:rgba(60,12,12,.55)}
+#banner h2{font-size:16px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+#banner p{font-size:13px;color:var(--dim);line-height:1.45;margin-top:4px;text-wrap:pretty}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--faint)}
+.chip.lit{color:var(--ink);border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.08)}
+
+#med{position:absolute;left:50%;top:57%;transform:translate(-50%,-50%) scale(.96);width:min(340px,80vw);text-align:center;opacity:0;transition:opacity .3s,transform .3s;border-color:rgba(10,132,255,.5);background:rgba(10,20,40,.55);padding:16px 18px}
+#med.on{opacity:1;transform:translate(-50%,-50%)}
+#med.crit{border-color:rgba(255,69,58,.6);background:rgba(60,12,12,.55)}
+#medBig{font:600 50px/1.05 "Geist",system-ui,sans-serif;letter-spacing:-.03em;margin:8px 0 4px;font-variant-numeric:tabular-nums}
+#medBig small{font-size:22px;color:var(--dim);font-weight:500}
+#medSub{font-size:13px;color:var(--dim)}
+#metro{width:14px;height:14px;border-radius:50%;background:var(--ink);margin:10px auto 0;opacity:0}
+#med.cpr #metro{opacity:1;animation:metro .5454s ease-out infinite}
+@keyframes metro{0%{transform:scale(1.7);opacity:1}100%{transform:scale(.7);opacity:.3}}
+#medRate{font-size:13px;margin-top:8px;min-height:18px}
+#medNote{font-size:12px;color:var(--dim);margin-top:8px;line-height:1.45;text-wrap:pretty}
+.bar{height:4px;border-radius:2px;background:rgba(255,255,255,.14);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:0;background:var(--ink);border-radius:2px}
+
+#objective{position:absolute;bottom:9vh;left:50%;transform:translateX(-50%);text-align:center;min-width:340px;max-width:46vw}
+#objective .t{font-size:16px;font-weight:500;margin-top:4px;text-wrap:balance}
+#objective .h{font-size:13px;color:var(--dim);margin-top:6px}
+#dustWarn{position:absolute;top:50%;left:50%;transform:translate(-50%,90px);font-size:13px;padding:8px 14px;border-radius:999px;opacity:0;transition:opacity .3s}
+#dustWarn.on{opacity:1}
+#marker{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;transition:opacity .3s}
+#marker.on{opacity:1}
+#marker .d{width:14px;height:14px;border:2px solid var(--ink);transform:rotate(45deg);border-radius:3px}
+#marker.crit .d{border-color:var(--red);background:rgba(255,69,58,.3)}
+#marker span{font-size:12px;padding:2px 8px;border-radius:999px;background:rgba(0,0,0,.45)}
+#reticle{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:rgba(255,255,255,.7)}
+#ring{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px;opacity:0;transition:opacity .2s}
+#ring.on{opacity:1}
+
+#watch{position:fixed;left:3.5vw;bottom:4vh;width:150px;height:176px;border-radius:40px;background:#0b0c0e;border:6px solid #2a2c30;box-shadow:0 20px 50px rgba(0,0,0,.5);transform:rotate(-12deg);padding:18px 16px;display:flex;flex-direction:column;justify-content:space-between;opacity:0;transition:opacity .6s;pointer-events:none}
+#watch.on{opacity:1}
+#watch.crit{border-color:#5a1a16}
+#watch.buzz{animation:buzz .12s linear 14}
+@keyframes buzz{0%,100%{transform:rotate(-12deg) translateX(0)}50%{transform:rotate(-12deg) translateX(3px)}}
+#watch .wl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+#watch .wv{font-size:36px;font-weight:600;letter-spacing:-.03em}
+#watch.crit .wv{color:var(--red)}
+#watch .ws{font-size:12px;color:var(--dim)}
+
+#lookHint{position:fixed;left:50%;bottom:3vh;transform:translateX(-50%);font-size:12px;color:var(--dim);opacity:0;transition:opacity .4s;pointer-events:none}
+#lookHint.on{opacity:1}
+#touch{position:fixed;right:4vw;bottom:5vh;display:none;gap:10px}
+.tbtn{width:60px;height:60px;border-radius:50%;border:1px solid var(--line);background:rgba(22,24,28,.6);color:var(--ink);font:600 14px "Geist",system-ui;backdrop-filter:blur(10px)}
+.tbtn.wide{width:auto;padding:0 18px;border-radius:30px}
+@media (pointer:coarse){#touch{display:flex}}
+
+.overlay{position:fixed;inset:0;display:flex;justify-content:center;padding:4vh 5vw;background:radial-gradient(ellipse at 50% 30%,rgba(30,32,38,.75),rgba(5,6,8,.96));transition:opacity .5s;overflow-y:auto;z-index:10}
+.overlay.hide{opacity:0;pointer-events:none}
+.overlay.hide *{pointer-events:none!important}
+.menuWrap{width:min(1080px,100%);margin:auto;display:flex;flex-direction:column;gap:28px;padding:16px 0}
+.heroTop{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.langSwitch{display:flex;padding:3px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.langSwitch button{appearance:none;border:0;background:transparent;color:var(--dim);font:600 12px "Geist Mono",ui-monospace,monospace;letter-spacing:.06em;padding:6px 12px;border-radius:999px;cursor:pointer}
+.langSwitch button[aria-pressed="true"]{background:var(--ink);color:#0b0c0e}
+.langSwitch button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.hero h1{font-size:clamp(32px,4.4vw,52px);font-weight:600;letter-spacing:-.035em;line-height:1.05;text-wrap:balance;margin-top:10px}
+.hero p{font-size:17px;color:var(--dim);line-height:1.55;max-width:660px;margin-top:12px;text-wrap:pretty}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.lv{appearance:none;text-align:left;color:inherit;font:inherit;background:rgba(28,28,30,.75);border:1px solid var(--line);border-radius:24px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:transform .25s,border-color .25s}
+.lv:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.38)}
+.lv:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.lv img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.lv .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px}
+.lv h2{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.lv p{font-size:14px;color:var(--dim);line-height:1.5;text-wrap:pretty}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feat{border-top:1px solid var(--line);padding-top:12px}
+.feat b{display:block;font-size:15px;font-weight:600;margin-bottom:4px}
+.feat span{font-size:14px;color:var(--dim);line-height:1.5}
+.controlsRow{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--dim)}
+.note{font-size:12px;color:var(--faint);line-height:1.5}
+.panel{width:min(520px,100%);margin:auto;background:rgba(28,28,30,.82);border:1px solid var(--line);border-radius:28px;padding:30px 32px;display:flex;flex-direction:column;gap:16px}
+.panel h1{font-size:26px;font-weight:600;letter-spacing:-.025em;line-height:1.2;text-wrap:balance}
+.panel p{font-size:14px;color:var(--dim);line-height:1.55}
+.stat{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.stat span{color:var(--dim)}
+.btn{appearance:none;border:0;border-radius:999px;background:var(--ink);color:#0b0c0e;font:600 16px "Geist",system-ui;padding:14px 22px;cursor:pointer}
+.btn:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--line);text-decoration:none;text-align:center;display:block}
+.btn.ghost:hover{background:rgba(255,255,255,.14)}
+.btns{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.back{display:inline-flex;align-items:center;gap:8px;font:600 13px "Geist",system-ui;color:var(--ink);text-decoration:none;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+.back:hover{background:rgba(255,255,255,.14)}
+.back:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.back svg,#menuBtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#menuBtn{position:absolute;top:2.4vh;left:3.5vw;pointer-events:auto;display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink);font:600 13px "Geist",system-ui;padding:8px 14px;border-radius:999px;background:var(--glass);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid var(--line)}
+#menuBtn:hover{background:rgba(60,62,68,.7)}
+#menuBtn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+#menuBtn kbd{font-size:11px;opacity:.7}
+#pause{z-index:12}
+@media (max-width:1100px){.col{width:206px}#left{left:3vw}#right{right:3vw}#banner{width:min(380px,40vw)}}
+@media (max-width:820px){.levels,.features{grid-template-columns:1fr}.col{width:170px}#ai .msg{display:none}#objective{max-width:90vw;min-width:0}}
+@media (prefers-reduced-motion:reduce){#med.cpr #metro,#alertGlow.on,#watch.buzz{animation:none}}
+
+/* ===== Estética Higía para menú, pausa y resumen (la simulación en sí queda oscura e inmersiva) ===== */
+@font-face{font-family:'Plus Jakarta Sans';font-weight:400 700;font-display:swap;src:url(../assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215}
+@font-face{font-family:'Plus Jakarta Sans';font-weight:400 700;font-display:swap;src:url(../assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+2020,U+20A0-20AB,U+2113,U+2C60-2C7F}
+@font-face{font-family:'JetBrains Mono';font-weight:400 500;font-display:swap;src:url(../assets/fonts/jetbrains-mono-latin.woff2) format('woff2')}
+#menu,#pause,#end{--ink:#0D2B26;--dim:#42655F;--faint:#5f7d77;--line:rgba(11,85,107,.16);--teal:#138D75;--teal-ink:#0B6E5B;--deep:#0B556B;--blue:#138D75;
+  --glass-l:rgba(255,255,255,.78);--grad:linear-gradient(135deg,#169873 0%,#0B556B 100%);
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink)}
+#menu kbd,#pause kbd,#end kbd{font-family:'JetBrains Mono',ui-monospace,monospace;background:rgba(11,85,107,.08);border-color:var(--line);color:var(--ink)}
+#menu .label,#pause .label,#end .label{font-family:inherit;font-weight:700;letter-spacing:.12em;color:var(--teal-ink)}
+#menu .mono,#end .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+
+#menu{user-select:text;background:
+  radial-gradient(900px 520px at 8% -4%,rgba(72,201,176,.35),transparent 60%),
+  radial-gradient(800px 520px at 100% 30%,rgba(184,230,196,.55),transparent 60%),
+  linear-gradient(170deg,#C8E8EB 0%,#D6F0E6 55%,#C4E9D3 100%)}
+#menu .menuWrap{gap:26px}
+#menu .heroTop{padding:8px 10px 8px 12px;border-radius:999px;background:var(--glass-l);border:1px solid var(--line);box-shadow:0 8px 28px rgba(11,85,107,.12);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3)}
+#menu .back{border:0;background:transparent;padding:4px 12px 4px 4px;font-family:inherit;font-size:15px;font-weight:700;color:var(--ink)}
+#menu .back:hover{background:rgba(255,255,255,.9)}
+.logo{width:32px;height:32px;border-radius:50%;background:var(--grad);display:grid;place-items:center;flex:none}
+.logo svg{width:18px!important;height:18px!important;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#menu .langSwitch{background:rgba(255,255,255,.6);border-color:var(--line)}
+#menu .langSwitch button{font-family:inherit;font-weight:700;font-size:13px;color:var(--dim)}
+#menu .langSwitch button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.14)}
+#menu .hero h1{font-weight:700;letter-spacing:-.035em;color:var(--ink);font-size:clamp(32px,4.6vw,56px)}
+#menu .hero p{color:var(--dim);font-size:18px}
+#menu .lv{background:var(--glass-l);border:1px solid var(--line);border-radius:28px;box-shadow:0 18px 50px rgba(11,85,107,.16);color:var(--ink);transition:transform .2s,box-shadow .2s,border-color .2s}
+#menu .lv:hover{transform:translateY(-4px);border-color:var(--teal);box-shadow:0 0 0 3px rgba(19,141,117,.18),0 22px 56px rgba(11,85,107,.22)}
+#menu .lv:focus-visible,#menu .back:focus-visible,#menu .langSwitch button:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+#menu .lv h2{font-weight:700;letter-spacing:-.025em}
+#menu .tag{background:rgba(19,141,117,.12);border:0;color:var(--teal-ink);font-weight:600}
+#menu .go{display:inline-flex;align-self:flex-start;align-items:center;gap:8px;margin-top:12px;padding:9px 18px;border-radius:999px;background:var(--grad);color:#fff;font-weight:700;font-size:14px}
+#menu .go::before{content:"";width:0;height:0;border-left:8px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent}
+#menu .features{gap:14px}
+#menu .feat{border:1px solid var(--line);border-radius:22px;padding:16px 18px;background:rgba(255,255,255,.62)}
+#menu .feat b{font-size:16px}
+#menu .controlsRow{padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.55);border:1px solid var(--line)}
+#menu .note{color:var(--dim)}
+
+#pause,#end{background:rgba(8,32,40,.58);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+#pause .panel,#end .panel{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:32px;box-shadow:0 30px 80px rgba(6,28,34,.4);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+#pause .panel h1,#end .panel h1{font-weight:700;letter-spacing:-.03em;color:var(--ink)}
+#pause .panel p,#end .panel p{color:var(--dim)}
+#pause .btn,#end .btn{background:var(--grad);color:#fff;font-family:inherit;font-weight:700;box-shadow:0 10px 26px rgba(11,85,107,.28)}
+#pause .btn.ghost,#end .btn.ghost{background:rgba(255,255,255,.7);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+#pause .btn.ghost:hover,#end .btn.ghost:hover{background:#fff}
+#pause .btn:focus-visible,#end .btn:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+#end .stat span{color:var(--dim)}
+@media (max-width:640px){#menu .heroTop .label{display:none}#menu .back{white-space:nowrap}}
+</style>
+</head>
+<body>
+<canvas id="scene" aria-label="Vista en primera persona de la simulación"></canvas>
+<div id="dust"></div><div id="tint"></div><div id="alertGlow"></div><div id="glare"></div><div id="helmet"></div><div id="flash"></div>
+
+<div id="hud">
+  <button type="button" id="menuBtn" aria-label="Pausa y menú"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg><span>Menú</span><kbd>Esc</kbd></button>
+  <div id="top" class="card">
+    <span class="label">MET</span><span id="clock" class="mono v">00:00</span>
+    <span class="sep"></span>
+    <span class="label" id="infoLabel">Rumbo</span><span id="infoVal" class="mono v">—</span>
+    <span class="sep"></span>
+    <span class="label" id="lvlTag">Sol 214</span>
+  </div>
+
+  <div id="left" class="col">
+    <div id="suit" class="card">
+      <span class="label" id="suitLabel">Tu traje · Tomás</span>
+      <div class="grid2">
+        <div class="kv"><span class="label">Tu pulso</span><b class="big" id="myHr">88</b></div>
+        <div class="kv"><span class="label" id="o2Label">O<sub>2</sub> traje</span><b class="big" id="o2">78%</b></div>
+        <div class="kv"><span class="label">CO<sub>2</sub></span><b id="co2">0.4 kPa</b></div>
+        <div class="kv"><span class="label">Presión</span><b id="pres">4.3 psi</b></div>
+        <div class="kv"><span class="label">Temp.</span><b id="temp">21.4 °C</b></div>
+        <div class="kv"><span class="label">Batería</span><b id="batt">86%</b></div>
+        <div class="kv"><span class="label">Radiación</span><b id="rad">0.64 mSv/d</b></div>
+        <div class="kv"><span class="label" id="xLabel">Polvo visor</span><b id="xVal">0%</b></div>
+      </div>
+    </div>
+    <div id="ai" class="card">
+      <div class="row"><span class="label">Higía · segundo médico</span><span class="label mono" id="voiceState">Voz · M</span></div>
+      <p class="msg" id="aiMsg">Listo.</p>
+      <ul id="aiSteps"></ul>
+    </div>
+  </div>
+
+  <div id="right" class="col">
+    <div id="crew" class="card">
+      <div class="row"><span class="label" id="crewLabel">Ana · biomonitor</span><span class="label mono" id="crewDist">—</span></div>
+      <div class="row" style="margin-top:6px"><span class="big mono" id="crewHr">76</span><span class="mono" style="font-size:14px">SpO<sub>2</sub> <span id="crewSpo2">98%</span></span></div>
+      <div class="label" id="crewRhythm">Ritmo sinusal</div>
+      <canvas id="ecg" width="460" height="108"></canvas>
+      <div class="grid2">
+        <div class="kv"><span class="label">Presión art.</span><b id="crewBp">118/76</b></div>
+        <div class="kv"><span class="label">Respiración</span><b id="crewRr">14 rpm</b></div>
+        <div class="kv"><span class="label">Temp.</span><b id="crewTemp">36.8 °C</b></div>
+        <div class="kv"><span class="label" id="crewXLabel">Confianza</span><b id="crewX">99%</b></div>
+      </div>
+    </div>
+    <div id="earth" class="card">
+      <div class="row"><span class="label">Tierra · envío automático</span><span class="label mono" id="pkCount">0</span></div>
+      <div class="row" style="margin-top:6px"><span class="label">Retardo una vía</span><span class="big mono" id="delay">20:00</span></div>
+      <div id="pkList" style="margin-top:6px"></div>
+      <div class="row" style="margin-top:6px"><span class="label">Respuesta médica</span><span class="mono" id="reply" style="font-size:13px">—</span></div>
+    </div>
+  </div>
+
+  <div id="banner" class="card" role="alert">
+    <h2 id="bTitle"></h2><p id="bBody"></p>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div id="dustWarn" class="card">Regolito en el visor · mantén <kbd>R</kbd></div>
+  <div id="marker"><div class="d"></div><span id="markerLabel"></span></div>
+  <div id="reticle"></div>
+  <svg id="ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="3"/><circle id="ringArc" cx="32" cy="32" r="28" fill="none" stroke="#f5f5f7" stroke-width="3" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="176" transform="rotate(-90 32 32)"/></svg>
+  <div id="med" class="card">
+    <span class="label" id="medTitle">DEA</span>
+    <div id="medBig">—</div>
+    <div id="medSub"></div>
+    <div id="metro"></div>
+    <div id="medRate" class="mono"></div>
+    <div class="bar"><i id="medBar"></i></div>
+    <p id="medNote"></p>
+  </div>
+  <div id="objective" class="card">
+    <span class="label" id="objLabel">Objetivo</span>
+    <div class="t" id="objText"></div>
+    <div class="h" id="objHint"></div>
+  </div>
+</div>
+
+<div id="watch"><span class="wl" id="wTitle">Ana</span><span class="wv mono" id="wVal">76</span><span class="ws" id="wSub">Todo bien</span></div>
+<div id="lookHint">Haz clic para mirar con el mouse · Esc para pausar y abrir el menú</div>
+<div id="touch">
+  <button class="tbtn" data-k="KeyE">E</button>
+  <button class="tbtn" data-k="KeyR" data-only="eva">R</button>
+  <button class="tbtn" data-k="KeyC" data-only="ship">C</button>
+  <button class="tbtn wide" data-k="Space">Espacio</button>
+</div>
+
+<div id="menu" class="overlay">
+  <div class="menuWrap">
+    <header class="hero">
+      <div class="heroTop">
+        <a class="back" href="../index.html"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg></span>Volver a Higía</a>
+        <span class="label">Higía · NASA Space Apps 2026</span>
+        <div class="langSwitch" role="group" aria-label="Idioma / Language">
+          <button type="button" data-lang="es" aria-pressed="true">ES</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+      </div>
+      <h1>Un segundo médico dentro de tu visor.</h1>
+      <p>Higía lee los signos vitales de toda la tripulación, te guía paso a paso en una emergencia y envía todo a la Tierra automáticamente, porque desde Marte la Tierra tarda hasta 20 minutos en enterarse.</p>
+    </header>
+    <div class="levels">
+      <button class="lv" data-level="eva">
+        <img src="./img/eva.webp" alt="Astronauta caminando sobre la superficie rojiza de Marte con un rover al fondo" />
+        <div class="body"><span class="label">Simulación 1</span><h2>EVA en Marte</h2><p>Ana colapsa en plena caminata. Con el traje puesto no hay RCP posible: el DEA del rover es la clave. Y el regolito no deja ver.</p><div class="tags"><span class="tag">Retardo 20 min</span><span class="tag">Regolito</span><span class="tag">DEA</span></div><span class="go">Iniciar simulación</span></div>
+      </button>
+      <button class="lv" data-level="rover">
+        <img src="./img/rover.webp" alt="Interior de un rover presurizado con vista al desierto marciano" />
+        <div class="body"><span class="label">Simulación 2</span><h2>Rover presurizado</h2><p>Luis se desploma al volante. Higía detiene el rover, avisa a todos y te guía con el DEA y la RCP dentro de la cabina.</p><div class="tags"><span class="tag">Retardo 20 min</span><span class="tag">RCP guiada</span><span class="tag">DEA</span></div><span class="go">Iniciar simulación</span></div>
+      </button>
+      <button class="lv" data-level="ship">
+        <img src="./img/ship.webp" alt="Interior blanco de una nave espacial con una ventana redonda que muestra Marte" />
+        <div class="body"><span class="label">Simulación 3</span><h2>Nave en tránsito</h2><p>Día 96 rumbo a Marte. Mei pierde el conocimiento en microgravedad: hay que fijarla a la camilla antes de reanimarla.</p><div class="tags"><span class="tag">Retardo 12 min</span><span class="tag">Microgravedad</span><span class="tag">RCP guiada</span></div><span class="go">Iniciar simulación</span></div>
+      </button>
+    </div>
+    <div class="features">
+      <div class="feat"><b>Visor con datos</b><span>ECG, SpO₂, presión, respiración y estado del traje de cada tripulante, siempre a la vista.</span></div>
+      <div class="feat"><b>Segundo médico</b><span>Detecta el paro, te dice qué hacer y te marca el ritmo de la RCP en tiempo real, con voz.</span></div>
+      <div class="feat"><b>Envío automático</b><span>Cada evento sale solo hacia la Tierra. Cuando responden, tú ya actuaste.</span></div>
+    </div>
+    <div class="controlsRow">
+      <span><kbd>W A S D</kbd> moverse</span><span><kbd>Mouse</kbd> mirar</span><span><kbd>E</kbd> mantener para actuar</span><span><kbd>Espacio</kbd> RCP · saltar · subir</span><span><kbd>R</kbd> limpiar visor</span><span><kbd>M</kbd> voz del asistente</span>
+    </div>
+    <p class="note">Simulación educativa. La guía de RCP es simplificada y no reemplaza un curso certificado.</p>
+  </div>
+</div>
+
+<div id="pause" class="overlay hide" role="dialog" aria-modal="true" aria-labelledby="pauseT">
+  <div class="panel">
+    <span class="label">Pausa</span>
+    <h1 id="pauseT">Simulación en pausa</h1>
+    <p>El reloj y la guía están detenidos. Tu progreso en esta simulación se pierde si cambias de simulación o vuelves a Higía.</p>
+    <div class="btns">
+      <button class="btn" id="resume" type="button">Continuar</button>
+      <button class="btn ghost" id="pAgain" type="button">Elegir otra simulación</button>
+      <a class="btn ghost" href="../index.html">Volver a Higía</a>
+    </div>
+  </div>
+</div>
+
+<div id="end" class="overlay hide">
+  <div class="panel">
+    <span class="label">Resumen de la simulación</span>
+    <h1 id="endTitle"></h1>
+    <div>
+      <div class="stat"><span>Alerta → pulso recuperado</span><b class="mono" id="sReact">—</b></div>
+      <div class="stat"><span>Primera respuesta posible de la Tierra</span><b class="mono" id="sEarth">—</b></div>
+      <div class="stat"><span>Paquetes enviados solos a la Tierra</span><b class="mono" id="sPk">0</b></div>
+      <div class="stat"><span>Calidad de la RCP (100–120 cpm)</span><b class="mono" id="sCpr">—</b></div>
+      <div class="stat"><span>Dispositivos alertados</span><b id="sDev">—</b></div>
+    </div>
+    <p id="endBody"></p>
+    <div class="btns"><button class="btn" id="again">Elegir otra simulación</button><a class="btn ghost" href="../index.html">Volver a Higía</a></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const D = {
+    'Higía — Simulaciones': 'Higía — Simulations',
+    'Higía · NASA Space Apps 2026': 'Higía · NASA Space Apps 2026',
+    'Un segundo médico dentro de tu visor.': 'A second doctor inside your visor.',
+    'Higía lee los signos vitales de toda la tripulación, te guía paso a paso en una emergencia y envía todo a la Tierra automáticamente, porque desde Marte la Tierra tarda hasta 20 minutos en enterarse.': 'Higía reads the whole crew’s vital signs, guides you step by step through an emergency and sends everything to Earth automatically, because from Mars it takes Earth up to 20 minutes to find out.',
+    'Simulación 1': 'Simulation 1', 'Simulación 2': 'Simulation 2', 'Simulación 3': 'Simulation 3',
+    'EVA en Marte': 'EVA on Mars', 'Rover presurizado': 'Pressurized rover', 'Nave en tránsito': 'Ship in transit',
+    'Ana colapsa en plena caminata. Con el traje puesto no hay RCP posible: el DEA del rover es la clave. Y el regolito no deja ver.': 'Ana collapses mid-walk. With the suit on, CPR is impossible: the rover’s AED is the key. And regolith blocks your view.',
+    'Luis se desploma al volante. Higía detiene el rover, avisa a todos y te guía con el DEA y la RCP dentro de la cabina.': 'Luis collapses at the wheel. Higía stops the rover, alerts everyone and guides you through the AED and CPR inside the cabin.',
+    'Día 96 rumbo a Marte. Mei pierde el conocimiento en microgravedad: hay que fijarla a la camilla antes de reanimarla.': 'Day 96 en route to Mars. Mei loses consciousness in microgravity: you must strap her to the stretcher before resuscitating her.',
+    'Retardo 20 min': '20 min delay', 'Retardo 12 min': '12 min delay', 'Regolito': 'Regolith', 'DEA': 'AED',
+    'RCP guiada': 'Guided CPR', 'Microgravedad': 'Microgravity',
+    'Visor con datos': 'Data in your visor', 'ECG, SpO₂, presión, respiración y estado del traje de cada tripulante, siempre a la vista.': 'ECG, SpO₂, blood pressure, breathing and suit status for every crew member, always in view.',
+    'Segundo médico': 'Second doctor', 'Detecta el paro, te dice qué hacer y te marca el ritmo de la RCP en tiempo real, con voz.': 'Detects the arrest, tells you what to do and sets the CPR pace in real time, by voice.',
+    'Envío automático': 'Automatic uplink', 'Cada evento sale solo hacia la Tierra. Cuando responden, tú ya actuaste.': 'Every event goes to Earth on its own. By the time they reply, you have already acted.',
+    'moverse': 'move', 'Mouse': 'Mouse', 'mirar': 'look', 'mantener para actuar': 'hold to act', 'Espacio': 'Space',
+    'RCP · saltar · subir': 'CPR · jump · rise', 'limpiar visor': 'clear visor', 'voz del asistente': 'assistant voice',
+    'Simulación educativa. La guía de RCP es simplificada y no reemplaza un curso certificado.': 'Educational simulation. The CPR guidance is simplified and does not replace a certified course.',
+    'Resumen de la simulación': 'Simulation summary', 'Alerta → pulso recuperado': 'Alert → pulse restored',
+    'Primera respuesta posible de la Tierra': 'Earliest possible reply from Earth', 'Paquetes enviados solos a la Tierra': 'Packets sent to Earth automatically',
+    'Calidad de la RCP (100–120 cpm)': 'CPR quality (100–120 cpm)', 'Dispositivos alertados': 'Devices alerted', 'Elegir otra simulación': 'Choose another simulation',
+    'Volver a Higía': 'Back to Higía', 'Iniciar simulación': 'Start the simulation', 'Menú': 'Menu', 'Pausa': 'Paused', 'Simulación en pausa': 'Simulation paused', 'Continuar': 'Resume',
+    'El reloj y la guía están detenidos. Tu progreso en esta simulación se pierde si cambias de simulación o vuelves a Higía.': 'The clock and the guidance are stopped. Your progress in this simulation is lost if you switch simulation or go back to Higía.',
+    'Vista en primera persona de la simulación': 'First-person view of the simulation',
+    'Astronauta caminando sobre la superficie rojiza de Marte con un rover al fondo': 'Astronaut walking on the reddish surface of Mars with a rover in the background',
+    'Interior de un rover presurizado con vista al desierto marciano': 'Interior of a pressurized rover overlooking the Martian desert',
+    'Interior blanco de una nave espacial con una ventana redonda que muestra Marte': 'White spacecraft interior with a round window showing Mars',
+    'Rumbo': 'Heading', 'Tu traje · Tomás': 'Your suit · Tomás', 'Tu visor AR · Tomás': 'Your AR visor · Tomás', 'Tu pulso': 'Your pulse',
+    'traje': 'suit', 'cabina': 'cabin', 'Presión': 'Pressure', 'Temp.': 'Temp.', 'Batería': 'Battery', 'Radiación': 'Radiation',
+    'Polvo visor': 'Visor dust', 'Filtro regolito': 'Regolith filter', 'Gravedad': 'Gravity',
+    'Higía · segundo médico': 'Higía · second doctor', 'Voz · M': 'Voice · M', 'Silencio · M': 'Muted · M', 'Listo.': 'Ready.',
+    'Ritmo sinusal': 'Sinus rhythm', 'Presión art.': 'Blood pressure', 'Respiración': 'Breathing', 'Confianza': 'Confidence',
+    'Tierra · envío automático': 'Earth · auto uplink', 'Retardo una vía': 'One-way delay', 'Respuesta médica': 'Medical reply',
+    'sin pedidos': 'none requested', 'recibido': 'received', 'recibida': 'received',
+    'Regolito en el visor · mantén': 'Regolith on visor · hold', 'Objetivo': 'Objective',
+    'Haz clic para mirar con el mouse · Esc para pausar y abrir el menú': 'Click to look with the mouse · Esc to pause and open the menu',
+    'Todo bien': 'All good', 'Velocidad': 'Speed', 'Tránsito': 'Transit', 'Día 96 · 225 M km': 'Day 96 · 225 M km',
+    'Nave Hermes': 'Hermes ship', 'Hermes · día 96': 'Hermes · day 96', 'Sol 214 · Kestrel': 'Sol 214 · Kestrel',
+    'Visor': 'Visor', 'Reloj': 'Watch', 'Rover': 'Rover', 'Hábitat': 'Habitat', 'Pantallas rover': 'Rover screens',
+    'Pantallas nave': 'Ship screens', 'Tripulación': 'Crew', 'Tierra (+20 min)': 'Earth (+20 min)', 'Tierra (+12 min)': 'Earth (+12 min)',
+    'Tierra avisada (+20 min)': 'Earth notified (+20 min)', 'Tierra avisada (+12 min)': 'Earth notified (+12 min)', 'Tierra a 12 min 30 s': 'Earth 12 min 30 s away',
+    'Usa': 'Use', 'y el mouse. La baliza está junto a Ana.': 'and the mouse. The beacon is next to Ana.',
+    'Mantén': 'Hold', 'Presiona': 'Press', 'para cada ventilación': 'for each breath', 'para apurarte': 'to hurry',
+    'o clic en cada compresión, al ritmo del punto': 'or click on each compression, in time with the dot',
+    '+ mirar ·': '+ look ·', 'sube ·': 'up ·', 'baja': 'down',
+    'cambiar el filtro': 'change the filter', 'colocar los parches': 'place the pads', 'conectar los electrodos al puerto del traje': 'connect the electrodes to the suit port',
+    'conectar su biomonitor a tu visor': 'link her biomonitor to your visor', 'evaluar si responde y respira': 'check if they respond and breathe',
+    'fijarla con las correas': 'secure her with the straps', 'registrar el experimento': 'log the experiment', 'sacar el DEA del rover': 'take the AED from the rover',
+    'sujetarla': 'grab her', 'tomar el DEA': 'take the AED', 'dar la descarga': 'deliver the shock',
+    'Alerta automática enviada': 'Automatic alert sent', 'ALERTA automática · ECG + SpO₂ + ubicación': 'Automatic ALERT · ECG + SpO₂ + location',
+    'Alto. Analizando de nuevo.': 'Stop. Analyzing again.', 'Alto. El DEA analiza de nuevo.': 'Stop. The AED is analyzing again.',
+    'Ana colapsó. Ve con ella ya': 'Ana collapsed. Go to her now', 'Ana colapsó. Ya avisé al rover, al hábitat y a la Tierra. Ve con ella.': 'Ana collapsed. I already alerted the rover, the habitat and Earth. Go to her.',
+    'Ana tiene pulso. Sigo monitoreándola y la Tierra ya recibe todo.': 'Ana has a pulse. I keep monitoring her and Earth is already receiving everything.',
+    'Ana tiene pulso. Volvamos al hábitat': 'Ana has a pulse. Let’s head back to the habitat',
+    'Ana va adelante, junto a la baliza. Tu visor, tu reloj y el rover comparten sus signos vitales.': 'Ana is ahead, by the beacon. Your visor, your watch and the rover share her vital signs.',
+    'Ana: paro cardíaco detectado': 'Ana: cardiac arrest detected', 'Analizando': 'Analyzing', 'Baliza': 'Beacon',
+    'Bien hecho. Deja que el DEA vuelva a analizar.': 'Well done. Let the AED analyze again.',
+    'Cabeza hacia atrás, mentón arriba. Cada ventilación dura 1 segundo.': 'Head tilted back, chin up. Each breath lasts 1 second.',
+    'Cambia el filtro de regolito (pared trasera)': 'Change the regolith filter (back wall)', 'Cambiado por Tomás': 'Replaced by Tomás', 'Cambiar ahora': 'Replace now',
+    'Camilla': 'Stretcher', 'Camilla: fondo del módulo': 'Stretcher: end of the module', 'Camina hasta la baliza de muestras': 'Walk to the sample beacon',
+    'Coloca los parches del DEA en Luis': 'Place the AED pads on Luis', 'Coloca los parches del DEA': 'Place the AED pads', 'Colocar parches': 'Place pads',
+    'Comienza la caminata · Sol 214': 'The walk begins · Sol 214', 'Compresiones · Espacio o clic al ritmo del punto': 'Compressions · Space or click in time with the dot',
+    'Conecta el DEA al traje de Ana': 'Connect the AED to Ana’s suit', 'Conectar electrodos': 'Connect electrodes',
+    'DEA en uso': 'AED in use', 'DEA retirado del rover': 'AED removed from rover', 'DEA · desfibrilador': 'AED · defibrillator', 'DEA · reanálisis': 'AED · re-analysis',
+    'DEA: pared izquierda': 'AED: left wall', 'DEA: rack verde': 'AED: green rack', 'Descarga DEA · 200 J': 'AED shock · 200 J', 'Descarga del DEA': 'AED shock',
+    'Descarga hecha. Reviso de nuevo su ritmo.': 'Shock delivered. Checking the rhythm again.', 'Descarga': 'Shock',
+    'Destino: base Jezero · 38 km': 'Destination: Jezero base · 38 km', 'Detenido': 'Stopped', 'Día 96 rumbo a Marte': 'Day 96 en route to Mars',
+    'El DEA está trabajando · no toques al paciente': 'The AED is working · do not touch the patient', 'El DEA vuelve a analizar': 'The AED is analyzing again',
+    'El polvo que entra con los trajes satura el filtro. Date vuelta: está atrás.': 'Dust brought in on the suits clogs the filter. Turn around: it’s behind you.',
+    'Electrodos conectados. Nadie toca a Ana: analizando el ritmo.': 'Electrodes connected. Nobody touch Ana: analyzing the rhythm.',
+    'Empieza la RCP ya. Sigue el punto: 30 compresiones, fuerte y rápido.': 'Start CPR now. Follow the dot: 30 compressions, hard and fast.',
+    'En microgravedad no puedes reanimarla flotando. Sujétala.': 'In microgravity you can’t resuscitate her while floating. Grab her.',
+    'En ruta a la base Jezero': 'En route to Jezero base',
+    'Engancha los pies en los estribos de la camilla para hacer fuerza. Brazos rectos, centro del pecho.': 'Hook your feet into the stretcher stirrups for leverage. Arms straight, center of the chest.',
+    'Evaluación · sin respuesta · FV': 'Assessment · unresponsive · VF', 'Evaluación · sin respuesta · sin respiración': 'Assessment · unresponsive · not breathing',
+    'Evaluar a Ana': 'Assess Ana', 'Evaluar a Luis': 'Assess Luis', 'Evaluar a Mei': 'Assess Mei', 'Experimento registrado': 'Experiment logged',
+    'FV · RCP en curso': 'VF · CPR in progress', 'Fibrilación ventricular · crítico': 'Ventricular fibrillation · critical',
+    'Fijada. Ahora coloca los parches del DEA.': 'Secured. Now place the AED pads.', 'Fijarla en la camilla': 'Strap her to the stretcher',
+    'Filtro al 100%. Buen trabajo.': 'Filter at 100%. Good job.', 'Filtro cambiado': 'Filter replaced', 'Filtro de regolito': 'Regolith filter', 'Filtro': 'Filter',
+    'Flota hasta el panel del laboratorio': 'Float to the lab panel',
+    'Hola, Tomás. Día 96 de tránsito. Monitoreo a Mei y a ti; la Tierra está a 12 minutos y medio.': 'Hi, Tomás. Day 96 of transit. I’m monitoring Mei and you; Earth is twelve and a half minutes away.',
+    'Hola, Tomás. Luis maneja y yo monitoreo a los dos. El filtro de regolito está casi saturado.': 'Hi, Tomás. Luis is driving and I’m monitoring you both. The regolith filter is almost clogged.',
+    'Hola, Tomás. Monitoreo a Ana y a ti en tiempo real. Todo normal por ahora.': 'Hi, Tomás. I’m monitoring Ana and you in real time. All normal for now.',
+    'Kestrel · ruta 14': 'Kestrel · route 14', 'La Tierra ya respondió · cerrando la simulación': 'Earth has replied · closing the simulation',
+    'La llevas contigo. Ve a la camilla médica, al fondo del módulo.': 'You’re carrying her. Go to the medical stretcher at the end of the module.',
+    'Laboratorio · cultivo 7': 'Lab · culture 7', 'Laboratorio': 'Lab', 'Llegó la respuesta de la Tierra': 'Earth’s reply arrived', 'Llévala a la camilla médica': 'Take her to the medical stretcher',
+    'Luis maneja. Higía monitorea a los dos y muestra todo en tu visor, tu reloj y las pantallas del rover.': 'Luis is driving. Higía monitors you both and shows everything on your visor, your watch and the rover screens.',
+    'Luis se desplomó. Detuve el rover y avisé a la Tierra. Ve con él.': 'Luis collapsed. I stopped the rover and alerted Earth. Go to him.',
+    'Luis se desplomó. Ve con él': 'Luis collapsed. Go to him',
+    'Luis tiene pulso. Lo sigo monitoreando y la Tierra ya tiene todo el registro.': 'Luis has a pulse. I keep monitoring him and Earth already has the full record.',
+    'Luis tiene pulso. Quédate con él': 'Luis has a pulse. Stay with him',
+    'Luis · estable': 'Luis · stable', 'Luis · pulso recuperado': 'Luis · pulse restored', 'Luis: paro cardíaco detectado': 'Luis: cardiac arrest detected', 'Luis: signos normales': 'Luis: vitals normal',
+    'Mei perdió el conocimiento. Avisé a la nave y a la Tierra. Ve con ella.': 'Mei lost consciousness. I alerted the ship and Earth. Go to her.',
+    'Mei perdió el conocimiento. Ve con ella': 'Mei lost consciousness. Go to her', 'Mei tiene pulso. Mantenla monitoreada': 'Mei has a pulse. Keep her monitored',
+    'Mei tiene pulso. Todo queda registrado y enviado a la Tierra.': 'Mei has a pulse. Everything is logged and sent to Earth.',
+    'Mei · estable': 'Mei · stable', 'Mei · pulso recuperado': 'Mei · pulse restored', 'Mei: paro cardíaco detectado': 'Mei: cardiac arrest detected',
+    'Microgravedad. Higía monitorea a Mei y a ti y envía todo a la Tierra, a 12 minutos y medio de distancia.': 'Microgravity. Higía monitors Mei and you and sends everything to Earth, twelve and a half minutes away.',
+    'Monitoreo continuo': 'Continuous monitoring', 'Monitoreo': 'Monitoring', 'Muestra lista para registrar': 'Sample ready to log',
+    'Nadie toca a Mei: analizando.': 'Nobody touch Mei: analyzing.', 'No aplica (traje)': 'N/A (suit)', 'No pares: cada segundo sin compresiones cuenta.': 'Don’t stop: every second without compressions counts.',
+    'No responde y no respira normal: es un paro cardíaco. Trae el DEA de la pared izquierda.': 'Unresponsive and not breathing normally: it’s cardiac arrest. Bring the AED from the left wall.',
+    'Objetivo: 100 a 120 por minuto': 'Target: 100 to 120 per minute',
+    'Parches colocados. Nadie toca a Luis: analizando.': 'Pads placed. Nobody touch Luis: analyzing.', 'Paro cardíaco detectado': 'Cardiac arrest detected',
+    'Paro cardíaco. Con el traje puesto no se puede hacer RCP: el DEA es lo primero. Está en el rover.': 'Cardiac arrest. With the suit on, CPR isn’t possible: the AED comes first. It’s in the rover.',
+    'Paro cardíaco. Trae el DEA del rack verde, en la pared derecha.': 'Cardiac arrest. Bring the AED from the green rack on the right wall.',
+    'Higía detectó el paro, alertó a cada dispositivo, te guió como un segundo médico y mandó todo a la Tierra sin que tocaras nada. La simulación acelera el retardo 60 veces.': 'Higía detected the arrest, alerted every device, guided you like a second doctor and sent everything to Earth without you touching a thing. The simulation speeds up the delay 60×.',
+    'Higía detuvo el rover, avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.': 'Higía stopped the rover and alerted every device and Earth, which will see it in 20 minutes.',
+    'Pulso presente': 'Pulse present', 'Pulso recuperado · signos vitales': 'Pulse restored · vital signs', 'Higía sigue vigilando': 'Higía keeps watching', 'Pulso': 'Pulse', 'Higía: monitoreando': 'Higía: monitoring',
+    'RCP en curso': 'CPR in progress', 'RCP en microgravedad: 30 y 2, dos veces': 'CPR in microgravity: 30 and 2, twice',
+    'RCP ya. En microgravedad ánclate con los pies para empujar.': 'CPR now. In microgravity, anchor yourself with your feet to push.', 'RCP · 2 ciclos': 'CPR · 2 cycles',
+    'RCP: 30 compresiones y 2 ventilaciones, dos veces': 'CPR: 30 compressions and 2 breaths, twice', 'Recomendada · mantén E': 'Advised · hold E', 'Reevaluar ritmo': 'Re-check rhythm',
+    'Registro enviado a la Tierra': 'Record sent to Earth', 'Registro guardado y enviado a la Tierra.': 'Record saved and sent to Earth.',
+    'Respondiendo a datos de hace 12 min: «Vemos a Mei en paro. Fíjenla a la camilla, usen el DEA y hagan RCP.»': 'Replying to data from 12 min ago: “We see Mei in arrest. Strap her to the stretcher, use the AED and do CPR.”',
+    'Respondiendo a datos de hace 20 min: «Vemos FV en Ana. Usen el DEA y vuelvan al hábitat.»': 'Replying to data from 20 min ago: “We see VF on Ana. Use the AED and return to the habitat.”',
+    'Respondiendo a datos de hace 20 min: «Vemos que Luis colapsó. Detengan el rover, usen el DEA e inicien RCP.»': 'Replying to data from 20 min ago: “We see Luis collapsed. Stop the rover, use the AED and start CPR.”',
+    'Ritmo organizado detectado': 'Organized rhythm detected', 'Ritmo recuperándose': 'Rhythm recovering', 'Rover detenido por Higía': 'Rover stopped by Higía',
+    'Sigue las indicaciones del DEA': 'Follow the AED prompts', 'Sin pulso · FV': 'No pulse · VF', 'Stream ECG + signos vitales': 'ECG + vitals stream',
+    'Su biomonitor detectó fibrilación ventricular (simulada). Higía avisó a la nave y a la Tierra, que lo verá en 12 min 30 s.': 'Her biomonitor detected ventricular fibrillation (simulated). Higía alerted the ship and Earth, which will see it in 12 min 30 s.',
+    'Su biomonitor detectó fibrilación ventricular (simulada). Higía avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.': 'The biomonitor detected ventricular fibrillation (simulated). Higía alerted every device and Earth, which will see it in 20 minutes.',
+    'Sujeta a Mei': 'Grab Mei', 'Sujetar a Mei': 'Grab Mei', 'Talón de la mano en el centro del pecho, brazos rectos, unos 5 cm de profundidad.': 'Heel of the hand on the center of the chest, arms straight, about 5 cm deep.',
+    'Telemetría de rutina': 'Routine telemetry', 'Tienes el DEA. Su traje tiene un puerto de electrodos en el pecho. Ve con ella.': 'You have the AED. Her suit has an electrode port on the chest. Go to her.',
+    'Todos alejados del paciente.': 'Everyone clear of the patient.', 'Toma el DEA de la pared izquierda': 'Take the AED from the left wall', 'Toma el DEA del rack verde': 'Take the AED from the green rack',
+    'Toma el DEA portátil del rover': 'Take the portable AED from the rover', 'Traer el DEA del rover': 'Bring the AED from the rover', 'Traer el DEA': 'Bring the AED',
+    'Treinta. Ahora 2 ventilaciones con la bolsa-mascarilla: presiona E.': 'Thirty. Now 2 breaths with the bag-valve mask: press E.',
+    'Velocidad 22 km/h': 'Speed 22 km/h', 'Ventilaciones · presiona E': 'Breaths · press E', 'Vida útil 100%': 'Lifespan 100%', 'Vida útil 31%': 'Lifespan 31%',
+    'Volver al hábitat': 'Return to the habitat', 'Vuelve con Luis. Un parche bajo la clavícula derecha y otro al costado izquierdo.': 'Go back to Luis. One pad below the right collarbone and the other on the left side.',
+    'Ustedes ya lo resolvieron.': 'You already handled it.', 'Llega tarde: tú ya estás actuando.': 'It arrives late: you are already acting.',
+    'más rápido': 'faster', 'más lento': 'slower', 'buen ritmo': 'good pace'
+  };
+  const card = { SO: 'SW', O: 'W', NO: 'NW' };
+  const R = [
+    [/^Recuperaste a (\S+) en (\S+)\. La primera respuesta de la Tierra llegó a los (\S+)\.$/, (m) => `You recovered ${m[1]} in ${m[2]}. Earth’s first reply arrived at ${m[3]}.`],
+    [/^(\S+) recuperó el pulso$/, (m) => `${m[1]} regained a pulse`],
+    [/^(.+) (Ustedes ya lo resolvieron\.|Llega tarde: tú ya estás actuando\.)$/, (m) => `${tr(m[1])} ${D[m[2]]}`],
+    [/^Ciclo (\d+)\. Sigue: fuerte y rápido\.$/, (m) => `Cycle ${m[1]}. Keep going: hard and fast.`],
+    [/^Descarga recomendada\. Que nadie toque a (\S+)\. Mantén E\.$/, (m) => `Shock advised. Nobody touch ${m[1]}. Hold E.`],
+    [/^La respuesta de la Tierra llega en (\S+)$/, (m) => `Earth’s reply arrives in ${m[1]}`],
+    [/^para dar la descarga · nadie toca a (\S+)$/, (m) => `to deliver the shock · nobody touch ${m[1]}`],
+    [/^para (.+)$/, (m) => `to ${tr(m[1])}`],
+    [/^No toques a (\S+)$/, (m) => `Don’t touch ${m[1]}`],
+    [/^Paro · a ([\d.]+) m$/, (m) => `Arrest · ${m[1]} m away`],
+    [/^Paso (\d+) de (\d+)$/, (m) => `Step ${m[1]} of ${m[2]}`],
+    [/^Higía lo registró y lo envió solo a la Tierra\. Llegará en (\S+)\.$/, (m) => `Higía logged it and sent it to Earth on its own. It will arrive in ${m[1]}.`],
+    [/^RCP ciclo (\d+) · 30:2 · calidad (\d+)%$/, (m) => `CPR cycle ${m[1]} · 30:2 · quality ${m[2]}%`],
+    [/^RCP guiada · ciclo (\d+) de (\d+)$/, (m) => `Guided CPR · cycle ${m[1]} of ${m[2]}`],
+    [/^Ritmo organizado y pulso presente\. Recuperamos a (\S+)\.$/, (m) => `Organized rhythm and pulse present. We got ${m[1]} back.`],
+    [/^en (\d+:\d+)$/, (m) => `in ${m[1]}`],
+    [/^(\d+) cpm · (.+)$/, (m) => `${m[1]} cpm · ${tr(m[2])}`],
+    [/^(.+?) · (\d+) lpm(.*)$/, (m) => `${tr(m[1])} · ${m[2]} bpm${m[3]}`],
+    [/^(\d{3})° (\S+)$/, (m) => `${m[1]}° ${card[m[2]] || m[2]}`],
+    [/^(.+) · ([\d.]+) m$/, (m) => `${tr(m[1])} · ${m[2]} m`],
+    [/^(.+) a ([\d.]+) m( ·)?$/, (m) => `${tr(m[1])} · ${m[2]} m${m[3] || ''}`],
+    [/^(.+) · biomonitor$/, (m) => `${tr(m[1])} · biomonitor`],
+    [/^Temp ([\d.]+ °C)$/, (m) => `Temp ${m[1]}`]
+  ];
+  function tr(s) {
+    if (I.lang !== 'en' || !s) return s;
+    const lead = s.match(/^\s*/)[0], trail = s.match(/\s*$/)[0], core = s.trim();
+    if (!core) return s;
+    let out = D[core];
+    if (out === undefined) for (const [re, fn] of R) { const m = core.match(re); if (m) { out = fn(m); break; } }
+    return out === undefined ? s : lead + out + trail;
+  }
+  const I = { lang: 'es', tr };
+  window.i18n = I;
+  const orig = new WeakMap();
+  const SKIP = new Set(['SCRIPT', 'STYLE', 'KBD']);
+  function apply(node) {
+    const p = node.parentNode; if (!p || SKIP.has(p.nodeName)) return;
+    const v = node.nodeValue, t = tr(v);
+    if (t !== v) { orig.set(node, v); node.nodeValue = t; }
+  }
+  function walk(root, fn) {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n;
+    while ((n = w.nextNode())) fn(n);
+  }
+  const ATTRS = ['alt', 'aria-label'];
+  function attrs() {
+    document.querySelectorAll('[alt],[aria-label]').forEach((el) => ATTRS.forEach((a) => {
+      if (!el.hasAttribute(a)) return;
+      if (!el.dataset['es' + a.replace('-', '')]) el.dataset['es' + a.replace('-', '')] = el.getAttribute(a);
+      const es = el.dataset['es' + a.replace('-', '')];
+      el.setAttribute(a, I.lang === 'en' ? (D[es] || es) : es);
+    }));
+  }
+  const kbdEn = (on) => document.querySelectorAll('kbd, .tbtn').forEach((k) => {
+    if (k.textContent === 'Espacio' && on) k.textContent = 'Space';
+    else if (k.textContent === 'Space' && !on) k.textContent = 'Espacio';
+  });
+  const mo = new MutationObserver((recs) => {
+    if (I.lang !== 'en') return;
+    for (const r of recs) {
+      if (r.type === 'characterData') apply(r.target);
+      else r.addedNodes.forEach((n) => { if (n.nodeType === 3) apply(n); else if (n.nodeType === 1) { walk(n, apply); kbdEn(true); } });
+    }
+    mo.takeRecords();
+  });
+  function setLang(l) {
+    I.lang = l;
+    document.documentElement.lang = l;
+    document.title = l === 'en' ? D['Higía — Simulaciones'] : 'Higía — Simulaciones';
+    if (l === 'en') walk(document.body, apply);
+    else walk(document.body, (n) => { if (orig.has(n)) { n.nodeValue = orig.get(n); orig.delete(n); } });
+    mo.takeRecords();
+    attrs(); kbdEn(l === 'en');
+    document.querySelectorAll('.langSwitch button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === l)));
+    try { localStorage.setItem('higia.lang', l); localStorage.setItem('pulso-lang', l); } catch (e) {}
+  }
+  I.set = setLang;
+  mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+  document.querySelectorAll('.langSwitch button').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
+  let saved = null;
+  try { const q = new URLSearchParams(location.search).get('lang'); if (q === 'es' || q === 'en') saved = q; } catch (e) {}
+  try { saved = saved || localStorage.getItem('higia.lang') || localStorage.getItem('pulso-lang'); } catch (e) {}
+  setLang(saved || ((navigator.language || 'es').toLowerCase().startsWith('es') ? 'es' : 'en'));
+})();
+</script>
+
+<script type="module">
+import * as THREE from 'https://esm.sh/three@0.170.0';
+
+const S = (window.S = { t: 0, collapsed: false, crisis: false, keys: {}, visorDust: 0, playing: false, camera: null, playerYaw: 0 });
+const V3 = THREE.Vector3;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function hash(x, y) { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); }
+function vnoise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...o });
+const M = {
+  white: mat(0xeeeeea, { roughness: 0.55 }), grey: mat(0x3a3c40, { roughness: 0.8 }), dark: mat(0x1b1c1f, { roughness: 0.9 }),
+  gold: mat(0xc89a3c, { metalness: 1, roughness: 0.18 }), glow: mat(0x0a84ff, { emissive: 0x0a84ff, emissiveIntensity: 2 }),
+  green: mat(0x30d158, { emissive: 0x30d158, emissiveIntensity: 0.6 }), panel: mat(0xe6e7e9, { roughness: 0.7 }), floor: mat(0x2b2d31, { roughness: 0.9 }),
+};
+const RED = new THREE.Color(0xff453a), BLUE = new THREE.Color(0x0a84ff), WHITE = new THREE.Color(0xffffff);
+
+function box(parent, w, h, d, m, x, y, z) { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); parent.add(b); return b; }
+
+function makePerson({ helmet = true, suit = 0xeeeeea } = {}) {
+  const g = new THREE.Group();
+  const cloth = mat(suit, { roughness: helmet ? 0.55 : 0.8 });
+  const rT = helmet ? 0.36 : 0.28;
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(rT, 0.55, 6, 14), cloth); torso.position.y = 1.25; g.add(torso);
+  const stripeMat = new THREE.MeshStandardMaterial({ color: 0x0a84ff, emissive: 0x0a84ff, emissiveIntensity: 1.4 });
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(helmet ? 0.5 : 0.14, helmet ? 0.07 : 0.14, 0.02), stripeMat);
+  stripe.position.set(helmet ? 0 : -0.1, 1.45, -(rT + 0.01)); g.add(stripe);
+  if (helmet) {
+    box(g, 0.6, 0.75, 0.32, M.white, 0, 1.35, 0.36);
+    const h = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 16), M.white); h.position.y = 1.9; g.add(h);
+    const v = new THREE.Mesh(new THREE.SphereGeometry(0.27, 24, 16, Math.PI * 0.6, Math.PI * 0.8, Math.PI * 0.25, Math.PI * 0.45), M.gold);
+    v.position.set(0, 1.9, -0.04); g.add(v);
+  } else {
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 20, 14), mat(0xc28e6e, { roughness: 0.8 })); head.position.y = 1.78; g.add(head);
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.168, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), mat(0x2a1d16, { roughness: 0.9 }));
+    hair.position.y = 1.79; hair.rotation.x = 0.35; g.add(hair);
+  }
+  const legs = [];
+  for (const s of [-1, 1]) {
+    const hip = new THREE.Group(); hip.position.set(0.15 * s, 0.9, 0); g.add(hip);
+    const leg = new THREE.Mesh(new THREE.CapsuleGeometry(helmet ? 0.14 : 0.11, 0.6, 4, 10), cloth); leg.position.y = -0.45; hip.add(leg);
+    legs.push(hip);
+    const arm = new THREE.Mesh(new THREE.CapsuleGeometry(helmet ? 0.11 : 0.085, 0.55, 4, 10), cloth);
+    arm.position.set((rT + 0.12) * s, 1.25, 0); arm.rotation.z = 0.15 * s; g.add(arm);
+  }
+  g.userData = { stripe, legs };
+  return g;
+}
+function setBadge(p, crit) { const c = crit ? RED : BLUE; p.userData.stripe.material.color.copy(c); p.userData.stripe.material.emissive.copy(c); }
+
+function makeScreen(w, h) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = Math.round((512 * h) / w);
+  const ctx = c.getContext('2d'); const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }));
+  const draw = (title, lines = [], crit = false) => {
+    const tr = window.i18n ? window.i18n.tr : (s) => s;
+    title = tr(title); lines = lines.map(tr);
+    ctx.fillStyle = crit ? '#3b0d0b' : '#0d0f13'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillStyle = crit ? '#ff453a' : '#0a84ff'; ctx.fillRect(0, 0, c.width, 8);
+    ctx.fillStyle = '#f5f5f7'; ctx.font = '600 38px Geist, system-ui, sans-serif'; ctx.fillText(title, 26, 62);
+    ctx.font = '26px Geist, system-ui, sans-serif'; ctx.fillStyle = 'rgba(245,245,247,.75)';
+    lines.forEach((l, i) => ctx.fillText(l, 26, 108 + i * 38));
+    tex.needsUpdate = true;
+  };
+  return { mesh, draw };
+}
+
+function makeSky(scene, top = 0x9c7766, hor = 0xe7b28c) {
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(600, 32, 16), new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, fog: false,
+    uniforms: { top: { value: new THREE.Color(top) }, hor: { value: new THREE.Color(hor) } },
+    vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: 'uniform vec3 top; uniform vec3 hor; varying vec3 vP; void main(){ float h = clamp(vP.y*1.6,0.0,1.0); gl_FragColor = vec4(mix(hor, top, pow(h,0.7)),1.0); }',
+  }));
+  scene.add(sky);
+}
+
+function makeDustTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 2600; i++) {
+    const r = Math.random() * 2.4 + 0.3, px = Math.random() * 512, py = Math.random() * 512;
+    const edge = Math.hypot(px - 256, py - 256) / 362;
+    x.fillStyle = `rgba(150,82,48,${(0.15 + edge * 0.55) * Math.random()})`;
+    x.beginPath(); x.arc(px, py, r, 0, 7); x.fill();
+  }
+  document.getElementById('dust').style.backgroundImage = `url(${c.toDataURL()})`;
+}
+
+/* ---------------- EVA en Marte ---------------- */
+function buildMars(scene) {
+  const FOG = new THREE.Color(0xd49c76);
+  scene.fog = new THREE.Fog(FOG, 25, 230); scene.background = FOG.clone();
+  makeSky(scene);
+  scene.add(new THREE.HemisphereLight(0xf0c3a0, 0x5a2a18, 1.1));
+  const sun = new THREE.DirectionalLight(0xfff0dd, 2.0); sun.position.set(50, 35, -80); scene.add(sun);
+  const CR = { x: 70, z: -90, r: 26 };
+  const heightAt = (x, z) => {
+    let h = (vnoise(x * 0.02, z * 0.02) - 0.5) * 9 + (vnoise(x * 0.08, z * 0.08) - 0.5) * 2.2 + (vnoise(x * 0.3, z * 0.3) - 0.5) * 0.35;
+    const d = Math.hypot(x - CR.x, z - CR.z) / CR.r;
+    if (d < 1.4) h += d < 1 ? -6 * (1 - d * d) : 3 * Math.cos((d - 1) * 4);
+    return h;
+  };
+  const geo = new THREE.PlaneGeometry(600, 600, 220, 220); geo.rotateX(-Math.PI / 2);
+  const pos = geo.attributes.position, col = new Float32Array(pos.count * 3);
+  const cA = new THREE.Color(0xb5562f), cB = new THREE.Color(0x7a321c), cC = new THREE.Color(0xd08055), tc = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i); pos.setY(i, heightAt(x, z));
+    const n = vnoise(x * 0.05, z * 0.05);
+    tc.copy(cA).lerp(cB, clamp(n * 1.2 - 0.2, 0, 1)).lerp(cC, clamp(vnoise(x * 0.2, z * 0.2) - 0.6, 0, 0.4));
+    col.set([tc.r, tc.g, tc.b], i * 3);
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.computeVertexNormals();
+  scene.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97 })));
+
+  const P = { beacon: new V3(24, 0, -40), rover: new V3(-14, 0, 8), hab: new V3(-46, 0, 34) };
+  const crewStart = new V3(20, 0, -32);
+  [P.beacon, P.rover, P.hab, crewStart].forEach((v) => (v.y = heightAt(v.x, v.z)));
+  const keep = [P.beacon, P.rover, P.hab, crewStart, new V3(0, 0, 0)];
+  const rocks = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1, 0), mat(0x6e3420, { roughness: 0.95, flatShading: true }), 420);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new V3(), p3 = new V3(); let n = 0;
+  while (n < 420) {
+    const x = (Math.random() - 0.5) * 360, z = (Math.random() - 0.5) * 360;
+    if (keep.some((k) => Math.hypot(k.x - x, k.z - z) < 8)) continue;
+    const s = Math.random() < 0.08 ? 1.2 + Math.random() * 1.6 : 0.15 + Math.random() * 0.55;
+    q.setFromEuler(new THREE.Euler(Math.random() * 3, Math.random() * 3, 0)); sc.set(s, s * 0.6, s * 0.9); p3.set(x, heightAt(x, z) + s * 0.2, z);
+    rocks.setMatrixAt(n++, m4.compose(p3, q, sc));
+  }
+  scene.add(rocks);
+
+  const roverLightMat = M.glow.clone();
+  const rover = new THREE.Group();
+  box(rover, 2.6, 1.4, 4.4, M.white, 0, 1.4, 0);
+  box(rover, 2.3, 0.6, 1.2, M.dark, 0, 1.8, -2.0);
+  box(rover, 2.7, 0.08, 4.5, roverLightMat, 0, 2.15, 0);
+  for (const x of [-1.4, 1.4]) for (const z of [-1.5, 0, 1.5]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.4, 16), M.dark); w.rotation.z = Math.PI / 2; w.position.set(x, 0.45, z); rover.add(w); }
+  rover.position.copy(P.rover); rover.rotation.y = 0.6; scene.add(rover);
+
+  const habLightMat = M.glow.clone();
+  const hab = new THREE.Group();
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(6, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), M.white); hab.add(dome);
+  const ringL = new THREE.Mesh(new THREE.TorusGeometry(6.02, 0.08, 8, 48), habLightMat); ringL.rotation.x = Math.PI / 2; ringL.position.y = 0.6; hab.add(ringL);
+  box(hab, 2, 2.4, 3, M.white, 0, 1.2, -6.5);
+  hab.position.copy(P.hab); scene.add(hab);
+
+  const bLightMat = M.glow.clone();
+  const beacon = new THREE.Group();
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.2, 8), M.grey); pole.position.y = 1.1; beacon.add(pole);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 8), bLightMat); bulb.position.y = 2.25; beacon.add(bulb);
+  beacon.position.copy(P.beacon); scene.add(beacon);
+
+  const crew = makePerson({ helmet: true }); crew.position.copy(crewStart); crew.rotation.y = 0.4; scene.add(crew);
+
+  const DN = 1400, dGeo = new THREE.BufferGeometry(), dPos = new Float32Array(DN * 3);
+  for (let i = 0; i < DN * 3; i++) dPos[i] = (Math.random() - 0.5) * 60;
+  dGeo.setAttribute('position', new THREE.BufferAttribute(dPos, 3));
+  const dMat = new THREE.PointsMaterial({ color: 0xe8b08a, size: 0.06, transparent: true, opacity: 0.5, depthWrite: false });
+  const dust = new THREE.Points(dGeo, dMat); scene.add(dust);
+  makeDustTexture();
+
+  const colliders = [{ p: P.rover, r: 2.8 }, { p: P.hab, r: 7.4 }];
+  let fall = 0, storm = 0.12;
+  const cp = new V3();
+  return {
+    mode: 'ground', eye: 1.72, crew,
+    pts: { beacon: new V3(P.beacon.x, P.beacon.y + 1.6, P.beacon.z), rover: new V3(P.rover.x, P.rover.y + 2.6, P.rover.z), hab: new V3(P.hab.x, P.hab.y + 3, P.hab.z) },
+    spawn: { x: 0, z: 0, yaw: Math.atan2(-P.beacon.x, -P.beacon.z) },
+    floor: heightAt,
+    crewPt: () => cp.set(crew.position.x, crew.position.y + (S.collapsed ? 0.7 : 1.6), crew.position.z),
+    constrain(p) {
+      for (const c of colliders) { const dx = p.x - c.p.x, dz = p.z - c.p.z, d = Math.hypot(dx, dz); if (d < c.r) { p.x = c.p.x + (dx / d) * c.r; p.z = c.p.z + (dz / d) * c.r; } }
+      p.x = clamp(p.x, -280, 280); p.z = clamp(p.z, -280, 280);
+    },
+    conf: () => Math.round(Math.max(55, 99 - storm * 18 - S.visorDust * 20)),
+    takeAed() {}, onCollapse() {}, onRosc() {},
+    update(dt) {
+      storm += ((S.crisis ? 0.75 : 0.18) - storm) * dt * 0.05;
+      if (S.playing) S.visorDust = clamp(S.visorDust + (S.keys.KeyR ? -dt * 0.9 : dt * storm * 0.022), 0, 0.85);
+      document.getElementById('dust').style.opacity = (S.visorDust * 0.95).toFixed(3);
+      scene.fog.near = 25 - storm * 18; scene.fog.far = 230 - storm * 150;
+      dMat.opacity = 0.3 + storm * 0.6;
+      const c = S.camera.position;
+      for (let i = 0; i < DN; i++) {
+        let x = dPos[i * 3] + dt * (2 + storm * 9), y = dPos[i * 3 + 1] - dt * 0.2, z = dPos[i * 3 + 2] + dt * storm * 3;
+        if (x - c.x > 30) x -= 60; if (x - c.x < -30) x += 60;
+        if (z - c.z > 30) z -= 60; if (z - c.z < -30) z += 60;
+        if (y - c.y < -6) y += 14;
+        dPos[i * 3] = x; dPos[i * 3 + 1] = y; dPos[i * 3 + 2] = z;
+      }
+      dGeo.attributes.position.needsUpdate = true;
+      bLightMat.emissiveIntensity = 1 + Math.sin(S.t * 4) * 1.2;
+      const ac = S.crisis ? RED : BLUE;
+      for (const m of [roverLightMat, habLightMat]) { m.color.copy(ac); m.emissive.copy(ac); m.emissiveIntensity = S.crisis ? 2 + Math.sin(S.t * 10) * 2 : 1.5; }
+      fall += ((S.collapsed ? 1 : 0) - fall) * dt * 3;
+      crew.rotation.x = (fall * Math.PI) / 2;
+      crew.position.y = heightAt(crew.position.x, crew.position.z) + fall * 0.38;
+      if (!S.collapsed) crew.rotation.y += dt * 0.15 * Math.sin(S.t * 0.3);
+    },
+  };
+}
+
+/* ---------------- Rover presurizado ---------------- */
+function buildRover(scene) {
+  const SKY = new THREE.Color(0xd8a27c);
+  scene.background = SKY; scene.fog = new THREE.Fog(SKY, 30, 190);
+  makeSky(scene);
+  scene.add(new THREE.HemisphereLight(0xf0c3a0, 0x5a2a18, 0.9));
+  const sunL = new THREE.DirectionalLight(0xfff0dd, 1.8); sunL.position.set(30, 40, -20); scene.add(sunL);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  for (const z of [-1, 2.4]) { const l = new THREE.PointLight(0xfff4e8, 4, 9, 1.2); l.position.set(0, 2.1, z); scene.add(l); }
+
+  const outside = new THREE.Group(); scene.add(outside);
+  const circ = (z) => { const a = (z / 100) * Math.PI * 2; return [Math.cos(a) * 4, Math.sin(a) * 4]; };
+  const gH = (x, z) => {
+    if (Math.abs(x) < 5) return -1.05;
+    const [c, s] = circ(z); const e = Math.min(1, (Math.abs(x) - 5) / 30);
+    return -1.05 + e * ((vnoise(x * 0.06 + c, s) - 0.3) * 6 + Math.abs(x) * 0.03);
+  };
+  const gGeo = new THREE.PlaneGeometry(360, 400, 120, 160); gGeo.rotateX(-Math.PI / 2); gGeo.translate(0, 0, -100);
+  const gp = gGeo.attributes.position, gc = new Float32Array(gp.count * 3);
+  const cA = new THREE.Color(0xb5562f), cB = new THREE.Color(0x7a321c), tc = new THREE.Color();
+  for (let i = 0; i < gp.count; i++) {
+    const x = gp.getX(i), z = gp.getZ(i); gp.setY(i, gH(x, z));
+    const [c, s] = circ(z);
+    tc.copy(cA).lerp(cB, clamp(vnoise(x * 0.15 + c * 3, s * 3) * 1.2 - 0.2, 0, 1));
+    if (Math.abs(Math.abs(x) - 1.3) < 0.5) tc.multiplyScalar(0.8);
+    gc.set([tc.r, tc.g, tc.b], i * 3);
+  }
+  gGeo.setAttribute('color', new THREE.BufferAttribute(gc, 3)); gGeo.computeVertexNormals();
+  outside.add(new THREE.Mesh(gGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97 })));
+  const rk = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1, 0), mat(0x6e3420, { roughness: 0.95, flatShading: true }), 800);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new V3(), p3 = new V3(); let n = 0;
+  for (let i = 0; i < 200; i++) {
+    let x = (Math.random() - 0.5) * 300; if (Math.abs(x) < 7) x += x < 0 ? -7 : 7;
+    const z0 = Math.random() * 100, s = Math.random() < 0.1 ? 1 + Math.random() * 1.8 : 0.2 + Math.random() * 0.6;
+    q.setFromEuler(new THREE.Euler(Math.random() * 3, Math.random() * 3, 0)); sc.set(s, s * 0.6, s * 0.9);
+    for (const k of [-3, -2, -1, 0]) { const z = z0 + k * 100; p3.set(x, gH(x, z) + s * 0.2, z); rk.setMatrixAt(n++, m4.compose(p3, q, sc)); }
+  }
+  outside.add(rk);
+  for (let i = 0; i < 14; i++) {
+    const side = i % 2 ? 1 : -1;
+    const m = new THREE.Mesh(new THREE.ConeGeometry(20 + Math.random() * 30, 10 + Math.random() * 18, 7), mat(0x9a5235, { roughness: 1, flatShading: true }));
+    m.position.set(side * (110 + Math.random() * 80), -2, -40 - Math.random() * 220); scene.add(m);
+  }
+
+  const cab = new THREE.Group(); scene.add(cab);
+  const W = 1.35;
+  box(cab, 2.7, 0.1, 8.2, M.floor, 0, -0.05, 0);
+  box(cab, 2.7, 0.1, 8.2, M.panel, 0, 2.4, 0);
+  for (const s of [-1, 1]) {
+    box(cab, 0.1, 1.0, 8.2, M.panel, s * W, 0.5, 0);
+    box(cab, 0.1, 0.55, 8.2, M.panel, s * W, 2.12, 0);
+    for (const z of [-4, -2.6, -1.2, 0.2, 1.6, 3, 4]) box(cab, 0.1, 0.9, 0.22, M.panel, s * W, 1.45, z);
+  }
+  box(cab, 2.7, 1.0, 0.1, M.panel, 0, 0.5, -4.1);
+  box(cab, 2.7, 0.3, 0.1, M.panel, 0, 2.25, -4.1);
+  box(cab, 0.12, 1.1, 0.1, M.panel, 0, 1.55, -4.1);
+  box(cab, 2.7, 2.5, 0.1, M.panel, 0, 1.2, 4.1);
+  box(cab, 0.9, 1.7, 0.02, M.grey, -0.5, 0.95, 4.04);
+  box(cab, 2.5, 0.22, 0.7, M.dark, 0, 0.95, -3.7);
+  for (const s of [-1, 1]) {
+    box(cab, 0.6, 0.12, 0.6, M.grey, s * 0.6, 0.5, -2.8);
+    box(cab, 0.6, 0.85, 0.1, M.grey, s * 0.6, 0.95, -2.45);
+    box(cab, 0.14, 0.45, 0.14, M.dark, s * 0.6, 0.22, -2.8);
+    box(cab, 0.5, 0.55, 3.4, M.grey, s * 1.05, 0.27, 2.0);
+  }
+  const stripMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.1 });
+  box(cab, 0.25, 0.03, 6.5, stripMat, 0, 2.34, 0);
+  const dash = makeScreen(1.0, 0.5); dash.mesh.position.set(0, 1.28, -3.62); dash.mesh.rotation.x = -0.55; cab.add(dash.mesh);
+  const side = makeScreen(0.8, 0.45); side.mesh.position.set(1.29, 1.45, -0.6); side.mesh.rotation.y = -Math.PI / 2; cab.add(side.mesh);
+  const filt = makeScreen(0.7, 0.4); filt.mesh.position.set(0.55, 1.5, 4.04); filt.mesh.rotation.y = Math.PI; cab.add(filt.mesh);
+  box(cab, 0.7, 0.5, 0.06, M.grey, 0.55, 0.98, 4.03);
+  const aed = new THREE.Group(); box(aed, 0.08, 0.5, 0.42, M.green, 0, 0, 0); box(aed, 0.02, 0.36, 0.3, M.white, 0.05, 0, 0);
+  aed.position.set(-1.27, 1.35, 0.9); cab.add(aed);
+
+  const crew = makePerson({ helmet: false, suit: 0x51627a });
+  const seat = new V3(-0.6, -0.36, -2.8), floorPos = new V3(0, 0.27, -1.7);
+  crew.position.copy(seat); crew.userData.legs.forEach((l) => (l.rotation.x = Math.PI / 2)); scene.add(crew);
+
+  let speed = 6, target = 6, fall = 0, filter = 31;
+  dash.draw('Kestrel · ruta 14', ['Velocidad 22 km/h', 'Destino: base Jezero · 38 km', 'Luis: signos normales']);
+  side.draw('Tripulación', ['Luis · 74 lpm · 98%', 'Tomás · 88 lpm', 'Higía: monitoreando']);
+  filt.draw('Filtro de regolito', ['Vida útil 31%', 'Cambiar ahora'], true);
+  const cp = new V3(), fp = new V3();
+  const L = {
+    mode: 'cabin', eye: 1.62, crew, shake: 0,
+    pts: { filter: new V3(0.55, 1.5, 3.9), aed: new V3(-1.2, 1.35, 0.9) },
+    spawn: { x: 0, z: 2.9, yaw: 0 },
+    floor: () => 0,
+    crewPt: () => (S.collapsed ? cp.set(0, 0.45, -0.45) : cp.set(-0.6, 1.4, -2.8)),
+    constrain(p) {
+      p.z = Math.min(3.65, p.z);
+      const xm = p.z > 0.25 ? 0.72 : 1.1; p.x = clamp(p.x, -xm, xm);
+      p.z = Math.max(Math.abs(p.x) > 0.25 ? -2.15 : -3.25, p.z);
+    },
+    conf: () => 99,
+    info: () => ['Velocidad', speed > 0.2 ? `${Math.round(speed * 3.6)} km/h` : 'Detenido'],
+    filter: () => filter,
+    changeFilter() { filter = 100; filt.draw('Filtro de regolito', ['Vida útil 100%', 'Cambiado por Tomás']); },
+    takeAed() { aed.visible = false; },
+    onCollapse() {
+      target = 0;
+      dash.draw('ALERTA · LUIS', ['Paro cardíaco detectado', 'Rover detenido por Higía', 'Tierra avisada (+20 min)'], true);
+      side.draw('ALERTA · LUIS', ['Sin pulso · FV', 'DEA: pared izquierda'], true);
+    },
+    onRosc() {
+      dash.draw('Luis · pulso recuperado', ['Monitoreo continuo', 'Registro enviado a la Tierra']);
+      side.draw('Luis · estable', ['Pulso presente', 'Higía sigue vigilando']);
+    },
+    update(dt) {
+      speed += (target - speed) * dt * (target ? 0.5 : 1.3);
+      outside.position.z += speed * dt; if (outside.position.z > 100) outside.position.z -= 100;
+      L.shake = speed / 6;
+      if (!S.collapsed && filter > 12) filter -= dt * 0.08;
+      fall += ((S.collapsed ? 1 : 0) - fall) * dt * 2.5;
+      crew.position.lerpVectors(seat, floorPos, fall);
+      crew.rotation.x = (fall * Math.PI) / 2;
+      crew.userData.legs.forEach((l) => (l.rotation.x = ((1 - fall) * Math.PI) / 2));
+      if (S.crisis) { stripMat.emissive.copy(WHITE).lerp(RED, 0.5 + Math.sin(S.t * 8) * 0.5); } else stripMat.emissive.copy(WHITE);
+    },
+  };
+  void fp;
+  return L;
+}
+
+/* ---------------- Nave en tránsito ---------------- */
+function buildShip(scene) {
+  scene.background = new THREE.Color(0x020306); scene.fog = null;
+  const SN = 2500, sGeo = new THREE.BufferGeometry(), sPos = new Float32Array(SN * 3);
+  for (let i = 0; i < SN; i++) { const v = new V3().randomDirection().multiplyScalar(450); sPos.set([v.x, v.y, v.z], i * 3); }
+  sGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+  scene.add(new THREE.Points(sGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.4, sizeAttenuation: false })));
+  const mars = new THREE.Mesh(new THREE.SphereGeometry(9, 48, 24), mat(0xb4532a, { roughness: 1 })); mars.position.set(5, 3, -420); scene.add(mars);
+  const sunL = new THREE.DirectionalLight(0xffffff, 2.0); sunL.position.set(-1, 0.4, 0.3); scene.add(sunL);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8a96a8, 0.7));
+  for (const z of [-5, 0, 5]) { const pl = new THREE.PointLight(0xffffff, 3, 9, 1.2); pl.position.set(0, 1.0, z); scene.add(pl); }
+
+  const H = 1.45, LEN = 15.2;
+  box(scene, 2.9, 0.1, LEN, M.panel, 0, -H, 0); box(scene, 2.9, 0.1, LEN, M.panel, 0, H, 0);
+  box(scene, 0.1, 2.9, LEN, M.panel, -H, 0, 0); box(scene, 0.1, 2.9, LEN, M.panel, H, 0, 0);
+  const rackA = mat(0xd5d7da, { roughness: 0.75 }), rackB = mat(0xc4c7cc, { roughness: 0.75 });
+  let k = 0;
+  for (let z = -6.6; z <= 6.7; z += 1.1, k++) {
+    const m = k % 2 ? rackA : rackB;
+    box(scene, 2.4, 0.05, 1.0, m, 0, -H + 0.07, z); box(scene, 2.4, 0.05, 1.0, m, 0, H - 0.07, z);
+    box(scene, 0.05, 2.4, 1.0, m, -H + 0.07, 0, z); box(scene, 0.05, 2.4, 1.0, m, H - 0.07, 0, z);
+  }
+  const stripMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.2 });
+  for (const [x, y] of [[-1.3, -1.3], [1.3, -1.3], [-1.3, 1.3], [1.3, 1.3]]) { const s = box(scene, 0.12, 0.12, LEN - 0.4, stripMat, x, y, 0); s.rotation.z = Math.PI / 4; }
+  const railMat = mat(0x9ea3aa, { roughness: 0.4, metalness: 0.3 });
+  for (const [x, y] of [[-1.3, 0.5], [1.3, -0.5], [0.5, 1.3], [-0.5, -1.3]]) {
+    const r = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, LEN - 1, 8), railMat); r.rotation.x = Math.PI / 2; r.position.set(x, y, 0); scene.add(r);
+  }
+  const shape = new THREE.Shape(); shape.moveTo(-H, -H); shape.lineTo(H, -H); shape.lineTo(H, H); shape.lineTo(-H, H); shape.lineTo(-H, -H);
+  const hole = new THREE.Path(); hole.absarc(0, 0.1, 0.75, 0, Math.PI * 2, true); shape.holes.push(hole);
+  const front = new THREE.Mesh(new THREE.ShapeGeometry(shape, 48), new THREE.MeshStandardMaterial({ color: 0xe4e5e7, roughness: 0.7, side: THREE.DoubleSide }));
+  front.position.z = -LEN / 2; scene.add(front);
+  const frame = new THREE.Mesh(new THREE.TorusGeometry(0.77, 0.05, 12, 48), M.grey); frame.position.set(0, 0.1, -LEN / 2 + 0.02); scene.add(frame);
+  box(scene, 2.9, 2.9, 0.1, M.panel, 0, 0, LEN / 2);
+  const hatch = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.05, 12, 40), M.grey); hatch.position.set(0, 0, LEN / 2 - 0.06); scene.add(hatch);
+
+  const lab = makeScreen(0.9, 0.5); lab.mesh.position.set(-1.36, 0.25, -4.5); lab.mesh.rotation.y = Math.PI / 2; scene.add(lab.mesh);
+  const stat = makeScreen(0.9, 0.5); stat.mesh.position.set(1.36, 0.25, 1.2); stat.mesh.rotation.y = -Math.PI / 2; scene.add(stat.mesh);
+  lab.draw('Laboratorio · cultivo 7', ['Muestra lista para registrar', 'Temp 22.4 °C']);
+  stat.draw('Hermes · día 96', ['Mei · 72 lpm · 98%', 'Tomás · 86 lpm', 'Tierra a 12 min 30 s']);
+  const aed = new THREE.Group(); box(aed, 0.1, 0.45, 0.4, M.green, 0, 0, 0); box(aed, 0.02, 0.32, 0.28, M.white, -0.06, 0, 0);
+  aed.position.set(1.36, -0.3, -2.2); scene.add(aed);
+  box(scene, 0.62, 0.06, 1.9, mat(0x4a5a72, { roughness: 0.8 }), 0, -1.36, 4.3);
+  for (const z of [3.7, 4.3, 4.9]) box(scene, 0.66, 0.02, 0.08, M.dark, 0, -1.32, z);
+  box(scene, 0.5, 0.04, 0.04, M.grey, 0, -1.3, 5.35);
+
+  const crew = new THREE.Group(); const body = makePerson({ helmet: false, suit: 0x56657d }); body.position.y = -1.0; crew.add(body);
+  crew.userData = body.userData;
+  crew.position.set(-0.75, 0.05, -4.3); crew.rotation.set(0, Math.PI / 2 - 0.2, 0.08); scene.add(crew);
+  let mstate = 'idle';
+  const drift = new V3(-0.2, -0.1, -3.4), fixPos = new V3(0, -1.05, 4.3), tmp = new V3(), f3 = new V3();
+  const lyingQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
+  return {
+    mode: 'zeroG', eye: 0, crew,
+    pts: { lab: new V3(-1.2, 0.25, -4.5), aed: new V3(1.2, -0.3, -2.2), cmrs: new V3(0, -0.9, 4.3) },
+    spawn: { x: 0, y: 0.1, z: 6.2, yaw: 0 },
+    floor: () => 0,
+    crewPt: () => crew.position,
+    constrain(p, v) {
+      const m = 1.12;
+      for (const a of ['x', 'y']) { if (p[a] > m) { p[a] = m; if (v) v[a] = 0; } if (p[a] < -m) { p[a] = -m; if (v) v[a] = 0; } }
+      if (p.z > 7.2) { p.z = 7.2; if (v) v.z = 0; } if (p.z < -7.2) { p.z = -7.2; if (v) v.z = 0; }
+    },
+    conf: () => 99,
+    info: () => ['Tránsito', 'Día 96 · 225 M km'],
+    takeAed() { aed.visible = false; },
+    carry() { mstate = 'carried'; },
+    fix() { mstate = 'fixed'; },
+    onCollapse() {
+      mstate = 'limp';
+      lab.draw('ALERTA · MEI', ['Paro cardíaco detectado', 'Tierra avisada (+12 min)'], true);
+      stat.draw('ALERTA · MEI', ['Sin pulso · FV', 'DEA: rack verde', 'Camilla: fondo del módulo'], true);
+    },
+    onRosc() {
+      lab.draw('Mei · pulso recuperado', ['Monitoreo continuo']);
+      stat.draw('Mei · estable', ['Pulso presente', 'Registro enviado a la Tierra']);
+    },
+    update(dt) {
+      const t = S.t;
+      if (mstate === 'idle') { crew.position.y = 0.05 + Math.sin(t * 0.8) * 0.04; crew.rotation.z = 0.08 + Math.sin(t * 0.5) * 0.03; }
+      else if (mstate === 'limp') { crew.rotation.x += dt * 0.18; crew.rotation.z += dt * 0.07; crew.position.lerp(drift, dt * 0.15); }
+      else if (mstate === 'carried') {
+        const cam = S.camera; f3.set(0, 0, -1).applyQuaternion(cam.quaternion);
+        tmp.copy(cam.position).addScaledVector(f3, 1.15); tmp.y -= 0.35;
+        crew.position.lerp(tmp, dt * 4); crew.quaternion.slerp(lyingQ, dt * 2);
+      } else if (mstate === 'fixed') { crew.position.lerp(fixPos, dt * 4); crew.quaternion.slerp(lyingQ, dt * 4); }
+      if (S.crisis) stripMat.emissive.copy(WHITE).lerp(RED, 0.5 + Math.sin(t * 8) * 0.5); else stripMat.emissive.copy(WHITE);
+    },
+  };
+}
+
+window.W = { THREE, buildMars, buildRover, buildShip, setBadge };
+
+</script>
+<script type="module">
+const { THREE, buildMars, buildRover, buildShip, setBadge } = window.W;
+const S = window.S;
+const $ = (id) => document.getElementById(id);
+const V3 = THREE.Vector3;
+const TS = 60;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fmt = (s) => { s = Math.max(0, Math.round(s)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+const cardinal = (d) => ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'][Math.round(d / 45) % 8];
+
+const canvas = $('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050608);
+const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 1200);
+camera.rotation.order = 'YXZ';
+S.camera = camera;
+function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+
+/* ---------- Niveles ---------- */
+let L = null;
+const collapse = () => doCollapse();
+const LEVELS = {
+  eva: {
+    crew: 'Ana', delay: 1200, hasCpr: false, tag: 'Sol 214', build: buildMars,
+    devices: ['Visor', 'Reloj', 'Rover', 'Hábitat', 'Tierra (+20 min)'],
+    suit: { label: 'Tu traje · Tomás', o2: 'O<sub>2</sub> traje', pres: '4.3 psi', rad: 0.64, x: 'Polvo visor' },
+    startTitle: 'Comienza la caminata · Sol 214', startBody: 'Ana va adelante, junto a la baliza. Tu visor, tu reloj y el rover comparten sus signos vitales.',
+    alertTitle: 'Ana: paro cardíaco detectado', alertBody: 'Su biomonitor detectó fibrilación ventricular (simulada). Higía avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.',
+    reply: 'Respondiendo a datos de hace 20 min: «Vemos FV en Ana. Usen el DEA y vuelvan al hábitat.»',
+    flow: () => [
+      { obj: 'Camina hasta la baliza de muestras', target: () => L.pts.beacon, name: 'Baliza', near: 4, reach: true, timeout: 40, idle: 'Usa <kbd>W A S D</kbd> y el mouse. La baliza está junto a Ana.', enter: 'Hola, Tomás. Monitoreo a Ana y a ti en tiempo real. Todo normal por ahora.', done: collapse },
+      { check: 'Evaluar a Ana', obj: 'Ana colapsó. Ve con ella ya', target: () => L.crewPt(), name: 'Ana', near: 2.8, hold: 1.4, act: 'conectar su biomonitor a tu visor', enter: 'Ana colapsó. Ya avisé al rover, al hábitat y a la Tierra. Ve con ella.', packet: 'Evaluación · sin respuesta · FV' },
+      { check: 'Traer el DEA del rover', obj: 'Toma el DEA portátil del rover', target: () => L.pts.rover, name: 'Rover', near: 4.6, hold: 1.2, act: 'sacar el DEA del rover', enter: 'Paro cardíaco. Con el traje puesto no se puede hacer RCP: el DEA es lo primero. Está en el rover.', packet: 'DEA retirado del rover' },
+      { check: 'Conectar electrodos', obj: 'Conecta el DEA al traje de Ana', target: () => L.crewPt(), name: 'Ana', near: 2.8, hold: 2, act: 'conectar los electrodos al puerto del traje', enter: 'Tienes el DEA. Su traje tiene un puerto de electrodos en el pecho. Ve con ella.' },
+      { check: 'Descarga del DEA', type: 'aed', obj: 'Sigue las indicaciones del DEA', enter: 'Electrodos conectados. Nadie toca a Ana: analizando el ritmo.' },
+      { check: 'Reevaluar ritmo', type: 'aed2', obj: 'El DEA vuelve a analizar', enter: 'Descarga hecha. Reviso de nuevo su ritmo.' },
+      { check: 'Volver al hábitat', type: 'final', obj: 'Ana tiene pulso. Volvamos al hábitat', target: () => L.pts.hab, name: 'Hábitat', enter: 'Ana tiene pulso. Sigo monitoreándola y la Tierra ya recibe todo.' },
+    ],
+  },
+  rover: {
+    crew: 'Luis', delay: 1200, hasCpr: true, tag: 'Sol 214 · Kestrel', build: buildRover,
+    devices: ['Visor', 'Reloj', 'Pantallas rover', 'Hábitat', 'Tierra (+20 min)'],
+    suit: { label: 'Tu visor AR · Tomás', o2: 'O<sub>2</sub> cabina', pres: '14.7 psi', rad: 0.31, x: 'Filtro regolito' },
+    startTitle: 'En ruta a la base Jezero', startBody: 'Luis maneja. Higía monitorea a los dos y muestra todo en tu visor, tu reloj y las pantallas del rover.',
+    alertTitle: 'Luis: paro cardíaco detectado', alertBody: 'Higía detuvo el rover, avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.',
+    reply: 'Respondiendo a datos de hace 20 min: «Vemos que Luis colapsó. Detengan el rover, usen el DEA e inicien RCP.»',
+    flow: () => [
+      { obj: 'Cambia el filtro de regolito (pared trasera)', target: () => L.pts.filter, name: 'Filtro', near: 1.5, hold: 1.2, act: 'cambiar el filtro', timeout: 45, idle: 'El polvo que entra con los trajes satura el filtro. Date vuelta: está atrás.', enter: 'Hola, Tomás. Luis maneja y yo monitoreo a los dos. El filtro de regolito está casi saturado.', done: () => L.changeFilter() },
+      { type: 'wait', after: 2.5, obj: 'Filtro cambiado', enter: 'Filtro al 100%. Buen trabajo.', done: collapse },
+      { check: 'Evaluar a Luis', obj: 'Luis se desplomó. Ve con él', target: () => L.crewPt(), name: 'Luis', near: 1.7, hold: 1.5, act: 'evaluar si responde y respira', enter: 'Luis se desplomó. Detuve el rover y avisé a la Tierra. Ve con él.', packet: 'Evaluación · sin respuesta · sin respiración' },
+      { check: 'Traer el DEA', obj: 'Toma el DEA de la pared izquierda', target: () => L.pts.aed, name: 'DEA', near: 1.4, hold: 1, act: 'tomar el DEA', enter: 'No responde y no respira normal: es un paro cardíaco. Trae el DEA de la pared izquierda.', packet: 'DEA en uso', done: () => L.takeAed() },
+      { check: 'Colocar parches', obj: 'Coloca los parches del DEA en Luis', target: () => L.crewPt(), name: 'Luis', near: 1.7, hold: 1.5, act: 'colocar los parches', enter: 'Vuelve con Luis. Un parche bajo la clavícula derecha y otro al costado izquierdo.' },
+      { check: 'Descarga del DEA', type: 'aed', obj: 'Sigue las indicaciones del DEA', enter: 'Parches colocados. Nadie toca a Luis: analizando.' },
+      { check: 'RCP · 2 ciclos', type: 'cpr', obj: 'RCP: 30 compresiones y 2 ventilaciones, dos veces', note: 'Talón de la mano en el centro del pecho, brazos rectos, unos 5 cm de profundidad.', enter: 'Empieza la RCP ya. Sigue el punto: 30 compresiones, fuerte y rápido.' },
+      { check: 'Reevaluar ritmo', type: 'aed2', obj: 'El DEA vuelve a analizar', enter: 'Alto. El DEA analiza de nuevo.' },
+      { check: 'Monitoreo', type: 'final', obj: 'Luis tiene pulso. Quédate con él', target: () => L.crewPt(), name: 'Luis', enter: 'Luis tiene pulso. Lo sigo monitoreando y la Tierra ya tiene todo el registro.' },
+    ],
+  },
+  ship: {
+    crew: 'Mei', delay: 750, hasCpr: true, tag: 'Nave Hermes', build: buildShip,
+    devices: ['Visor', 'Reloj', 'Pantallas nave', 'Tripulación', 'Tierra (+12 min)'],
+    suit: { label: 'Tu visor AR · Tomás', o2: 'O<sub>2</sub> cabina', pres: '14.7 psi', rad: 1.82, x: 'Gravedad' },
+    startTitle: 'Día 96 rumbo a Marte', startBody: 'Microgravedad. Higía monitorea a Mei y a ti y envía todo a la Tierra, a 12 minutos y medio de distancia.',
+    alertTitle: 'Mei: paro cardíaco detectado', alertBody: 'Su biomonitor detectó fibrilación ventricular (simulada). Higía avisó a la nave y a la Tierra, que lo verá en 12 min 30 s.',
+    reply: 'Respondiendo a datos de hace 12 min: «Vemos a Mei en paro. Fíjenla a la camilla, usen el DEA y hagan RCP.»',
+    flow: () => [
+      { obj: 'Flota hasta el panel del laboratorio', target: () => L.pts.lab, name: 'Laboratorio', near: 1.7, hold: 1.2, act: 'registrar el experimento', timeout: 45, idle: '<kbd>W A S D</kbd> + mirar · <kbd>Espacio</kbd> sube · <kbd>C</kbd> baja', enter: 'Hola, Tomás. Día 96 de tránsito. Monitoreo a Mei y a ti; la Tierra está a 12 minutos y medio.' },
+      { type: 'wait', after: 2.5, obj: 'Experimento registrado', enter: 'Registro guardado y enviado a la Tierra.', done: collapse },
+      { check: 'Evaluar a Mei', obj: 'Mei perdió el conocimiento. Ve con ella', target: () => L.crewPt(), name: 'Mei', near: 1.8, hold: 1.4, act: 'evaluar si responde y respira', enter: 'Mei perdió el conocimiento. Avisé a la nave y a la Tierra. Ve con ella.', packet: 'Evaluación · sin respuesta · sin respiración' },
+      { check: 'Traer el DEA', obj: 'Toma el DEA del rack verde', target: () => L.pts.aed, name: 'DEA', near: 1.6, hold: 1, act: 'tomar el DEA', enter: 'Paro cardíaco. Trae el DEA del rack verde, en la pared derecha.', packet: 'DEA en uso', done: () => L.takeAed() },
+      { check: 'Sujetar a Mei', obj: 'Sujeta a Mei', target: () => L.crewPt(), name: 'Mei', near: 1.8, hold: 1, act: 'sujetarla', enter: 'En microgravedad no puedes reanimarla flotando. Sujétala.', done: () => L.carry() },
+      { check: 'Fijarla en la camilla', obj: 'Llévala a la camilla médica', target: () => L.pts.cmrs, name: 'Camilla', near: 1.9, hold: 1.4, act: 'fijarla con las correas', enter: 'La llevas contigo. Ve a la camilla médica, al fondo del módulo.', done: () => L.fix() },
+      { check: 'Colocar parches', obj: 'Coloca los parches del DEA', target: () => L.crewPt(), name: 'Mei', near: 1.9, hold: 1.2, act: 'colocar los parches', enter: 'Fijada. Ahora coloca los parches del DEA.' },
+      { check: 'Descarga del DEA', type: 'aed', obj: 'Sigue las indicaciones del DEA', enter: 'Nadie toca a Mei: analizando.' },
+      { check: 'RCP · 2 ciclos', type: 'cpr', obj: 'RCP en microgravedad: 30 y 2, dos veces', note: 'Engancha los pies en los estribos de la camilla para hacer fuerza. Brazos rectos, centro del pecho.', enter: 'RCP ya. En microgravedad ánclate con los pies para empujar.' },
+      { check: 'Reevaluar ritmo', type: 'aed2', obj: 'El DEA vuelve a analizar', enter: 'Alto. Analizando de nuevo.' },
+      { check: 'Monitoreo', type: 'final', obj: 'Mei tiene pulso. Mantenla monitoreada', target: () => L.crewPt(), name: 'Mei', enter: 'Mei tiene pulso. Todo queda registrado y enviado a la Tierra.' },
+    ],
+  },
+};
+
+/* ---------- Estado ---------- */
+let level = null, flow = [], si = 0, stepT = 0, state = 'menu';
+let alertAt = 0, stableAt = 0, replyAt = 0, replied = false;
+let hold = 0, lastDom = 0, lastBeep = 0, lastTele = 0, lastMetro = 0, flatUntil = 0, myHr = 88, voice = true;
+let compBump = 0, compBob = 0, bannerTimer = 0;
+const stats = { packets: 0, mb: 0, good: 0, total: 0 };
+const crewV = { hr: 76, spo2: 98, rhythm: 'normal', etco2: 0 };
+const packets = [];
+const med = { mode: null, phase: null, t0: 0 };
+const cpr = { cycle: 1, cycles: 2, count: 0, phase: 'comp', breaths: 0, last: 0, rates: [], note: '' };
+const player = { pos: new V3(), yaw: 0, pitch: -0.05, vy: 0, ground: true, bob: 0, vel: new V3() };
+const keys = S.keys;
+
+/* ---------- Audio y voz ---------- */
+let actx = null;
+function beep(f = 880, d = 0.12, v = 0.05, type = 'sine') {
+  if (!actx) return;
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = f; g.gain.value = v;
+  g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + d);
+  o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + d);
+}
+function say(text) {
+  if (!voice || !('speechSynthesis' in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const en = window.i18n && window.i18n.lang === 'en';
+    const u = new SpeechSynthesisUtterance(window.i18n ? window.i18n.tr(text) : text); u.lang = en ? 'en-US' : 'es-ES'; u.rate = 1.06;
+    const v = speechSynthesis.getVoices().find((x) => x.lang && x.lang.startsWith(en ? 'en' : 'es')); if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (_) {}
+}
+function assistant(msg, speak = true) { $('aiMsg').textContent = msg; if (speak) say(msg); }
+function updateVoiceLabel() { $('voiceState').textContent = voice ? 'Voz · M' : 'Silencio · M'; }
+
+/* ---------- UI helpers ---------- */
+function showBanner(title, body, lit = [], ok = true, ms = 6000) {
+  $('bTitle').textContent = title; $('bBody').textContent = body;
+  [...$('chips').children].forEach((c, i) => c.classList.toggle('lit', lit.includes(i)));
+  const b = $('banner'); b.classList.toggle('crit', !ok); b.classList.add('on');
+  clearTimeout(bannerTimer); bannerTimer = setTimeout(() => b.classList.remove('on'), ms);
+}
+function sendPacket(name) {
+  stats.packets++; stats.mb += 0.08 + Math.random() * 0.5;
+  packets.unshift({ name, at: S.t }); if (packets.length > 3) packets.pop();
+}
+function renderSteps() {
+  const ul = $('aiSteps');
+  if (!S.collapsed) { ul.innerHTML = ''; return; }
+  let html = '<li class="done">Alerta automática enviada</li>';
+  flow.forEach((s, i) => { if (s.check) html += `<li class="${i < si ? 'done' : i === si ? 'active' : ''}">${s.check}</li>`; });
+  ul.innerHTML = html;
+}
+const quality = () => (stats.total ? Math.round((stats.good / stats.total) * 100) : 0);
+
+/* ---------- Flujo ---------- */
+function enterStep(i) {
+  si = i; stepT = 0; hold = 0;
+  const s = flow[i];
+  if (s.enter) assistant(s.enter);
+  if (s.type === 'aed' || s.type === 'aed2') startMed(s.type);
+  if (s.type === 'cpr') { Object.assign(cpr, { cycle: 1, count: 0, phase: 'comp', breaths: 0, last: 0, rates: [], note: s.note || '' }); startMed('cpr'); }
+  renderSteps();
+}
+function completeStep() {
+  const s = flow[si];
+  if (s.packet) sendPacket(s.packet);
+  if (s.done) s.done();
+  if (si < flow.length - 1) enterStep(si + 1); else renderSteps();
+}
+function doCollapse() {
+  S.collapsed = true; S.crisis = true; alertAt = S.t; lastTele = S.t;
+  crewV.rhythm = 'vf';
+  L.onCollapse(); setBadge(L.crew, true);
+  $('alertGlow').classList.add('on'); $('crew').classList.add('crit');
+  const w = $('watch'); w.classList.add('crit', 'buzz'); setTimeout(() => w.classList.remove('buzz'), 2000);
+  showBanner(level.alertTitle, level.alertBody, [0, 1, 2, 3, 4], false, 9000);
+  sendPacket('ALERTA automática · ECG + SpO₂ + ubicación');
+  beep(880, 0.2, 0.08, 'square'); setTimeout(() => beep(660, 0.25, 0.08, 'square'), 220);
+}
+function rosc() {
+  S.crisis = false; stableAt = S.t; crewV.rhythm = 'recover';
+  L.onRosc(); setBadge(L.crew, false);
+  $('alertGlow').classList.remove('on'); $('crew').classList.remove('crit'); $('watch').classList.remove('crit');
+  sendPacket('Pulso recuperado · signos vitales');
+  showBanner(`${level.crew} recuperó el pulso`, `Higía lo registró y lo envió solo a la Tierra. Llegará en ${fmt(level.delay)}.`, [0, 1, 2, 4], true, 6000);
+  beep(660, 0.12, 0.05); setTimeout(() => beep(990, 0.18, 0.05), 140);
+}
+
+/* ---------- DEA y RCP ---------- */
+function startMed(mode) { med.mode = mode; med.phase = mode === 'cpr' ? 'comp' : 'analyze'; med.t0 = S.t; renderMed(); }
+function endMed() { med.mode = null; renderMed(); }
+function updateAed() {
+  if (med.phase === 'analyze' && S.t - med.t0 > 3.2) {
+    if (med.mode === 'aed') { med.phase = 'shock'; beep(440, 0.3, 0.07, 'square'); assistant(`Descarga recomendada. Que nadie toque a ${level.crew}. Mantén E.`); }
+    else { med.phase = 'rosc'; med.t0 = S.t; assistant(`Ritmo organizado y pulso presente. Recuperamos a ${level.crew}.`); rosc(); }
+    renderMed();
+  }
+  if (med.phase === 'rosc' && S.t - med.t0 > 2.2) { endMed(); completeStep(); }
+}
+function shock() {
+  const f = $('flash'); f.classList.add('on'); requestAnimationFrame(() => requestAnimationFrame(() => f.classList.remove('on')));
+  beep(120, 0.35, 0.12, 'sawtooth'); flatUntil = S.t + 0.8;
+  sendPacket('Descarga DEA · 200 J');
+  endMed(); completeStep();
+}
+function compress() {
+  if (med.mode !== 'cpr' || cpr.phase !== 'comp') return;
+  if (cpr.count > 0) {
+    const iv = S.t - cpr.last;
+    if (iv < 1.5) { const r = 60 / iv; cpr.rates.push(r); if (cpr.rates.length > 4) cpr.rates.shift(); stats.total++; if (r >= 100 && r <= 120) stats.good++; }
+  }
+  cpr.last = S.t; cpr.count++; compBump = 1; compBob = 1;
+  beep(170, 0.07, 0.07);
+  if (cpr.count >= 30) { cpr.phase = 'breath'; cpr.breaths = 0; assistant('Treinta. Ahora 2 ventilaciones con la bolsa-mascarilla: presiona E.'); }
+  renderMed();
+}
+function breath() {
+  if (med.mode !== 'cpr' || cpr.phase !== 'breath') return;
+  cpr.breaths++; beep(520, 0.3, 0.04);
+  if (cpr.breaths >= 2) {
+    sendPacket(`RCP ciclo ${cpr.cycle} · 30:2 · calidad ${quality()}%`);
+    if (cpr.cycle < cpr.cycles) { cpr.cycle++; cpr.count = 0; cpr.phase = 'comp'; cpr.last = 0; assistant(`Ciclo ${cpr.cycle}. Sigue: fuerte y rápido.`); }
+    else { endMed(); assistant('Bien hecho. Deja que el DEA vuelva a analizar.'); completeStep(); return; }
+  }
+  renderMed();
+}
+function renderMed() {
+  const el = $('med');
+  if (!med.mode) { el.className = 'card'; return; }
+  const name = level.crew;
+  let title = '', big = '', sub = '', rate = '', rateColor = 'var(--dim)', note = '', bar = 0, cls = 'card on';
+  if (med.mode === 'cpr') {
+    title = `RCP guiada · ciclo ${cpr.cycle} de ${cpr.cycles}`;
+    if (cpr.phase === 'comp') {
+      cls += ' cpr';
+      big = `${cpr.count}<small> / 30</small>`; sub = 'Compresiones · Espacio o clic al ritmo del punto';
+      const r = cpr.rates.length ? cpr.rates.reduce((a, b) => a + b) / cpr.rates.length : 0;
+      if (r) { rate = `${Math.round(r)} cpm · ${r < 100 ? 'más rápido' : r > 120 ? 'más lento' : 'buen ritmo'}`; rateColor = r < 100 || r > 120 ? 'var(--red)' : 'var(--green)'; }
+      else rate = 'Objetivo: 100 a 120 por minuto';
+      note = cpr.count > 0 && S.t - cpr.last > 3 ? 'No pares: cada segundo sin compresiones cuenta.' : cpr.note;
+      bar = cpr.count / 30;
+    } else {
+      big = `${cpr.breaths}<small> / 2</small>`; sub = 'Ventilaciones · presiona E';
+      note = 'Cabeza hacia atrás, mentón arriba. Cada ventilación dura 1 segundo.'; bar = cpr.breaths / 2;
+    }
+  } else {
+    title = med.mode === 'aed' ? 'DEA · desfibrilador' : 'DEA · reanálisis';
+    if (med.phase === 'analyze') { cls += ' crit'; big = 'Analizando'; sub = `No toques a ${name}`; bar = clamp((S.t - med.t0) / 3.2, 0, 1); }
+    else if (med.phase === 'shock') { cls += ' crit'; big = 'Descarga'; sub = 'Recomendada · mantén E'; note = 'Todos alejados del paciente.'; bar = 1; }
+    else { big = 'Pulso'; sub = 'Ritmo organizado detectado'; bar = 1; }
+  }
+  el.className = cls;
+  $('medTitle').textContent = title; $('medBig').innerHTML = big; $('medSub').textContent = sub;
+  $('medRate').textContent = rate; $('medRate').style.color = rateColor; $('medNote').textContent = note;
+  $('medBar').style.width = `${bar * 100}%`;
+}
+
+/* ---------- Entrada ---------- */
+function press(code) {
+  if (state !== 'play') return;
+  const first = !keys[code]; keys[code] = true;
+  if (!first) return;
+  if (code === 'Space') {
+    if (med.mode === 'cpr') compress();
+    else if (L.mode === 'ground' && player.ground) { player.vy = 3.4; player.ground = false; }
+  }
+  if (code === 'KeyE' && med.mode === 'cpr') breath();
+  if (code === 'KeyM') { voice = !voice; if (!voice && 'speechSynthesis' in window) speechSynthesis.cancel(); updateVoiceLabel(); }
+}
+const release = (code) => { keys[code] = false; };
+addEventListener('keydown', (e) => { if (e.code === 'Space') e.preventDefault(); if (e.repeat) return; press(e.code); });
+addEventListener('keyup', (e) => release(e.code));
+addEventListener('blur', () => Object.keys(keys).forEach((k) => (keys[k] = false)));
+let locked = false, drag = null;
+document.addEventListener('pointerlockchange', () => { const was = locked; locked = document.pointerLockElement === canvas; if (was && !locked && state === 'play') pauseGame(); $('lookHint').classList.toggle('on', state === 'play' && !locked); });
+canvas.addEventListener('mousedown', (e) => {
+  if (state !== 'play') return;
+  if (med.mode === 'cpr') compress();
+  if (!locked) { try { canvas.requestPointerLock(); } catch (_) {} drag = { x: e.clientX, y: e.clientY }; }
+});
+addEventListener('mouseup', () => (drag = null));
+addEventListener('mousemove', (e) => {
+  if (state !== 'play') return;
+  let dx = 0, dy = 0;
+  if (locked) { dx = e.movementX; dy = e.movementY; } else if (drag) { dx = e.clientX - drag.x; dy = e.clientY - drag.y; drag = { x: e.clientX, y: e.clientY }; } else return;
+  player.yaw -= dx * 0.0022; player.pitch = clamp(player.pitch - dy * 0.0022, -1.4, 1.4);
+});
+let touchLook = null;
+canvas.addEventListener('touchstart', (e) => { const t0 = e.touches[0]; touchLook = { x: t0.clientX, y: t0.clientY }; if (med.mode === 'cpr') compress(); }, { passive: true });
+canvas.addEventListener('touchmove', (e) => { if (!touchLook) return; const t0 = e.touches[0]; player.yaw -= (t0.clientX - touchLook.x) * 0.004; player.pitch = clamp(player.pitch - (t0.clientY - touchLook.y) * 0.004, -1.4, 1.4); touchLook = { x: t0.clientX, y: t0.clientY }; keys.KeyW = true; }, { passive: true });
+canvas.addEventListener('touchend', () => { touchLook = null; keys.KeyW = false; });
+document.querySelectorAll('.tbtn').forEach((b) => {
+  b.addEventListener('touchstart', (e) => { e.preventDefault(); press(b.dataset.k); });
+  b.addEventListener('touchend', (e) => { e.preventDefault(); release(b.dataset.k); });
+});
+
+/* ---------- Inicio y fin ---------- */
+function startLevel(key) {
+  level = LEVELS[key];
+  L = level.build(scene);
+  flow = level.flow();
+  document.body.classList.toggle('ar', L.mode !== 'ground');
+  player.pos.set(L.spawn.x, L.spawn.y || 0, L.spawn.z); player.yaw = L.spawn.yaw; player.pitch = -0.05;
+  if (L.mode !== 'zeroG') player.pos.y = L.floor(player.pos.x, player.pos.z);
+  $('delay').textContent = fmt(level.delay);
+  $('suitLabel').textContent = level.suit.label; $('o2Label').innerHTML = level.suit.o2;
+  $('pres').textContent = level.suit.pres; $('xLabel').textContent = level.suit.x;
+  $('crewLabel').textContent = `${level.crew} · biomonitor`; $('lvlTag').textContent = level.tag;
+  $('wTitle').textContent = level.crew;
+  $('chips').innerHTML = level.devices.map((d) => `<span class="chip">${d}</span>`).join('');
+  document.querySelectorAll('.tbtn[data-only]').forEach((b) => (b.style.display = b.dataset.only === key ? '' : 'none'));
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (_) {}
+  state = 'play'; S.playing = true; S.t = 0;
+  $('menu').classList.add('hide'); $('hud').classList.add('on'); $('watch').classList.add('on');
+  try { canvas.requestPointerLock(); } catch (_) {}
+  $('lookHint').classList.add('on');
+  enterStep(0);
+  showBanner(level.startTitle, level.startBody, [0, 1, 2, 3], true, 6000);
+}
+document.querySelectorAll('.lv').forEach((b) => b.addEventListener('click', () => startLevel(b.dataset.level)));
+$('again').addEventListener('click', () => location.reload());
+
+/* ---------- Pausa y menú ---------- */
+function pauseGame() {
+  if (state !== 'play') return;
+  state = 'pause'; S.playing = false;
+  Object.keys(keys).forEach((k) => (keys[k] = false));
+  try { document.exitPointerLock(); } catch (_) {}
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  $('lookHint').classList.remove('on');
+  $('pause').classList.remove('hide');
+  $('resume').focus({ preventScroll: true });
+}
+function resumeGame() {
+  if (state !== 'pause') return;
+  state = 'play'; S.playing = true;
+  $('pause').classList.add('hide');
+  try { canvas.requestPointerLock(); } catch (_) {}
+  $('lookHint').classList.toggle('on', !locked);
+}
+$('menuBtn').addEventListener('click', pauseGame);
+$('resume').addEventListener('click', resumeGame);
+$('pAgain').addEventListener('click', () => location.reload());
+addEventListener('keydown', (e) => {
+  if (e.code === 'Escape') { if (state === 'play') pauseGame(); else if (state === 'pause') resumeGame(); }
+  else if (e.code === 'KeyP' && !e.repeat) { if (state === 'play') pauseGame(); else if (state === 'pause') resumeGame(); }
+});
+
+function endGame() {
+  state = 'end'; S.playing = false;
+  try { document.exitPointerLock(); } catch (_) {}
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  const r = stableAt - alertAt;
+  $('endTitle').textContent = `Recuperaste a ${level.crew} en ${fmt(r)}. La primera respuesta de la Tierra llegó a los ${fmt(2 * level.delay)}.`;
+  $('sReact').textContent = fmt(r);
+  $('sEarth').textContent = fmt(2 * level.delay);
+  $('sPk').textContent = `${stats.packets} · ${stats.mb.toFixed(1)} MB`;
+  $('sCpr').textContent = level.hasCpr ? `${quality()}%` : 'No aplica (traje)';
+  $('sDev').textContent = level.devices.length;
+  $('endBody').textContent = 'Higía detectó el paro, alertó a cada dispositivo, te guió como un segundo médico y mandó todo a la Tierra sin que tocaras nada. La simulación acelera el retardo 60 veces.';
+  $('hud').classList.remove('on'); $('watch').classList.remove('on'); $('lookHint').classList.remove('on');
+  $('end').classList.remove('hide');
+}
+
+/* ---------- Movimiento ---------- */
+const fwd = new V3(), right = new V3(), f3 = new V3(), acc = new V3(), UP = new V3(0, 1, 0);
+function movePlayer(dt) {
+  const inCpr = med.mode === 'cpr';
+  let mx = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0), mz = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0);
+  if (inCpr) mx = mz = 0;
+  const shift = keys.ShiftLeft || keys.ShiftRight;
+  right.set(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+  let roll = 0;
+  if (L.mode === 'zeroG') {
+    const cp = Math.cos(player.pitch);
+    f3.set(-Math.sin(player.yaw) * cp, Math.sin(player.pitch), -Math.cos(player.yaw) * cp);
+    const up = (keys.Space && !inCpr ? 1 : 0) - (keys.KeyC || keys.ControlLeft ? 1 : 0);
+    acc.copy(f3).multiplyScalar(mz).addScaledVector(right, mx).addScaledVector(UP, up);
+    if (acc.lengthSq() > 1) acc.normalize();
+    const top = shift ? 3.6 : 2.2;
+    player.vel.addScaledVector(acc, top * 2 * dt).multiplyScalar(Math.max(0, 1 - dt * 1.6));
+    if (player.vel.length() > top) player.vel.setLength(top);
+    player.pos.addScaledVector(player.vel, dt);
+    L.constrain(player.pos, player.vel);
+    camera.position.copy(player.pos);
+    roll = Math.sin(S.t * 0.4) * 0.015;
+  } else {
+    fwd.set(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+    const len = Math.hypot(mx, mz) || 1;
+    const base = L.mode === 'cabin' ? [2.0, 3.0] : [3.4, 6.2];
+    const speed = (shift ? base[1] : base[0]) * (L.mode === 'ground' ? 1 - S.visorDust * 0.25 : 1);
+    player.pos.addScaledVector(fwd, (mz / len) * speed * dt).addScaledVector(right, (mx / len) * speed * dt);
+    L.constrain(player.pos);
+    const gy = L.floor(player.pos.x, player.pos.z);
+    if (L.mode === 'ground') {
+      player.vy -= 3.71 * dt; player.pos.y += player.vy * dt;
+      if (player.pos.y <= gy) { player.pos.y = gy; player.vy = 0; player.ground = true; }
+    } else player.pos.y = gy;
+    if ((mx || mz) && player.ground) player.bob += dt * (shift ? 9 : 6);
+    const bob = Math.sin(player.bob) * 0.035;
+    const shake = L.shake ? Math.sin(S.t * 23) * 0.006 * L.shake : 0;
+    camera.position.set(player.pos.x, player.pos.y + L.eye + bob + shake - compBob * 0.05, player.pos.z);
+  }
+  if (inCpr) {
+    const tg = L.crewPt();
+    const dx = tg.x - camera.position.x, dy = tg.y - camera.position.y, dz = tg.z - camera.position.z;
+    const wantYaw = Math.atan2(-dx, -dz), wantPitch = Math.atan2(dy, Math.hypot(dx, dz));
+    let dyaw = wantYaw - player.yaw; dyaw = Math.atan2(Math.sin(dyaw), Math.cos(dyaw));
+    player.yaw += dyaw * Math.min(1, dt * 3); player.pitch += (wantPitch - player.pitch) * Math.min(1, dt * 3);
+    if (L.mode === 'zeroG') camera.position.y -= compBob * 0.05;
+  }
+  compBob *= Math.max(0, 1 - dt * 10);
+  camera.rotation.set(player.pitch, player.yaw, roll);
+  const moving = mx || mz;
+  myHr += ((S.crisis ? 124 : moving ? (shift ? 112 : 96) : 86) - myHr) * dt * 0.3;
+}
+
+/* ---------- Lógica por frame ---------- */
+const proj = new V3();
+function distTo(v) {
+  if (L.mode === 'zeroG') return camera.position.distanceTo(v);
+  return Math.hypot(v.x - player.pos.x, v.z - player.pos.z);
+}
+function logic(dt) {
+  const s = flow[si];
+  let hint = '', holdNeed = 0, holdAction = null;
+  const tgt = s.target ? s.target() : null;
+  const d = tgt ? distTo(tgt) : Infinity;
+  if (!s.type) {
+    const near = d < s.near;
+    if (s.reach && near) { completeStep(); return; }
+    if (s.hold && near) { hint = `Mantén <kbd>E</kbd> para ${s.act}`; holdNeed = s.hold; holdAction = completeStep; }
+    else hint = !S.collapsed && s.idle ? s.idle : `${s.name} a ${d.toFixed(d < 10 ? 1 : 0)} m${S.crisis ? ' · <kbd>Shift</kbd> para apurarte' : ''}`;
+    if (s.timeout && stepT > s.timeout) { completeStep(); return; }
+  } else if (s.type === 'wait') {
+    if (stepT > s.after) { completeStep(); return; }
+  } else if (s.type === 'aed' || s.type === 'aed2') {
+    updateAed();
+    if (med.phase === 'shock') { hint = `Mantén <kbd>E</kbd> para dar la descarga · nadie toca a ${level.crew}`; holdNeed = 1; holdAction = shock; }
+    else hint = 'El DEA está trabajando · no toques al paciente';
+  } else if (s.type === 'cpr') {
+    hint = cpr.phase === 'comp' ? '<kbd>Espacio</kbd> o clic en cada compresión, al ritmo del punto' : 'Presiona <kbd>E</kbd> para cada ventilación';
+    if (cpr.phase === 'comp' && S.t - lastMetro > 0.5454) { lastMetro = S.t; beep(1250, 0.03, 0.025); }
+  } else if (s.type === 'final') {
+    hint = replied ? 'La Tierra ya respondió · cerrando la simulación' : `La respuesta de la Tierra llega en ${fmt((alertAt + (2 * level.delay) / TS - S.t) * TS)}`;
+  }
+
+  if (holdAction && keys.KeyE) {
+    hold += dt;
+    if (hold >= holdNeed) { hold = 0; keys.KeyE = false; beep(1046, 0.08, 0.04); holdAction(); }
+  } else hold = Math.max(0, hold - dt * 3);
+  $('ring').classList.toggle('on', hold > 0 && !!holdAction);
+  $('ringArc').setAttribute('stroke-dashoffset', 176 - 176 * Math.min(1, hold / (holdNeed || 1)));
+
+  if (S.t - lastTele > (S.crisis ? 10 : 15)) { lastTele = S.t; sendPacket(S.crisis ? 'Stream ECG + signos vitales' : 'Telemetría de rutina'); }
+  if (S.collapsed && !replied && S.t >= alertAt + (2 * level.delay) / TS) {
+    replied = true; replyAt = S.t;
+    showBanner('Llegó la respuesta de la Tierra', `${level.reply} ${stableAt ? 'Ustedes ya lo resolvieron.' : 'Llega tarde: tú ya estás actuando.'}`, [4], true, 9000);
+    beep(740, 0.15, 0.05);
+  }
+  if (S.crisis && med.mode !== 'cpr' && S.t - lastBeep > 2.2) { lastBeep = S.t; beep(880, 0.12, 0.04, 'square'); }
+
+  if (!S.collapsed) { crewV.hr = 74 + Math.sin(S.t * 0.4) * 3; crewV.spo2 = 98; }
+  else if (S.crisis) {
+    crewV.spo2 = Math.max(68, 96 - (S.t - alertAt) * 0.25);
+    crewV.etco2 += ((med.mode === 'cpr' ? 8 + quality() * 0.14 : 0) - crewV.etco2) * dt * 0.8;
+  } else {
+    const k = Math.min(1, (S.t - stableAt) / 20);
+    crewV.hr = 112 - k * 24 + Math.sin(S.t) * 2; crewV.spo2 = Math.min(95, 86 + k * 9);
+  }
+
+  if (stableAt && replied && S.t - stableAt > 6 && S.t - replyAt > 5) { endGame(); return; }
+
+  const m = $('marker');
+  if (tgt && med.mode !== 'cpr') {
+    proj.copy(tgt).project(camera);
+    const behind = proj.z > 1;
+    let x = proj.x, y = proj.y; if (behind) { x = -x; y = -y; }
+    const off = behind || Math.abs(x) > 0.9 || Math.abs(y) > 0.85;
+    if (off) { const k = 0.9 / Math.max(Math.abs(x), Math.abs(y) / 0.94, 0.0001); x *= k; y *= k; }
+    m.style.transform = `translate(${((x + 1) / 2) * innerWidth - 40}px, ${((1 - y) / 2) * innerHeight - 10}px)`;
+    m.classList.add('on'); m.classList.toggle('crit', S.crisis);
+    $('markerLabel').textContent = `${s.name || ''} · ${d.toFixed(d < 10 ? 1 : 0)} m`;
+  } else m.classList.remove('on');
+  $('reticle').style.opacity = med.mode ? 0 : 1;
+
+  if (S.t - lastDom > 0.1) { lastDom = S.t; updateDom(s, hint); }
+}
+
+function updateDom(s, hint) {
+  $('clock').textContent = fmt(S.t);
+  if (L.info) { const [a, b] = L.info(); $('infoLabel').textContent = a; $('infoVal').textContent = b; }
+  else { const hd = (((-player.yaw * 180) / Math.PI) % 360 + 360) % 360; $('infoLabel').textContent = 'Rumbo'; $('infoVal').textContent = `${String(Math.round(hd)).padStart(3, '0')}° ${cardinal(hd)}`; }
+  const eva = L.mode === 'ground';
+  $('myHr').textContent = Math.round(myHr);
+  $('o2').textContent = eva ? `${(78 - S.t * 0.02).toFixed(0)}%` : '20.9%';
+  $('co2').textContent = `${(eva ? 0.4 + (S.crisis ? 0.2 : 0) : 0.3).toFixed(1)} kPa`;
+  $('temp').textContent = `${(eva ? 21.4 : 22.1).toFixed(1)} °C`;
+  $('batt').textContent = `${Math.round((eva ? 86 : 91) - S.t * 0.03)}%`;
+  $('rad').textContent = `${level.suit.rad.toFixed(2)} mSv/d`;
+  $('xVal').textContent = eva ? `${Math.round(S.visorDust * 100)}%` : L.filter ? `${Math.round(L.filter())}%` : '0.00 g';
+  $('dustWarn').classList.toggle('on', eva && S.visorDust > 0.35);
+
+  const crit = S.crisis;
+  $('crewHr').textContent = crit ? '— —' : Math.round(crewV.hr);
+  $('crewSpo2').textContent = `${Math.round(crewV.spo2)}%`;
+  const rh = $('crewRhythm');
+  rh.textContent = !S.collapsed ? 'Ritmo sinusal' : crit ? (med.mode === 'cpr' ? 'FV · RCP en curso' : 'Fibrilación ventricular · crítico') : 'Ritmo recuperándose';
+  rh.classList.toggle('crit', crit);
+  const k = stableAt ? Math.min(1, (S.t - stableAt) / 20) : 0;
+  $('crewBp').textContent = !S.collapsed ? '118/76' : crit ? (med.mode === 'cpr' ? 'RCP' : '— / —') : `${Math.round(96 + k * 12)}/${Math.round(60 + k * 10)}`;
+  $('crewRr').textContent = !S.collapsed ? '14 rpm' : crit ? '0 rpm' : '12 rpm';
+  $('crewTemp').textContent = !S.collapsed ? '36.8 °C' : '36.5 °C';
+  if (crit && med.mode === 'cpr') { $('crewXLabel').innerHTML = 'EtCO<sub>2</sub>'; $('crewX').textContent = `${Math.round(crewV.etco2)} mmHg`; }
+  else { $('crewXLabel').textContent = 'Confianza'; $('crewX').textContent = `${L.conf()}%`; }
+  const dc = distTo(L.crewPt());
+  $('crewDist').textContent = `${dc.toFixed(dc < 10 ? 1 : 0)} m`;
+
+  $('pkCount').textContent = `${stats.packets} · ${stats.mb.toFixed(1)} MB`;
+  $('pkList').innerHTML = packets.map((p) => {
+    const rem = p.at + level.delay / TS - S.t;
+    return `<div class="pk"><span>${p.name}</span><span class="mono ${rem <= 0 ? 'ok' : ''}">${rem > 0 ? `llega ${fmt(rem * TS)}` : 'recibido'}</span></div>`;
+  }).join('');
+  $('reply').textContent = !S.collapsed ? 'sin pedidos' : replied ? 'recibida' : `en ${fmt((alertAt + (2 * level.delay) / TS - S.t) * TS)}`;
+
+  $('objLabel').textContent = S.collapsed ? `Paso ${Math.max(1, flow.slice(0, si + 1).filter((x) => x.check).length)} de ${flow.filter((x) => x.check).length}` : 'Objetivo';
+  $('objText').textContent = s.obj || '';
+  $('objHint').innerHTML = hint;
+  $('wVal').textContent = crit ? '— —' : Math.round(crewV.hr);
+  $('wSub').textContent = !S.collapsed ? 'Todo bien' : crit ? (med.mode === 'cpr' ? 'RCP en curso' : `Paro · a ${dc.toFixed(0)} m`) : 'Pulso presente';
+  if (med.mode) renderMed();
+}
+
+/* ---------- ECG ---------- */
+const ecgCtx = $('ecg').getContext('2d');
+const ecgBuf = new Array(230).fill(0);
+let ecgAcc = 0, ecgPhase = 0, ecgN = 0;
+function ecgNormal(p) {
+  if (p < 0.1) return Math.sin((p / 0.1) * Math.PI) * 0.12;
+  if (p < 0.16) return 0; if (p < 0.18) return -0.12; if (p < 0.21) return 1; if (p < 0.24) return -0.25;
+  if (p < 0.4) return 0; if (p < 0.55) return Math.sin(((p - 0.4) / 0.15) * Math.PI) * 0.22; return 0;
+}
+function stepEcg(dt) {
+  ecgAcc += dt * 90;
+  while (ecgAcc >= 1) {
+    ecgAcc--; ecgN++;
+    let v;
+    if (S.t < flatUntil) v = (Math.random() - 0.5) * 0.02;
+    else if (S.crisis) { const tt = ecgN / 90; v = 0.32 * Math.sin(tt * 31) + 0.26 * Math.sin(tt * 19 + 1.3) + 0.2 * (Math.random() - 0.5); }
+    else { ecgPhase = (ecgPhase + crewV.hr / 60 / 90) % 1; v = ecgNormal(ecgPhase); }
+    v += compBump * 0.9; compBump *= 0.6;
+    ecgBuf.shift(); ecgBuf.push(v);
+  }
+  const w = 460, h = 108;
+  ecgCtx.clearRect(0, 0, w, h);
+  ecgCtx.strokeStyle = S.crisis ? '#ff453a' : '#f5f5f7'; ecgCtx.lineWidth = 2.4; ecgCtx.lineJoin = 'round';
+  ecgCtx.beginPath();
+  ecgBuf.forEach((v, i) => { const x = (i / (ecgBuf.length - 1)) * w, y = h * 0.62 - v * h * 0.45; i ? ecgCtx.lineTo(x, y) : ecgCtx.moveTo(x, y); });
+  ecgCtx.stroke();
+}
+
+/* ---------- Loop ---------- */
+const clock = new THREE.Clock();
+camera.position.set(0, 1.7, 0);
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (state === 'play') { S.t += dt; stepT += dt; }
+  if (L) {
+    if (state === 'play') movePlayer(dt);
+    L.update(dt);
+    if (state === 'play') logic(dt);
+    if (state !== 'menu') stepEcg(dt);
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+updateVoiceLabel();
+tick();
+
+</script>
+</body>
+</html>
