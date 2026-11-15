@@ -21,14 +21,15 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<a class="skip" href="#sensores" data-es="Saltar al contenido" data-en="Skip to content">Saltar al contenido</a>
+<a class="skip" href="#problema" data-es="Saltar al contenido" data-en="Skip to content">Saltar al contenido</a>
 
 <header class="tesai-bar is-sticky" role="banner">
   <tesai-brand root="./"></tesai-brand>
   <nav class="bar-links" aria-label="Principal">
-    <a href="#sensores" data-es="Astronauta y sensores" data-en="Astronaut & sensors">Astronauta y sensores</a>
+    <a href="#tesai" data-es="La app" data-en="The app">La app</a>
     <a href="#como" data-es="Cómo funciona" data-en="How it works">Cómo funciona</a>
-    <a href="#puertas" data-es="Simulación y prototipo" data-en="Simulation & prototype">Simulación y prototipo</a>
+    <a href="#sensores" data-es="Sensores" data-en="Sensors">Sensores</a>
+    <a href="#puertas" data-es="Probalo" data-en="Try it">Probalo</a>
     <a href="#equipo" data-es="Equipo" data-en="Team">Equipo</a>
   </nav>
   <div class="bar-right">
@@ -57,14 +58,120 @@
         <span class="cta-note" data-es="Corre en el navegador · 3 escenarios · con voz" data-en="Runs in your browser · 3 scenarios · with voice">Corre en el navegador · 3 escenarios · con voz</span>
       </figcaption>
     </figure>
-    <p class="hero-sub" data-es="Tesai monitorea los signos vitales de la tripulación y, cuando algo cambia, avisa por tono y por voz y guía paso a paso. Desde Marte la Tierra tarda hasta 20 minutos en enterarse: por eso el primer médico es el que está ahí." data-en="Tesai monitors the crew's vital signs and, when something changes, warns by tone and voice and guides you step by step. From Mars, Earth takes up to 20 minutes to find out, so the first doctor is the one on site.">Tesai monitorea los signos vitales de la tripulación y, cuando algo cambia, avisa por tono y por voz y guía paso a paso. Desde Marte la Tierra tarda hasta 20 minutos en enterarse: por eso el primer médico es el que está ahí.</p>
+  </section>
+
+  <!-- ============ THE PROBLEM · the delay, drawn ============ -->
+  <section class="sec" id="problema" aria-labelledby="h-prob">
+    <div class="sec-head">
+      <span class="kicker" data-es="El problema" data-en="The problem">El problema</span>
+      <h2 id="h-prob" data-es="Desde Marte, la Tierra tarda hasta 20 minutos en enterarse" data-en="From Mars, Earth takes up to 20 minutes to find out">Desde Marte, la Tierra tarda hasta 20 minutos en enterarse</h2>
+      <p class="lead" data-es="Si alguien se descompensa, el primer médico es el que está ahí: la tripulación. Tesai la acompaña con los signos vitales de todos y una guía paso a paso." data-en="If someone gets sick, the first doctor is the one on site: the crew. Tesai backs them up with everyone's vital signs and step-by-step guidance.">Si alguien se descompensa, el primer médico es el que está ahí: la tripulación. Tesai la acompaña con los signos vitales de todos y una guía paso a paso.</p>
+    </div>
+    <figure class="delay" aria-labelledby="delay-cap">
+      <div class="delay-end">
+        <span class="delay-dot mars" aria-hidden="true"></span>
+        <b data-es="Marte" data-en="Mars">Marte</b>
+        <span data-es="La tripulación y Tesai" data-en="The crew and Tesai">La tripulación y Tesai</span>
+      </div>
+      <div class="delay-track" aria-hidden="true">
+        <div class="delay-lane"><span class="delay-label" data-es="Hasta 20 min de ida" data-en="Up to 20 min out">Hasta 20 min de ida</span><i class="delay-line"><i class="delay-pulse"></i></i></div>
+        <div class="delay-lane back"><i class="delay-line"><i class="delay-pulse"></i></i><span class="delay-label" data-es="Hasta 20 min de vuelta" data-en="Up to 20 min back">Hasta 20 min de vuelta</span></div>
+      </div>
+      <div class="delay-end">
+        <span class="delay-dot earth" aria-hidden="true"></span>
+        <b data-es="Tierra" data-en="Earth">Tierra</b>
+        <span data-es="Cirujanos de vuelo" data-en="Flight surgeons">Cirujanos de vuelo</span>
+      </div>
+      <figcaption id="delay-cap" data-es="Una pregunta y su respuesta pueden tardar 40 minutos. Lo que pase en ese tiempo lo resuelve la tripulación, con Tesai al lado." data-en="A question and its answer can take 40 minutes. Whatever happens in between, the crew handles it, with Tesai beside them.">Una pregunta y su respuesta pueden tardar 40 minutos. Lo que pase en ese tiempo lo resuelve la tripulación, con Tesai al lado.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ WHAT TESAI IS · real captures of the prototype ============ -->
+  <section class="sec" id="tesai" aria-labelledby="h-app">
+    <div class="sec-head">
+      <span class="kicker" data-es="La app" data-en="The app">La app</span>
+      <h2 id="h-app" data-es="Lo mismo que ves en la simulación, en un prototipo para explorar" data-en="What you see in the simulation, in a prototype you can explore">Lo mismo que ves en la simulación, en un prototipo para explorar</h2>
+      <p data-es="Tesai muestra los signos vitales de toda la tripulación en el visor. Cuando algo cambia, avisa con un tono y por voz, el segundo doctor guía paso a paso y queda registrado el aviso a la Tierra." data-en="Tesai shows the whole crew's vital signs in the visor. When something changes, it warns by tone and voice, the second doctor guides you step by step, and the notice to Earth is logged.">Tesai muestra los signos vitales de toda la tripulación en el visor. Cuando algo cambia, avisa con un tono y por voz, el segundo doctor guía paso a paso y queda registrado el aviso a la Tierra.</p>
+    </div>
+    <figure class="shot shot-video">
+      <div class="shot-frame dark">
+        <video id="visor-loop" muted loop playsinline preload="metadata" width="1920" height="1458"
+          poster="assets/tesai/visor-es.webp" data-poster-es="assets/tesai/visor-es.webp" data-poster-en="assets/tesai/visor-en.webp"
+          data-src-es="assets/tesai/visor-es.mp4" data-src-en="assets/tesai/visor-en.mp4"
+          aria-label="Visor de Tesai: una tripulante tiene la frecuencia cardíaca alta, aparece el aviso, el segundo doctor marca los pasos y se avisa a la Tierra."
+          data-es-label="Visor de Tesai: una tripulante tiene la frecuencia cardíaca alta, aparece el aviso, el segundo doctor marca los pasos y se avisa a la Tierra."
+          data-en-label="Tesai Visor: a crew member's heart rate rises, the notice appears, the second doctor marks the steps and Earth is notified.">
+          <source src="assets/tesai/visor-es.mp4" type="video/mp4">
+        </video>
+        <button class="shot-play" type="button" id="visor-toggle" aria-pressed="false">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path class="i-pause" d="M7 5h3v14H7zM14 5h3v14h-3z"/><path class="i-play" d="M8 5.5v13l11-6.5z"/></svg>
+          <span data-es="Pausar" data-en="Pause">Pausar</span>
+        </button>
+      </div>
+      <figcaption>
+        <b data-es="Visor" data-en="Visor">Visor</b>
+        <span data-es="Una emergencia real dentro del prototipo, en 14 segundos: el aviso, los pasos del segundo doctor y el aviso a la Tierra. Datos simulados." data-en="A real emergency inside the prototype, in 14 seconds: the notice, the second doctor's steps and the notice to Earth. Simulated data.">Una emergencia real dentro del prototipo, en 14 segundos: el aviso, los pasos del segundo doctor y el aviso a la Tierra. Datos simulados.</span>
+      </figcaption>
+    </figure>
+    <div class="shots">
+      <figure class="shot">
+        <div class="shot-frame"><img src="assets/tesai/overview-es.webp" data-img-es="assets/tesai/overview-es.webp" data-img-en="assets/tesai/overview-en.webp" width="1600" height="1000" loading="lazy"
+          alt="Panel de Tesai: el gemelo del astronauta con seis signos vitales conectados al cuerpo." data-es-alt="Panel de Tesai: el gemelo del astronauta con seis signos vitales conectados al cuerpo." data-en-alt="Tesai dashboard: the astronaut twin with six vital signs connected to the body."></div>
+        <figcaption>
+          <b data-es="Gemelo de salud" data-en="Health twin">Gemelo de salud</b>
+          <span data-es="Seis signos vitales comparados con la línea base de cada persona." data-en="Six vital signs compared with each person's own baseline.">Seis signos vitales comparados con la línea base de cada persona.</span>
+        </figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="shot-frame"><img src="assets/tesai/checkin-es.webp" data-img-es="assets/tesai/checkin-es.webp" data-img-en="assets/tesai/checkin-en.webp" width="1600" height="993" loading="lazy"
+          alt="Chequeo diario de Tesai: escalas de 0 a 10 y el panel Quién ve esto." data-es-alt="Chequeo diario de Tesai: escalas de 0 a 10 y el panel Quién ve esto." data-en-alt="Tesai daily check-in: 0 to 10 scales and the Who sees this panel."></div>
+        <figcaption>
+          <b data-es="Chequeo diario privado" data-en="Private daily check-in">Chequeo diario privado</b>
+          <span data-es="Ánimo, calma, sueño y equipo. Queda en tu dispositivo." data-en="Mood, calm, sleep and team. It stays on your device.">Ánimo, calma, sueño y equipo. Queda en tu dispositivo.</span>
+        </figcaption>
+      </figure>
+    </div>
+    <div class="row center">
+      <a class="btn brand" href="tesai/" data-es="Abrir dashboard" data-en="Open dashboard">Abrir dashboard</a>
+      <a class="btn" href="tesai/#/visor" data-es="Ir al Visor" data-en="Go to the Visor">Ir al Visor</a>
+    </div>
+  </section>
+
+  <!-- ============ EXPLANATION ============ -->
+  <section class="sec" id="como" aria-labelledby="h-como">
+    <div class="sec-head">
+      <span class="kicker" data-es="Cómo funciona" data-en="How it works">Cómo funciona</span>
+      <h2 id="h-como" data-es="De un sensor a un paso a paso" data-en="From a sensor to a step by step">De un sensor a un paso a paso</h2>
+    </div>
+    <ol class="steps">
+      <li>
+        <span class="n">1</span>
+        <h3 data-es="Mide" data-en="It measures">Mide</h3>
+        <p data-es="Los sensores del cuerpo, del traje y de la cabina mandan sus lecturas varias veces por segundo, para cada tripulante." data-en="Body, suit and cabin sensors send readings many times a second, for each crew member.">Los sensores del cuerpo, del traje y de la cabina mandan sus lecturas varias veces por segundo, para cada tripulante.</p>
+      </li>
+      <li>
+        <span class="n">2</span>
+        <h3 data-es="Interpreta" data-en="It interprets">Interpreta</h3>
+        <p data-es="Tesai compara cada valor con la línea base de esa persona y no se alarma por un pico aislado: espera a que se sostenga." data-en="Tesai compares each value with that person's own baseline and doesn't panic over an isolated spike: it waits for it to hold.">Tesai compara cada valor con la línea base de esa persona y no se alarma por un pico aislado: espera a que se sostenga.</p>
+        <div class="levels" role="list">
+          <span class="lv ok" role="listitem" data-es="Normal" data-en="Normal">Normal</span>
+          <span class="lv warn" role="listitem" data-es="Atención" data-en="Attention">Atención</span>
+          <span class="lv crit" role="listitem" data-es="Avisar a cirujanos de vuelo" data-en="Alert flight surgeons">Avisar a cirujanos de vuelo</span>
+        </div>
+      </li>
+      <li>
+        <span class="n">3</span>
+        <h3 data-es="Guía" data-en="It guides">Guía</h3>
+        <p data-es="Suena un tono, habla una voz y el segundo doctor te muestra los pasos en tu visor. Tesai también actúa sobre lo que lo rodea, queda todo registrado y se avisa a la Tierra por el enlace, con su demora." data-en="A tone sounds, a voice speaks and the second doctor shows the steps in your visor. Tesai also acts on what surrounds it, everything is logged and Earth is notified over the link, delay included.">Suena un tono, habla una voz y el segundo doctor te muestra los pasos en tu visor. Tesai también actúa sobre lo que lo rodea, queda todo registrado y se avisa a la Tierra por el enlace, con su demora.</p>
+      </li>
+    </ol>
   </section>
 
   <!-- ============ ASTRONAUT + SENSOR GUIDE ============ -->
   <section class="sec" id="sensores" aria-labelledby="h-sens">
     <div class="sec-head">
       <span class="kicker" data-es="Guía de sensores" data-en="Sensor guide">Guía de sensores</span>
-      <h2 id="h-sens" data-es="Lo que Tesai mide, vigila y acciona" data-en="What Tesai measures, watches and acts on">Lo que Tesai mide, vigila y acciona</h2>
+      <h2 id="h-sens" data-es="Lo que Tesai mide y vigila" data-en="What Tesai measures and watches">Lo que Tesai mide y vigila</h2>
       <p data-es="No mira sólo el cuerpo: cruza los signos vitales de cada tripulante con los datos del traje y de la cabina, y cuando algo cambia actúa sobre los elementos de alrededor." data-en="It doesn't only watch the body: it crosses each crew member's vital signs with suit and cabin data, and when something changes it acts on the elements around.">No mira sólo el cuerpo: cruza los signos vitales de cada tripulante con los datos del traje y de la cabina, y cuando algo cambia actúa sobre los elementos de alrededor.</p>
     </div>
 
@@ -128,7 +235,7 @@
     <h3 class="sub" data-es="2 · En el ambiente: hábitat y cabina" data-en="2 · In the environment: habitat and cabin">2 · En el ambiente: hábitat y cabina</h3>
     <div class="env" role="list">
       <div class="etile" role="listitem"><b data-es="Oxígeno" data-en="Oxygen">Oxígeno</b><em>ppO₂ · kPa</em><p data-es="Dentro del rango de diseño de la cabina de la ISS." data-en="Inside the ISS cabin design range.">Dentro del rango de diseño de la cabina de la ISS.</p></div>
-      <div class="etile" role="listitem"><b>CO₂</b><em>ppm</em><p data-es="Objetivo operativo de la ISS: menos de 3 mmHg (≈ 3.950 ppm)." data-en="ISS operating target: below 3 mmHg (≈ 3,950 ppm).">Objetivo operativo de la ISS: menos de 3 mmHg (≈ 3.950 ppm).</p></div>
+      <div class="etile" role="listitem"><b>CO₂</b><em>ppm</em><p data-es="Límite de NASA-STD-3001: 3 mmHg como promedio de 1 hora (≈ 3.950 ppm)." data-en="NASA-STD-3001 limit: 3 mmHg as a 1-hour average (≈ 3,950 ppm).">Límite de NASA-STD-3001: 3 mmHg como promedio de 1 hora (≈ 3.950 ppm).</p></div>
       <div class="etile" role="listitem"><b data-es="Presión de cabina" data-en="Cabin pressure">Presión de cabina</b><em>kPa</em><p data-es="Una caída sostenida levanta alerta y manda a revisar sellos y escotillas." data-en="A sustained drop raises an alert and sends you to check seals and hatches.">Una caída sostenida levanta alerta y manda a revisar sellos y escotillas.</p></div>
       <div class="etile" role="listitem"><b data-es="Temperatura" data-en="Temperature">Temperatura</b><em>°C</em><p data-es="Zona de confort de la tripulación: 20–25 °C. Límite operativo: 18–27 °C." data-en="Crew comfort zone: 20–25 °C. Operating limit: 18–27 °C.">Zona de confort de la tripulación: 20–25 °C. Límite operativo: 18–27 °C.</p></div>
       <div class="etile" role="listitem"><b data-es="Humedad" data-en="Humidity">Humedad</b><em>%</em><p data-es="Zona de confort: 30–60 %. Límite operativo: 25–75 %." data-en="Comfort zone: 30–60 %. Operating limit: 25–75 %.">Zona de confort: 30–60 %. Límite operativo: 25–75 %.</p></div>
@@ -136,7 +243,15 @@
     </div>
     <p class="fine" data-es="Rangos ilustrativos tomados de material público de NASA; no son criterios clínicos validados. Las fuentes están en Tesai, sección Acerca de." data-en="Illustrative ranges taken from public NASA material; they are not validated clinical criteria. Sources are in Tesai, About section.">Rangos ilustrativos tomados de material público de NASA; no son criterios clínicos validados. Las fuentes están en Tesai, sección Acerca de.</p>
 
-    <h3 class="sub" data-es="3 · Control de los elementos de alrededor" data-en="3 · Control of the elements around">3 · Control de los elementos de alrededor</h3>
+  </section>
+
+  <!-- ============ WHEN SOMETHING CHANGES ============ -->
+  <section class="sec" id="cambia" aria-labelledby="h-cambia">
+    <div class="sec-head">
+      <span class="kicker" data-es="Cuando algo cambia" data-en="When something changes">Cuando algo cambia</span>
+      <h2 id="h-cambia" data-es="Qué hace Tesai cuando algo cambia" data-en="What Tesai does when something changes">Qué hace Tesai cuando algo cambia</h2>
+      <p data-es="Así lo vas a ver en los escenarios de la simulación: en una emergencia actúa por su cuenta, y cuando el ambiente sale de rango te guía a revisar." data-en="This is how you will see it in the simulation's scenarios: in an emergency it acts on its own, and when the environment goes out of range it guides you to check.">Así lo vas a ver en los escenarios de la simulación: en una emergencia actúa por su cuenta, y cuando el ambiente sale de rango te guía a revisar.</p>
+    </div>
     <div class="ctl">
       <article class="ccard act">
         <span class="tagline" data-es="Actúa por su cuenta" data-en="Acts on its own">Actúa por su cuenta</span>
@@ -161,40 +276,10 @@
     </div>
   </section>
 
-  <!-- ============ EXPLANATION ============ -->
-  <section class="sec" id="como" aria-labelledby="h-como">
-    <div class="sec-head">
-      <span class="kicker" data-es="Cómo funciona" data-en="How it works">Cómo funciona</span>
-      <h2 id="h-como" data-es="De un sensor a un paso a paso" data-en="From a sensor to a step by step">De un sensor a un paso a paso</h2>
-    </div>
-    <ol class="steps">
-      <li>
-        <span class="n">1</span>
-        <h3 data-es="Mide" data-en="It measures">Mide</h3>
-        <p data-es="Los sensores del cuerpo, del traje y de la cabina mandan sus lecturas varias veces por segundo, para cada tripulante." data-en="Body, suit and cabin sensors send readings many times a second, for each crew member.">Los sensores del cuerpo, del traje y de la cabina mandan sus lecturas varias veces por segundo, para cada tripulante.</p>
-      </li>
-      <li>
-        <span class="n">2</span>
-        <h3 data-es="Interpreta" data-en="It interprets">Interpreta</h3>
-        <p data-es="Tesai compara cada valor con la línea base de esa persona y no se alarma por un pico aislado: espera a que se sostenga." data-en="Tesai compares each value with that person's own baseline and doesn't panic over an isolated spike: it waits for it to hold.">Tesai compara cada valor con la línea base de esa persona y no se alarma por un pico aislado: espera a que se sostenga.</p>
-        <div class="levels" role="list">
-          <span class="lv ok" role="listitem" data-es="Normal" data-en="Normal">Normal</span>
-          <span class="lv warn" role="listitem" data-es="Atención" data-en="Attention">Atención</span>
-          <span class="lv crit" role="listitem" data-es="Avisar a cirujanos de vuelo" data-en="Alert flight surgeons">Avisar a cirujanos de vuelo</span>
-        </div>
-      </li>
-      <li>
-        <span class="n">3</span>
-        <h3 data-es="Guía" data-en="It guides">Guía</h3>
-        <p data-es="Suena un tono, habla una voz y el segundo doctor te muestra los pasos en tu visor. Tesai también actúa sobre lo que lo rodea, queda todo registrado y se avisa a la Tierra por el enlace, con su demora." data-en="A tone sounds, a voice speaks and the second doctor shows the steps in your visor. Tesai also acts on what surrounds it, everything is logged and Earth is notified over the link, delay included.">Suena un tono, habla una voz y el segundo doctor te muestra los pasos en tu visor. Tesai también actúa sobre lo que lo rodea, queda todo registrado y se avisa a la Tierra por el enlace, con su demora.</p>
-      </li>
-    </ol>
-  </section>
-
   <!-- ============ TWO DOORS · demo first ============ -->
   <section class="sec" id="puertas" aria-labelledby="h-door">
     <div class="sec-head">
-      <span class="kicker" data-es="Entrá" data-en="Step in">Entrá</span>
+      <span class="kicker" data-es="Probalo" data-en="Try it">Probalo</span>
       <h2 id="h-door" data-es="Una simulación para vivirla y un prototipo para explorar" data-en="A simulation to live and a prototype to explore">Una simulación para vivirla y un prototipo para explorar</h2>
     </div>
 
@@ -214,7 +299,8 @@
       </div>
     </article>
 
-    <article class="door">
+    <article class="door main alt">
+      <a class="door-media" href="tesai/" tabindex="-1" aria-hidden="true"><img src="assets/tesai/visor-es.webp" data-img-es="assets/tesai/visor-es.webp" data-img-en="assets/tesai/visor-en.webp" alt="" loading="lazy" width="1920" height="1458"></a>
       <div class="door-body">
         <span class="tagline" data-es="Dashboard · Tesai" data-en="Dashboard · Tesai">Dashboard · Tesai</span>
         <h3 data-es="El panel de la tripulación" data-en="The crew dashboard">El panel de la tripulación</h3>
@@ -225,6 +311,32 @@
         </div>
       </div>
     </article>
+  </section>
+
+  <!-- ============ WHY TRUST IT ============ -->
+  <section class="sec" id="confiar" aria-labelledby="h-trust">
+    <div class="sec-head">
+      <span class="kicker" data-es="Por qué confiar" data-en="Why trust it">Por qué confiar</span>
+      <h2 id="h-trust" data-es="Honesto con cada número" data-en="Honest about every number">Honesto con cada número</h2>
+    </div>
+    <div class="trust">
+      <article class="tcard wide">
+        <div class="tcard-media"><img src="assets/tesai/evidence-es.webp" data-img-es="assets/tesai/evidence-es.webp" data-img-en="assets/tesai/evidence-en.webp" width="1240" height="1012" loading="lazy"
+          alt="Ventana de evidencia de Tesai para el límite de CO₂, con su respaldo y sus fuentes." data-es-alt="Ventana de evidencia de Tesai para el límite de CO₂, con su respaldo y sus fuentes." data-en-alt="Tesai evidence window for the CO₂ limit, with its basis and sources."></div>
+        <div>
+          <h3 data-es="Cada número dice de dónde sale" data-en="Every number says where it comes from">Cada número dice de dónde sale</h3>
+          <p data-es="Junto a cada límite, meta y regla hay un botón que dice si el valor sale de un estándar de la NASA, si es una adaptación o si es un valor de diseño del equipo, con sus fuentes." data-en="Next to every limit, goal and rule there is a button that says whether the value comes from a NASA standard, is an adaptation or is a team design value, with its sources.">Junto a cada límite, meta y regla hay un botón que dice si el valor sale de un estándar de la NASA, si es una adaptación o si es un valor de diseño del equipo, con sus fuentes.</p>
+        </div>
+      </article>
+      <article class="tcard">
+        <h3 data-es="Tu chequeo es privado" data-en="Your check-in is private">Tu chequeo es privado</h3>
+        <p data-es="Las respuestas del chequeo diario quedan en tu dispositivo. Nadie de la tripulación las ve, no hay promedios grupales y no generan avisos ni puntos." data-en="Daily check-in answers stay on your device. No one on the crew sees them, there are no group averages, and they never raise alerts or earn points.">Las respuestas del chequeo diario quedan en tu dispositivo. Nadie de la tripulación las ve, no hay promedios grupales y no generan avisos ni puntos.</p>
+      </article>
+      <article class="tcard">
+        <h3 data-es="Límites claros" data-en="Clear limits">Límites claros</h3>
+        <p data-es="Todos los datos son simulados. Tesai no diagnostica ni reemplaza al cirujano de vuelo, y sus umbrales son ilustrativos." data-en="All data is simulated. Tesai does not diagnose or replace the flight surgeon, and its thresholds are illustrative.">Todos los datos son simulados. Tesai no diagnostica ni reemplaza al cirujano de vuelo, y sus umbrales son ilustrativos.</p>
+      </article>
+    </div>
   </section>
 
   <!-- ============ TEAM ============ -->
@@ -240,6 +352,12 @@
 </main>
 
 <footer class="foot">
+  <nav class="foot-links" aria-label="Enlaces" data-es-label="Enlaces" data-en-label="Links">
+    <a href="simulacion/" data-es="Simulación" data-en="Simulation">Simulación</a>
+    <a href="tesai/" data-es="Dashboard" data-en="Dashboard">Dashboard</a>
+    <a href="tesai/#/about" data-es="Evidencia y uso de IA" data-en="Evidence and AI use">Evidencia y uso de IA</a>
+    <a href="https://github.com/natayadev/astronauts-health-monitor" rel="noopener" data-es="Repositorio" data-en="Repository">Repositorio</a>
+  </nav>
   <p data-es="Proyecto del NASA Space Apps Challenge 2026. Simulación educativa con datos simulados: no diagnostica, no reemplaza al cirujano de vuelo y la guía de RCP es simplificada, no reemplaza un curso certificado." data-en="NASA Space Apps Challenge 2026 project. Educational simulation with simulated data: it does not diagnose, does not replace the flight surgeon, and the CPR guidance is simplified and no substitute for a certified course.">Proyecto del NASA Space Apps Challenge 2026. Simulación educativa con datos simulados: no diagnostica, no reemplaza al cirujano de vuelo y la guía de RCP es simplificada, no reemplaza un curso certificado.</p>
 </footer>
 <script src="main.js"></script>

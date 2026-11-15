@@ -154,3 +154,76 @@ a{color:inherit}
 .ccard li b{font-size:15px}.ccard li span{font-size:14px;color:var(--muted)}
 @media (max-width:980px){.env{grid-template-columns:repeat(2,minmax(0,1fr))}.ctl{grid-template-columns:1fr}.flow i{display:none}}
 @media (max-width:600px){.env{grid-template-columns:1fr}.fl{min-width:0;flex:1 1 140px}}
+
+/* ---------- problem: the delay, drawn ---------- */
+.lead{color:var(--muted);font-size:18px}
+.delay{margin:0 auto;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:24px;padding:28px 32px;border-radius:var(--r);background:var(--glass-2);border:1px solid var(--line);box-shadow:var(--shadow);max-width:980px}
+.delay-end{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;min-width:120px}
+.delay-end b{font-size:18px;letter-spacing:-.01em;margin-top:8px}
+.delay-end span{font-size:13.5px;color:var(--muted)}
+.delay-dot{width:46px;height:46px;border-radius:50%}
+.delay-dot.mars{background:radial-gradient(circle at 35% 30%,#f0a37e,#b5532c 70%)}
+.delay-dot.earth{background:radial-gradient(circle at 35% 30%,#8fd3ff,#1f6fb2 60%,#2f8f5b 100%)}
+.delay-track{display:grid;gap:18px}
+.delay-lane{display:grid;gap:6px}
+.delay-label{font:600 13px var(--mono);color:var(--teal-ink);text-align:center}
+.delay-line{position:relative;display:block;height:2px;background:repeating-linear-gradient(90deg,var(--line-2) 0 8px,transparent 8px 14px);border-radius:2px}
+.delay-pulse{position:absolute;top:-4px;left:0;width:10px;height:10px;border-radius:50%;background:var(--teal);animation:travel 6s linear infinite}
+.delay-lane.back .delay-pulse{background:var(--deep);animation-direction:reverse;animation-delay:-3s}
+@keyframes travel{from{left:0}to{left:calc(100% - 10px)}}
+.delay figcaption{grid-column:1/-1;text-align:center;color:var(--ink);font-weight:600;font-size:16px;padding-top:8px;border-top:1px solid var(--line)}
+
+/* ---------- the app: real captures ---------- */
+.shot{margin:0}
+.shot-frame{position:relative;border-radius:24px;overflow:hidden;background:var(--glass-2);border:1px solid var(--line);box-shadow:var(--shadow)}
+.shot-frame.dark{background:#050608;border-color:rgba(255,255,255,.08);box-shadow:0 30px 80px rgba(11,60,74,.3)}
+.shot-frame img,.shot-frame video{display:block;width:100%;height:auto}
+.shot figcaption{display:flex;flex-direction:column;gap:2px;margin-top:12px;padding:0 4px}
+.shot figcaption b{font-size:16px}
+.shot figcaption span{color:var(--muted);font-size:14.5px}
+.shot-video{max-width:980px;margin:0 auto}
+.shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:28px}
+.shot-play{position:absolute;right:14px;bottom:14px;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(22,24,28,.6);color:#f5f5f7;font:600 13px var(--font);cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.shot-play .ic{width:16px;height:16px;fill:currentColor}
+.shot-play .i-play{display:none}
+.shot-play[aria-pressed="true"] .i-play{display:inline}
+.shot-play[aria-pressed="true"] .i-pause{display:none}
+.row.center{justify-content:center;margin-top:28px}
+
+/* ---------- doors: the prototype door mirrors the simulation door ---------- */
+.door.main.alt{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);border-width:1px;border-color:var(--line);box-shadow:var(--shadow)}
+.door.main.alt .door-media{order:2;background:#050608}
+.door.main.alt .door-media img{object-fit:cover;object-position:50% 20%}
+
+/* ---------- why trust it ---------- */
+.trust{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.tcard{padding:26px;border-radius:var(--r);background:var(--glass-2);border:1px solid var(--line);box-shadow:var(--shadow)}
+.tcard h3{font-size:21px;letter-spacing:-.02em;margin-bottom:8px}
+.tcard p{color:var(--muted)}
+.tcard.wide{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1fr);gap:28px;align-items:center}
+.tcard-media img{border-radius:18px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(11,85,107,.14)}
+
+/* ---------- team as plain names, footer links ---------- */
+.team li{background:none;border:0;padding:4px 14px;font-size:18px}
+.foot-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 20px;margin-bottom:16px}
+.foot-links a{font-weight:600;color:var(--teal-ink);text-decoration:underline;text-underline-offset:3px}
+
+/* decorations never widen the page */
+html,body{overflow-x:clip}
+
+@media (max-width:980px){
+  .shots,.trust{grid-template-columns:1fr}
+  .tcard.wide{grid-template-columns:1fr}
+  .door.main.alt{grid-template-columns:1fr}
+  .door.main.alt .door-media{order:0}
+}
+@media (max-width:600px){
+  .delay{grid-template-columns:1fr;padding:22px}
+  .delay-track{order:1}
+  .delay-end:last-of-type{order:2}
+  .delay figcaption{order:3}
+  .delay-line{height:2px}
+}
+@media (prefers-reduced-motion:reduce){
+  .delay-pulse{animation:none}
+}
