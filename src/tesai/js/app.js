@@ -217,7 +217,7 @@ function announce(a) {
 function say(msg, assertive) { const el = document.querySelector(assertive ? '#live-assertive' : '#live-polite'); if (!el) return; el.textContent = ''; setTimeout(() => { el.textContent = msg; }, 30); }
 
 /* ===== main · entry point ===== */
-const VIEWS = ['overview', 'visor', 'biometrics', 'alerts', 'history', 'about', 'advanced'];
+const VIEWS = ['overview', 'visor', 'biometrics', 'checkin', 'alerts', 'history', 'about', 'advanced'];
 (async function main() {
   const { I18N } = await import('./i18n.js');
   State.load(); UI.init(); I18N.init(State.lang); UI.syncLang();

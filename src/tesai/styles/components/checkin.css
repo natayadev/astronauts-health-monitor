@@ -1,0 +1,71 @@
+/* ==========================================================================
+   CHECK-IN · private daily check-in (form, 0–10 scales, own-history strip)
+   ========================================================================== */
+
+#ci-items { display: grid; gap: 14px }
+
+.ci-q {
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 12px 14px 14px; margin: 0;
+  background: color-mix(in srgb, var(--color-white) 55%, transparent);
+}
+.ci-q legend { display: flex; align-items: center; gap: 8px; padding: 0 6px; font-size: var(--fs-md) }
+.ci-text { font-size: var(--fs-md); margin: 2px 0 10px }
+
+/* 0–10 scale: native radios, visually as a segmented row */
+.ci-scale { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px }
+.ci-opt { position: relative; display: block }
+.ci-opt input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer }
+.ci-opt span {
+  display: grid; place-items: center; min-height: 36px;
+  border-radius: var(--r-sm); border: 1px solid var(--line-2);
+  font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 600;
+  background: color-mix(in srgb, var(--color-white) 80%, transparent);
+  transition: background-color .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
+}
+.ci-opt input:hover + span { border-color: var(--color-teal) }
+.ci-opt input:checked + span { background: var(--color-teal); border-color: var(--color-teal); color: var(--color-white) }
+.ci-opt input:focus-visible + span { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-teal) 30%, transparent) }
+.ci-anchors { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font-size: var(--fs-xs); color: var(--color-muted) }
+
+/* Choice chips (tension, symptoms) */
+.ci-choices { display: flex; flex-wrap: wrap; gap: 6px }
+.ci-chip { position: relative }
+.ci-chip input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer }
+.ci-chip span {
+  display: inline-flex; align-items: center; min-height: 34px; padding: 6px 12px;
+  border-radius: var(--r-pill); border: 1px solid var(--line-2); font-size: var(--fs-sm); font-weight: 600;
+  background: color-mix(in srgb, var(--color-white) 80%, transparent);
+}
+.ci-chip input:checked + span { background: color-mix(in srgb, var(--color-teal) 16%, var(--color-white)); border-color: var(--color-teal); color: var(--color-teal-ink) }
+.ci-chip input:focus-visible + span { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-teal) 30%, transparent) }
+
+.ci-actions { margin-top: 14px }
+
+/* Who sees this */
+.ci-who { display: grid; gap: 6px; padding-left: 18px; font-size: var(--fs-sm) }
+
+/* Own-history rows */
+#ci-trend { display: grid; gap: 12px }
+.ci-row { display: grid; gap: 6px }
+.ci-rh { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-sm) }
+.ci-rh b { flex: 1 }
+.ci-strip { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 3px }
+.ci-cell {
+  display: grid; place-items: center; height: 24px; border-radius: 5px;
+  font-style: normal; font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-teal) calc(var(--v) * 55%), var(--color-white));
+}
+.ci-cell.ci-sim { outline: 1px dashed color-mix(in srgb, var(--color-muted) 45%, transparent); outline-offset: -1px }
+.ci-cell.ci-skip, .ci-cell.ci-none { background: transparent; border: 1px dashed var(--line-2) }
+.ci-meta { display: flex; gap: 6px; align-items: baseline; font-size: var(--fs-xs); color: var(--color-muted) }
+.ci-meta b { color: var(--color-ink); font-family: var(--font-mono); margin-right: 10px }
+.ci-msg {
+  padding: 10px 12px; border-radius: var(--r-md); font-size: var(--fs-sm);
+  background: color-mix(in srgb, var(--color-sensor) 14%, transparent);
+}
+
+@media (max-width: 640px) {
+  .ci-scale { grid-template-columns: repeat(6, minmax(0, 1fr)) }
+}

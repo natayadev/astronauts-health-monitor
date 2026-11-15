@@ -132,7 +132,7 @@ export const CREDITS = {
 };
 
 export const ENV_META = {
-  co2:       { label: 'CO₂',           short: 'CO₂',   unit: 'ppm',   dec: 0, icon: 'wind',  src: 'NASA ISS ops target: below 3 mmHg (≈ 3,950 ppm). Older 180-day limit: 5.3 mmHg (≈ 7,000 ppm).' },
+  co2:       { label: 'CO₂',           short: 'CO₂',   unit: 'ppm',   dec: 0, icon: 'wind',  src: 'NASA-STD-3001 limit: 3 mmHg as a 1-hour average (≈ 3,950 ppm at sea-level pressure). Older 180-day limit: 5.3 mmHg (≈ 7,000 ppm).' },
   oxygen:    { label: 'Oxygen (ppO₂)', short: 'ppO₂',  unit: 'kPa',   dec: 1, icon: 'o2',    src: 'ISS cabin design range for oxygen partial pressure.' },
   pressure:  { label: 'Cabin pressure', short: 'Press.', unit: 'kPa', dec: 1, icon: 'gauge' },
   temp:      { label: 'Temperature',   short: 'Temp.', unit: '°C',   dec: 1, icon: 'temp',  src: 'Crew performance zone 20–25 °C; operating limit 18–27 °C.' },

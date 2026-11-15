@@ -24,6 +24,8 @@
 <link rel="stylesheet" href="styles/components/forms.css">
 <link rel="stylesheet" href="styles/components/evidence.css">
 <link rel="stylesheet" href="styles/components/visor.css">
+<link rel="stylesheet" href="styles/components/checkin.css">
+<link rel="stylesheet" href="styles/components/twin.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -40,6 +42,7 @@
         <button class="tab" data-view="overview" aria-current="page">Overview</button>
         <button class="tab" data-view="visor">Visor</button>
         <button class="tab" data-view="biometrics">Biometrics</button>
+        <button class="tab" data-view="checkin">Check-in</button>
         <button class="tab" data-view="history">History</button>
         <button class="tab" data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>About</button>
       </div>
@@ -91,11 +94,6 @@
                   <stop offset="0" style="stop-color:var(--tw1)"/>
                   <stop offset="1" style="stop-color:var(--tw2)"/>
                 </linearGradient>
-                <linearGradient id="tz-scanband" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" style="stop-color:var(--color-aqua)" stop-opacity="0"/>
-                  <stop offset=".85" style="stop-color:var(--color-aqua)" stop-opacity=".55"/>
-                  <stop offset="1" style="stop-color:var(--scan-hi)" stop-opacity="1"/>
-                </linearGradient>
                 <filter id="tz-glow" x="-100%" y="-100%" width="300%" height="300%">
                   <feGaussianBlur stdDeviation="3.5" result="b"/>
                   <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -103,9 +101,6 @@
                 <pattern id="tz-lines" width="12" height="11" patternUnits="userSpaceOnUse">
                   <line x1="0" y1="0.5" x2="12" y2="0.5" style="stroke:var(--color-teal)" stroke-width=".7" stroke-opacity=".45"/>
                 </pattern>
-                <mask id="tz-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1440" height="780">
-                  <g id="twin-mask-g" stroke-linecap="round" stroke-linejoin="round"></g>
-                </mask>
               </defs>
             </svg>
             <svg viewBox="0 0 1440 780" width="1440" height="780" aria-hidden="true" focusable="false">
@@ -116,24 +111,8 @@
                 <line x1="720" y1="0" x2="720" y2="780" stroke-dasharray="2 8"/>
               </g>
             </svg>
-            <div class="twin-persp" aria-hidden="true">
-              <div class="twin-spin" id="twin-spin">
-                <svg viewBox="0 0 1440 780" width="1440" height="780" style="position:absolute;inset:0;overflow:visible" focusable="false">
-                  <!-- astronaut PNG — natural proportions, centred in stage -->
-                  <image id="twin-body-img" href="assets/human.png"
-                    x="0" y="0" width="1440" height="780"
-                    preserveAspectRatio="xMidYMid meet" opacity=".95"/>
-                  <!-- hidden — not used -->
-                  <g id="twin-body" style="display:none" stroke-linecap="round" stroke-linejoin="round"></g>
-                </svg>
-              </div>
-            </div>
-            <svg id="scan-layer" viewBox="0 0 1440 780" width="1440" height="780" style="position:absolute;inset:0;overflow:visible;pointer-events:none" aria-hidden="true" focusable="false" hidden>
-              <g mask="url(#tz-mask)">
-                <rect class="scan-band" x="540" y="-60" width="360" height="70" fill="url(#tz-scanband)"/>
-              </g>
-              <line class="scan-line" x1="520" x2="920" y1="10" y2="10" style="stroke:var(--color-teal)" stroke-width="1.2" filter="url(#tz-glow)"/>
-            </svg>
+            <!-- astronaut twin (plate, figure, 360° view, scan sweep): drawn by js/twin/twin.js -->
+            <div id="twin" aria-hidden="true"></div>
             <svg id="layer-links" viewBox="0 0 1440 780" width="1440" height="780" style="position:absolute;inset:0;overflow:visible" focusable="false"></svg>
             <div id="cards"></div>
             <div class="hint"><i></i>Pick a vital sign or a point on the body to open its history</div>
@@ -370,6 +349,55 @@
       </div>
     </section>
 
+    <!-- ===================== DAILY CHECK-IN ===================== -->
+    <section class="view" id="view-checkin" aria-labelledby="h-ci">
+      <div class="page-head">
+        <div>
+          <h2 id="h-ci">Daily check-in</h2>
+          <p>A short, private check-in about how you are today. It is not a clinical questionnaire and it does not diagnose anything. It never raises alerts and never earns points.</p>
+        </div>
+        <span data-evslot="checkin.items"></span>
+      </div>
+      <p class="banner-demo">The days before today are simulated for the demo. What you answer today is saved only on this device.</p>
+      <div class="grid g2" style="align-items:start;margin-top:16px">
+        <section class="panel" aria-labelledby="h-ci-today">
+          <h3 id="h-ci-today"><span class="grow">Today <span class="tag" id="ci-day"></span></span><span id="ci-state"></span></h3>
+          <p class="sub">Answering for <b id="ci-who"></b>. Every scale goes from 0 (worst) to 10 (best).</p>
+          <form id="ci-form" novalidate>
+            <div id="ci-items"></div>
+            <div class="toolbar ci-actions">
+              <button class="btn primary" type="submit" id="ci-submit">Save today’s check-in</button>
+              <button class="btn" type="button" id="ci-skip">Skip today</button>
+              <span class="spacer"></span>
+              <button class="btn sm" type="button" id="ci-clear">Delete my answers</button>
+            </div>
+          </form>
+        </section>
+        <div class="grid" style="align-content:start">
+          <section class="panel" aria-labelledby="h-ci-priv">
+            <h3 id="h-ci-priv"><span class="grow">Who sees this</span><span data-evslot="checkin.privacy"></span></h3>
+            <ul class="ci-who">
+              <li><b>You:</b> everything you answer.</li>
+              <li><b>Rest of the crew:</b> nothing, ever. No group averages either.</li>
+              <li><b>Crew medical officer:</b> nothing, unless you turn on sharing below.</li>
+              <li><b>Flight surgeons on Earth:</b> nothing in this prototype. Health and psychological communications are private under NASA standards.</li>
+            </ul>
+            <label class="switch"><input type="checkbox" id="ci-share"> Share a trend summary with the crew medical officer</label>
+            <div id="ci-share-note"></div>
+          </section>
+          <section class="panel" aria-labelledby="h-ci-trend">
+            <h3 id="h-ci-trend"><span class="grow">Compared with your usual</span><span data-evslot="checkin.trend"></span></h3>
+            <p class="sub">Last 14 days. Empty cells are skipped or missing days, which is normal.</p>
+            <div id="ci-trend"></div>
+          </section>
+          <section class="panel" aria-labelledby="h-ci-co2">
+            <h3 id="h-ci-co2"><span class="grow">Symptoms and cabin CO₂</span><span data-evslot="checkin.co2"></span></h3>
+            <div id="ci-co2"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
     <!-- ===================== ABOUT ===================== -->
     <section class="view" id="view-about" aria-labelledby="h-about">
       <div class="page-head">
@@ -511,6 +539,10 @@
     <button data-view="biometrics">
       <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
       Biometrics
+    </button>
+    <button data-view="checkin">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>
+      Check-in
     </button>
     <button data-view="history">
       <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg>
