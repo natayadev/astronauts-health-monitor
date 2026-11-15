@@ -68,19 +68,10 @@ main { flex: 1; width: 100%; position: relative }
 #stage[data-level="nodata"]    { --tw1: var(--color-none-soft); --tw2: var(--color-slate) }
 #stage > svg { position: absolute; inset: 0; overflow: visible }
 
-.twin-persp { position: absolute; inset: 0; perspective: 1600px }
-.twin-spin  { position: absolute; inset: 0; transform-origin: 720px 400px }
-.twin-spin.on { animation: twinSpin 6s linear infinite }
-@keyframes twinSpin { 0% { transform: rotateY(0deg) } 100% { transform: rotateY(360deg) } }
-
+/* The astronaut itself (plate, figure, 360° view, scan sweep) is styled in components/twin.css. */
 #layer-links, #cards { transition: opacity .4s var(--ease) }
 #stage.spinning #layer-links,
 #stage.spinning #cards { opacity: .25 }
-
-/* Scan animation */
-.scan-band { animation: scanY 3s linear forwards }
-.scan-line  { animation: scanY 3s linear forwards }
-@keyframes scanY { from { transform: translateY(0) } to { transform: translateY(820px) } }
 
 /* SVG link lines */
 .link polyline { fill: none; stroke: var(--color-deep); stroke-width: 1.1; stroke-opacity: .55; stroke-linejoin: round; transition: stroke-opacity .3s var(--ease), stroke-width .3s var(--ease) }
@@ -106,7 +97,8 @@ main { flex: 1; width: 100%; position: relative }
 .link:has(.hit:focus-visible) .node { stroke: var(--color-ink); stroke-width: 3 }
 
 /* Cards layer */
-#cards { position: absolute; inset: 0 }
+#cards { position: absolute; inset: 0; pointer-events: none }  /* the layer is empty space; only its cards take the pointer, so the body points under it stay clickable */
+#cards .metric { pointer-events: auto }
 
 /* Hint text */
 .hint { position: absolute; left: 96px; top: 716px; display: flex; align-items: center; gap: 8px; font-size: var(--fs-md) !important; color: var(--color-muted); white-space: nowrap }

@@ -2,7 +2,7 @@
 
 **Tesai** es el prototipo de *health twin* para astronautas de Team Higía (NASA Space Apps Challenge 2026). Este documento describe la arquitectura del frontend modular que reemplazó el monolito original de ~3700 líneas.
 
-> **Nota de estructura:** Tesai vive ahora en `src/tesai/`. Las rutas `src/...` de este documento son relativas a esa carpeta. El sitio completo (web central + simulación + Tesai) está descrito en `src/README.md`.
+> **Nota de estructura:** Tesai vive ahora en `src/tesai/`. Las rutas cortas de módulos (`js/...`, `styles/...`) de este documento son relativas a esa carpeta. El sitio completo (web central + simulación + Tesai) está descrito en `src/README.md`.
 >
 > Sin bundler, sin framework. Solo HTML, CSS y ES modules nativos del browser. Desplegable en Vercel con un solo `vercel.json`.
 
@@ -26,8 +26,8 @@
 
 ```
 Browser
-  └── src/index.html
-        ├── <link> × 13 archivos CSS
+  └── src/tesai/index.html
+        ├── <link> × 16 archivos CSS
         └── <script type="module" src="js/app.js">
               └── importa todo el grafo de módulos
 ```
@@ -43,46 +43,72 @@ El JS usa ES modules estáticos; el browser los resuelve sin bundler.
 ```
 astronauts-health-monitor/
 ├── vercel.json                     Caché de assets, headers de seguridad
+├── tools/twin/                     Geometría de la figura (no se despliega): build.mjs, scene.mjs, stand.mjs, suit.mjs, overlays/, kit/
+├── react/astronaut/                El astronauta como componentes React/Next.js (no se despliega ni lo usa el dashboard); ver su README
 └── src/
-    ├── index.html                  HTML puro (~330 líneas)
-    ├── assets/
-    │   └── fonts/                  Plus Jakarta Sans + JetBrains Mono (SIL OFL)
-    │       ├── jetbrains-mono-*.woff2
-    │       └── plus-jakarta-sans-*.woff2
-    ├── styles/
-    │   ├── tokens.css              Variables CSS (paleta, tipografía, radios)
-    │   ├── base.css                Reset, @font-face, body, utilidades
-    │   ├── layout.css              Views, grids, stage, twin, responsive
-    │   └── components/
-    │       ├── buttons.css
-    │       ├── nav.css
-    │       ├── cards.css
-    │       ├── badges.css
-    │       ├── drawer.css
-    │       ├── toasts.css
-    │       ├── lists.css
-    │       ├── charts.css
-    │       ├── forms.css
-    │       └── evidence.css
-    └── js/
-        ├── app.js                  Entry point: bootstrap, main loop, alert processing
-        ├── config.js               SCHEMA, CONFIG, METRICS, LEVELS, CREDITS, ENV_META
-        ├── utils.js                Helpers puros (clamp, uid, fmtTime, …)
-        ├── rules.js                RulesEngine: lecturas → niveles de semáforo
-        ├── state.js                Estado mutable global + ciclo de vida de alertas
-        ├── i18n.js                 I18N: ES_DICT, ES_PATTERNS, traducción del DOM
-        ├── evidence.js             SOURCES (APA), EVIDENCE, helpers de rendering
-        ├── providers/
-        │   ├── base.js             Clase abstracta DataProvider
-        │   ├── simulated.js        SimulatedProvider (circadian, AR(1), eventos)
-        │   ├── remote.js           RemoteProvider skeleton (fetch + retries + caché)
-        │   ├── file.js             FileProvider (CSV / JSON importado por el usuario)
-        │   └── adapters.js         Normalizer, Adapters, validateVital, parseCsv
-        └── ui/
-            ├── icons.js            ICONS (27 SVG), LV_ICON
-            ├── helpers.js          $ $$ setHtml setText pillHtml chartInner download …
-            ├── toasts.js           showToast, dismissToast, closeToastFor
-            └── ui.js               Objeto UI: todas las funciones de render y navegación
+    ├── index.html                  Web central de Higía: portada, guía de sensores, accesos
+    ├── main.js                     Idioma de la portada y enlaces a la simulación
+    ├── styles.css                  Estilos de la portada
+    ├── assets/                     hero.webp, astronaut.webp
+    ├── simulacion/                 Simulación inmersiva: index.html + img/ (eva, rover, ship)
+    └── tesai/                      La app Tesai (las rutas src/... del resto del documento son relativas a esta carpeta)
+        ├── index.html                  HTML puro de Tesai (~580 líneas)
+        ├── assets/
+        │   ├── fonts/                  Plus Jakarta Sans + JetBrains Mono (SIL OFL)
+        │   │   ├── jetbrains-mono-*.woff2
+        │   │   └── plus-jakarta-sans-*.woff2
+        │   ├── human.png               Astronauta PNG anterior (ya no lo usa la UI; se conserva)
+        │   └── visor/                  Fondos del Visor (ship.webp, rover.webp)
+        ├── styles/
+        │   ├── tokens.css              Variables CSS (paleta, tipografía, radios)
+        │   ├── base.css                Reset, @font-face, body, utilidades
+        │   ├── layout.css              Views, grids, stage, twin, responsive
+        │   └── components/
+        │       ├── buttons.css
+        │       ├── nav.css
+        │       ├── cards.css
+        │       ├── badges.css
+        │       ├── drawer.css
+        │       ├── toasts.css
+        │       ├── lists.css
+        │       ├── charts.css
+        │       ├── forms.css
+        │       ├── evidence.css
+        │       ├── visor.css               Visor en primera persona y segundo doctor
+        │       ├── checkin.css             Chequeo diario (escalas 0–10, tira de 14 días)
+        │       └── twin.css                Astronauta: placa, figura, vista 360°, barrido y overlays de métricas
+        └── js/
+            ├── app.js                  Entry point: bootstrap, main loop, alert processing
+            ├── config.js               SCHEMA, CONFIG, METRICS, LEVELS, CREDITS, ENV_META
+            ├── utils.js                Helpers puros (clamp, uid, fmtTime, …)
+            ├── rules.js                RulesEngine: lecturas → niveles de semáforo
+            ├── state.js                Estado mutable global + ciclo de vida de alertas
+            ├── i18n.js                 I18N: ES_DICT, ES_PATTERNS, traducción del DOM
+            ├── evidence.js             SOURCES (APA), EVIDENCE, helpers de rendering
+            ├── checkin.js              Chequeo diario privado: ítems, almacenamiento local, comparación con la propia historia
+            ├── audio.js                Audio incorporado: tonos de aviso y voz (Web Audio + speech synthesis)
+            ├── guidance.js             Segundo doctor: guías paso a paso por aviso, EN/ES
+            ├── twin/
+            │   ├── twin.js             Componente público: createTwin(root) → update(props), scan(), destroy()
+            │   ├── figure.js           Dibujo + bucle de overlays; anchorOf(metric)
+            │   ├── plate.js            Placa: Fig 1, título y línea de lectura
+            │   ├── spin.js             Vista 360°: caja con perspectiva que gira
+            │   ├── scan.js             Barrido de escaneo
+            │   ├── art.js              GENERADO por tools/twin/build.mjs (SVG estático + datos de overlays)
+            │   └── overlays/           index.js (registro métrica → overlay), heart.js (frecuencia cardíaca)
+            ├── providers/
+            │   ├── base.js             Clase abstracta DataProvider
+            │   ├── simulated.js        SimulatedProvider (circadian, AR(1), eventos)
+            │   ├── remote.js           RemoteProvider skeleton (fetch + retries + caché)
+            │   ├── file.js             FileProvider (CSV / JSON importado por el usuario)
+            │   └── adapters.js         Normalizer, Adapters, validateVital, parseCsv
+            └── ui/
+                ├── icons.js            ICONS (27 SVG), LV_ICON
+                ├── helpers.js          $ $$ setHtml setText pillHtml chartInner download …
+                ├── toasts.js           showToast, dismissToast, closeToastFor
+                ├── checkin.js          Vista del chequeo diario (formulario, tendencia, CO₂)
+                ├── visor.js            Vista Visor: HUD en primera persona, aviso de situación, segundo doctor
+                └── ui.js               Objeto UI: todas las funciones de render y navegación
 ```
 
 ---
@@ -141,6 +167,9 @@ app.js (entry point)
   ├── state.js         → config.js, utils.js, rules.js
   ├── i18n.js          (importado dinámicamente en main())
   ├── evidence.js      → utils.js
+  ├── checkin.js       → config.js, utils.js
+  ├── audio.js         → state.js
+  ├── guidance.js      → config.js, state.js, i18n.js
   ├── providers/
   │   ├── base.js      (sin dependencias)
   │   ├── simulated.js → base.js, config.js, utils.js, adapters.js
@@ -151,9 +180,14 @@ app.js (entry point)
       ├── icons.js     (sin dependencias)
       ├── helpers.js   → config.js, utils.js, state.js
       ├── toasts.js    → state.js, ui/icons.js
+      ├── checkin.js   → helpers.js, toasts.js, utils.js, state.js, checkin.js
+      ├── visor.js     → helpers.js, icons.js, toasts.js, config.js, utils.js,
+      │                   state.js, audio.js, guidance.js
       └── ui.js        → helpers.js, icons.js, toasts.js, config.js,
                           utils.js, state.js, rules.js, i18n.js,
-                          evidence.js, app.js  ← (importa refreshSecondary,
+                          evidence.js, ui/visor.js, audio.js, guidance.js,
+                          ui/checkin.js, twin/twin.js,
+                          app.js  ← (importa refreshSecondary,
                                                    startProvider, runAlertAction)
 ```
 
@@ -177,7 +211,15 @@ La única referencia circular es `ui.js → app.js` y `app.js → ui.js`. ES mod
 | `ui/icons.js` | 27 íconos SVG exportados como strings. Trazo de 2 px, estilo Lucide. Sin emojis. |
 | `ui/helpers.js` | Helpers de DOM (`$`, `$$`, `setHtml`, `setText`) y de rendering (`pillHtml`, `chartInner`, `fmtVal`, `download`, `beep`). |
 | `ui/toasts.js` | Toast system: cola de máximo 4, auto-dismiss, toasts persistentes para alertas críticas. |
-| `ui/ui.js` | Objeto `UI`: inicialización, navegación, todas las funciones de render (twin, strip, stage, cards, drawer, vistas, misiones, score). |
+| `checkin.js` | Chequeo diario: ítems (escalas 0–10 en la misma dirección, con período), guardado en `localStorage` con clave propia (`tesai.checkin.v1`), historial simulado rotulado para la demo y regla de comparación con la propia historia. **No** alimenta al `RulesEngine`, no abre alertas y no da puntos. |
+| `ui/checkin.js` | `CheckinUI`: formulario, panel "Quién ve esto", tira de 14 días por ítem y cruce de síntomas con el CO₂ de cabina (promedio de 30 min convertido a mmHg con la presión de cabina). |
+| `ui/ui.js` | Objeto `UI`: inicialización, navegación, todas las funciones de render (strip, stage, cards, drawer, vistas, misiones, score). Al astronauta solo le pasa props (`syncTwin()`, botones 360° y escaneo); el dibujo vive en `twin/`. |
+| `twin/twin.js` | Componente del astronauta: todo el centro del escenario. `createTwin(root)` monta, dentro de `#twin`, la placa, la caja de giro, la figura y el barrido; devuelve `update(props)`, `scan()` (promesa que termina con el barrido) y `destroy()`. No lee `State`: `UI.syncTwin()` le pasa `{ metrics, focus, pinned, motion }` y el botón 360° le pasa `{ spin }`. Reexporta `anchorOf(metric)`, el punto del cuerpo donde termina la línea de cada tarjeta. El botón, la etiqueta "Scanning…", el toast y `#stage.spinning` (que atenúa tarjetas y líneas) siguen en `ui.js`. |
+| `twin/figure.js` | Dibujo isométrico (`art.js`) y bucle de animación de los overlays (solo corre con la figura visible y la pestaña al frente). Avisa a la placa cuando cambia la línea de lectura. Define `FIGURE` y `anchorOf`. |
+| `twin/plate.js`, `twin/spin.js`, `twin/scan.js` | Placa con título y lectura; caja con perspectiva para la vista 360°; barrido de escaneo (3,2 s, con su propio degradado y máscara; el brillo usa `#tz-glow`, compartido con los gráficos). |
+| `twin/overlays/index.js` | Registro métrica → overlay. Hoy solo `hr`. Cada overlay implementa `mount(ctx) → { update, tick, readout }`. |
+| `twin/overlays/heart.js` | Frecuencia cardíaca en vivo: aguja del dial, lámpara, traza en el display del pecho y, al enfocar la métrica, la mirilla del pecho que se abre sobre el corazón latiendo. Un único acumulador de fase (`fase += dt × bpm / 60`). |
+| `twin/art.js` | **Generado** por `node tools/twin/build.mjs` (no editar a mano). SVG estático de la figura y datos de sus overlays. La geometría vive en `tools/twin/` (`stand.mjs`, `suit.mjs`, `overlays/heart.mjs`); `--audit` verifica contactos, holguras y orden de pintado. |
 | `app.js` | Entry point. Gestiona el ciclo de vida del provider, `onReading`, `onTick`, `refreshSecondary`, `runAlertAction`, y el procesamiento de alertas (`processVitals`, `processEnvironment`, `processDevices`, `checkEscalations`, `checkReminders`). Contiene el `main()` IIFE de arranque. |
 
 ---
@@ -255,7 +297,7 @@ Alert lifecycle
 
 ## 7. Cómo agregar una fuente de datos real
 
-El único cambio es implementar `RemoteProvider` en `src/js/providers/remote.js`. La UI y el motor de reglas no se tocan.
+El único cambio es implementar `RemoteProvider` en `src/tesai/js/providers/remote.js`. La UI y el motor de reglas no se tocan.
 
 ```js
 // providers/remote.js — métodos a implementar
