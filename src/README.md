@@ -32,6 +32,7 @@ src/
 │  ├─ evidence.js        # SOURCES (APA) and EVIDENCE (basis of every number)
 │  ├─ i18n.js            # Spanish dictionary applied at runtime
 │  ├─ providers/         # simulated, file and remote data providers + normalizer
+│  ├─ twin/              # astronaut: twin.js (component), figure/plate/spin/scan.js, overlays/ (one per metric), art.js (generated)
 │  └─ ui/                # UI controller, check-in view, helpers, icons, toasts
 └─ assets/fonts/         # Plus Jakarta Sans and JetBrains Mono (SIL OFL), local
 ```
@@ -49,6 +50,20 @@ The full module map, data flow and alert system are in [`../ARCHITECTURE.md`](..
 | History | Chart with traffic-light bands and baseline, signal quality, missions and streak |
 | About | Team credits, the NASA challenge, how Claude was used, evidence by data point, references and notices |
 | Advanced (hidden) | Data source, import/export, demo mode, appearance, thresholds (read-only), schema. Not in the navigation: open `#/advanced` |
+
+## Astronaut twin
+
+The figure in the middle of Overview is an isometric SVG drawing with live, data-driven overlays. It lives in `js/twin/` and is built like a component: `createTwin(root)` fills the `#twin` element with the plate, the figure, the 360° view and the scan sweep, and returns `update(props)`, `scan()` and `destroy()`. It never reads app state. `UI.syncTwin()` passes it `{ metrics, focus, pinned, motion }` on every render, and the 360° button passes `{ spin }`.
+
+- **Parts.** `twin.js` puts the pieces together; `figure.js` draws the figure and runs the overlays; `plate.js` is the frame and its readout; `spin.js` turns the figure for the 360° view; `scan.js` runs the scan sweep. All of it is styled in `styles/components/twin.css`.
+
+- **Overlays** are registered per metric in `js/twin/overlays/index.js`. Heart rate is the first: the console dial reads beats per minute, the lamp and the chest display follow each beat, and hovering or selecting the Heart rate card opens the chest port on the beating heart. With no trusted reading nothing beats.
+- **The drawing** is static markup in `js/twin/art.js`, generated from the geometry in `../tools/twin/` (`stand.mjs`, `suit.mjs`, `overlays/heart.mjs`). The app still has no build step: `art.js` is committed. Regenerate it only when the drawing or the heart-rate limits in `config.js` change:
+
+```bash
+node tools/twin/build.mjs            # write src/js/twin/art.js (run from the repo root; tested on Node 22)
+node tools/twin/build.mjs --audit    # also check contacts, clearances and paint order
+```
 
 ## Daily check-in
 

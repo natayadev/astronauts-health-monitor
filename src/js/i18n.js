@@ -198,6 +198,8 @@ const ES_DICT = {
 "Ground link": "Enlace con Tierra",
 "HR": "FC",
 "Heart rate": "Frecuencia cardíaca",
+"Suit checkout stand": "Banco de chequeo del traje",
+"Heart rate · no signal": "Frecuencia cardíaca · sin señal",
 "Heart rate variability": "Variabilidad cardíaca",
 "History": "Historial",
 "Humidity": "Humedad",
@@ -360,6 +362,7 @@ const ES_DICT = {
 const ES_COUNT = { Active: 'Activas', Snoozed: 'Pospuestas', Acknowledged: 'Reconocidas', Resolved: 'Resueltas', All: 'Todas' };
 
 const ES_PATTERNS = [
+["^Heart rate (\\d+) bpm · one beat every (.+) s$","Frecuencia cardíaca $1 bpm · un latido cada $2 s"],
 ["^Sources: (.*)$","Fuentes: $1"],
 ["^(.+) was made with Claude, an AI assistant by Anthropic\\. The visual design comes from Claude Design, and Claude Code helped write, review and test the code\\. Team (.+) chose what to build, directed the work and made the product decisions\\.$","$1 se hizo con Claude, un asistente de IA de Anthropic. El diseño visual viene de Claude Design y Claude Code ayudó a escribir, revisar y probar el código. El equipo $2 eligió qué construir, dirigió el trabajo y tomó las decisiones de producto."],
 ["^All\\ data\\ is\\ simulated\\ \\(seed\\ (.+?)\\)\\.\\ No\\ reading\\ belongs\\ to\\ a\\ real\\ person\\.$","Todos los datos son simulados (semilla $1). Ninguna lectura es de una persona real."],

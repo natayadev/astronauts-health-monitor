@@ -1,6 +1,7 @@
 /**
  * ui.js · UI controller
- * Owns: navigation, stage, twin, cards, drawer, views, alert list, About, Advanced.
+ * Owns: navigation, stage, cards, drawer, views, alert list, About, Advanced.
+ * The astronaut in the middle of the stage is its own component (../twin/twin.js); this file only passes it props.
  */
 import { $, $$, setHtml, setText, pillHtml, alertLevelData, alertIcon, alertPillText, fmtVal, levelOf, trusted, metricKey, histRows, chartInner, download, beep } from './helpers.js';
 import { ICONS, LV_ICON } from './icons.js';
@@ -13,46 +14,19 @@ import { I18N } from '../i18n.js';
 import { EVIDENCE, SOURCES, REAL_SOURCES, BASIS_LABEL, BASIS_LEVEL, EVIDENCE_LEGEND, citeText, apaItems, hasUnverified, evBtn, evidenceBody, evCell, basisPill } from '../evidence.js';
 import { refreshSecondary, startProvider, runAlertAction } from '../app.js';
 import { CheckinUI } from './checkin.js';
+import { createTwin, anchorOf } from '../twin/twin.js';
 
 const VIEWS = ['overview', 'biometrics', 'checkin', 'alerts', 'history', 'about', 'advanced'];
 
-/* ===== Twin geometry ===== */
-/* Astronaut suit silhouette — used only for the scan-line mask.
-   PNG is 491×1080, rendered at x=542 y=0 w=356 h=780 in the 1440×780 viewBox.
-   Scale factors: sx = 356/491 ≈ 0.725, sy = 780/1080 ≈ 0.722, offset x += 542.
-   Suit occupies roughly the central 70% of the PNG width. */
-const TWIN_PARTS = [
-  // Helmet
-  '<ellipse cx="720" cy="108" rx="62" ry="68" stroke-width="0"/>',
-  // Neck / collar
-  '<ellipse cx="720" cy="178" rx="38" ry="16" stroke-width="0"/>',
-  // Torso
-  '<path d="M638 184 C624 192 616 210 616 230 L616 460 C616 476 626 488 642 494 L720 498 L798 494 C814 488 824 476 824 460 L824 230 C824 210 816 192 802 184 Z" stroke-width="0"/>',
-  // Left upper arm
-  '<path d="M622 190 C606 196 594 210 588 228 L572 334 C568 350 574 364 586 370 L608 376 C620 370 626 356 628 340 L640 234 C642 218 638 204 622 190 Z" stroke-width="0"/>',
-  // Left forearm + glove
-  '<path d="M586 370 C572 378 562 392 560 408 L552 480 C550 496 558 508 570 514 L596 520 C608 514 614 500 614 486 L620 414 C622 398 616 386 602 378 Z" stroke-width="0"/>',
-  '<ellipse cx="582" cy="536" rx="28" ry="22" stroke-width="0"/>',
-  // Right upper arm
-  '<path d="M818 190 C834 196 846 210 852 228 L868 334 C872 350 866 364 854 370 L832 376 C820 370 814 356 812 340 L800 234 C798 218 802 204 818 190 Z" stroke-width="0"/>',
-  // Right forearm + glove
-  '<path d="M854 370 C868 378 878 392 880 408 L888 480 C890 496 882 508 870 514 L844 520 C832 514 826 500 826 486 L820 414 C818 398 824 386 838 378 Z" stroke-width="0"/>',
-  '<ellipse cx="858" cy="536" rx="28" ry="22" stroke-width="0"/>',
-  // Left leg
-  '<path d="M642 494 C628 500 618 512 616 528 L608 616 C606 632 612 644 624 650 L664 656 C676 650 682 638 682 622 L688 534 C690 518 686 506 672 498 Z" stroke-width="0"/>',
-  '<path d="M624 650 C610 658 602 672 602 688 L600 752 C600 762 608 768 620 768 L672 768 C684 768 692 762 692 752 L692 688 C692 672 684 658 668 650 Z" stroke-width="0"/>',
-  // Right leg
-  '<path d="M798 494 C812 500 822 512 824 528 L832 616 C834 632 828 644 816 650 L776 656 C764 650 758 638 758 622 L752 534 C750 518 754 506 768 498 Z" stroke-width="0"/>',
-  '<path d="M816 650 C830 658 838 672 838 688 L840 752 C840 762 832 768 820 768 L768 768 C756 768 748 762 748 752 L748 688 C748 672 756 658 772 650 Z" stroke-width="0"/>'
-];
-
+/* ===== Stage layout ===== */
+/* Where each card sits, and the point on the astronaut its link line ends on (from the twin's own geometry). */
 const LAYOUT = {
-  hrv:  { side: 'L', top: 60,  node: [720, 108] },  // helmet (HRV)
-  resp: { side: 'L', top: 290, node: [655, 310] },  // left chest (respiration)
-  spo2: { side: 'L', top: 520, node: [582, 536] },  // left glove (SpO₂)
-  hr:   { side: 'R', top: 60,  node: [762, 310] },  // right chest / heart
-  bp:   { side: 'R', top: 290, node: [858, 536] },  // right glove (BP cuff)
-  temp: { side: 'R', top: 520, node: [720, 420] }   // abdomen / belt (core temp)
+  hrv:  { side: 'L', top: 60,  node: anchorOf('hrv') },   // helmet
+  resp: { side: 'L', top: 290, node: anchorOf('resp') },  // chest
+  spo2: { side: 'L', top: 520, node: anchorOf('spo2') },  // right glove
+  hr:   { side: 'R', top: 60,  node: anchorOf('hr') },    // heart port on the left chest
+  bp:   { side: 'R', top: 290, node: anchorOf('bp') },    // cuff on the left upper arm
+  temp: { side: 'R', top: 520, node: anchorOf('temp') }   // patch on the abdomen
 };
 const COL = { L: { x: 96, w: 290 }, R: { x: 1054, w: 290 } };
 
@@ -69,11 +43,11 @@ function _evidenceBody(key) { return evidenceBody(key, pillHtml); }
 function _evCell(key) { return evCell(key, pillHtml); }
 
 export const UI = {
-  menuOpen: null, drawerTrigger: null, compact: false, scale: 1, evOpen: false, evKey: null, evTrigger: null,
+  menuOpen: null, drawerTrigger: null, twin: null, hoverMetric: null, compact: false, scale: 1, evOpen: false, evKey: null, evTrigger: null,
 
   init() {
-    // Twin — PNG is shown via <image> in HTML; no SVG primitives needed
-    // #twin-body and #twin-mask-g are kept empty (mask not used with the PNG approach)
+    // Twin: the astronaut figure and its metric overlays. It only ever sees the props syncTwin() passes.
+    this.twin = createTwin($('#twin'));
 
     // Links and cards
     let links = '', cards = '';
@@ -91,6 +65,14 @@ export const UI = {
     $('#cards').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('metric')) { e.preventDefault(); this.toggleDrawer(e.target.dataset.m, e.target); } });
     $('#layer-links').addEventListener('click', e => { const h = e.target.closest('.hit'); if (h) this.toggleDrawer(h.dataset.m, h); });
     $('#layer-links').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('hit')) { e.preventDefault(); this.toggleDrawer(e.target.dataset.m, e.target); } });
+    // Hovering or focusing a card or a body point previews that metric on the twin; a click still opens its history.
+    for (const [root, sel] of [[$('#cards'), '.metric'], [$('#layer-links'), '.hit']]) {
+      const preview = m => { if (this.hoverMetric !== m) { this.hoverMetric = m; this.syncTwin(); } };
+      const enter = e => { if (e.pointerType !== 'touch') preview(e.target.closest?.(sel)?.dataset.m || null); };  // a tap selects; it must not leave a hover behind
+      const leave = e => { if (!e.relatedTarget?.closest?.(sel)) preview(null); };
+      root.addEventListener('pointerover', enter); root.addEventListener('focusin', enter);
+      root.addEventListener('pointerout', leave);  root.addEventListener('focusout', leave);
+    }
 
     // Drawer
     $('#dr-close').onclick = () => this.closeDrawer(); $('#scrim').onclick = () => this.closeDrawer();
@@ -112,7 +94,7 @@ export const UI = {
     });
 
     // Bottom bar
-    $('#btn-spin').onclick = () => { const on = !$('#twin-spin').classList.contains('on'); $('#twin-spin').classList.toggle('on', on); $('#stage').classList.toggle('spinning', on); $('#btn-spin').setAttribute('aria-pressed', String(on)); };
+    $('#btn-spin').onclick = () => { const on = $('#btn-spin').getAttribute('aria-pressed') !== 'true'; this.twin.update({ spin: on }); $('#stage').classList.toggle('spinning', on); $('#btn-spin').setAttribute('aria-pressed', String(on)); };
     $('#btn-scan').onclick = () => this.runScan();
     $('#btn-export').onclick = () => this.exportReport();
 
@@ -191,6 +173,7 @@ export const UI = {
     const reduced = State.motion === 'reduced' || (State.motion === 'auto' && sys);
     document.documentElement.dataset.motion = reduced ? 'reduced' : 'full';
     const cb = $('#set-motion'); if (cb) cb.checked = reduced;
+    this.syncTwin();
   },
 
   /* ===== Stage ===== */
@@ -283,6 +266,14 @@ export const UI = {
       el.classList.toggle('dim', text === '--');
     }
     $('#m-hr').style.setProperty('--beat', (60 / Math.max(40, r?.hr || 70)).toFixed(2) + 's');
+    this.syncTwin();
+  },
+  /* Props for the twin: one reading per metric, plus which metric is hovered or selected. */
+  syncTwin() {
+    if (!this.twin) return;
+    const id = State.selectedId, ev = State.evals[id], r = State.shown[id], metrics = {};
+    for (const g of GROUPS) { const value = r?.[metricKey(g)] ?? null, level = ev?.metrics[g]?.level || 'nodata'; metrics[g] = { value, level, signal: value != null && level !== 'nodata' }; }
+    this.twin.update({ metrics, focus: State.selMetric || this.hoverMetric || null, pinned: !!State.selMetric, motion: document.documentElement.dataset.motion === 'reduced' ? 'reduced' : 'full' });
   },
   renderDockbar() {
     const id = State.selectedId, c = State.crew.find(x => x.id === id); if (!c) return;
@@ -295,12 +286,11 @@ export const UI = {
   runScan() {
     const btn = $('#btn-scan'); if (btn.getAttribute('aria-pressed') === 'true') return;
     btn.setAttribute('aria-pressed', 'true'); setText($('#scan-label'), 'Scanning…');
-    const s = $('#scan-layer'); s.hidden = true; void s.getBoundingClientRect(); s.hidden = false;
-    setTimeout(() => {
-      s.hidden = true; btn.setAttribute('aria-pressed', 'false'); setText($('#scan-label'), 'Scan system');
+    this.twin.scan().then(() => {
+      btn.setAttribute('aria-pressed', 'false'); setText($('#scan-label'), 'Scan system');
       const ev = State.evals[State.selectedId], devs = State.devicesOf(State.selectedId), on = devs.filter(d => d.status === 'connected').length;
       showToast({ level: ev?.partial ? 'attention' : 'normal', icon: 'achievement', title: 'Scan complete', message: `${ev?.coverage ?? 0} of ${GROUPS.length} metrics · ${on} of ${devs.length} sensors online · ${activeAlerts().length} active alerts` });
-    }, 3200);
+    });
   },
   exportReport() {
     const id = State.selectedId, c = State.crew.find(x => x.id === id); if (!c) return;
