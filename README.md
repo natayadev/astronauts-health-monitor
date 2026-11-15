@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Tesai - NASA Space Apps Challenge 2026" width="100%">
+  <img src="assets/banner.png" alt="Tesai App - Health monitoring software for astronauts on space missions. NASA Space Apps Challenge 2026, Equipo Higía" width="100%">
 </p>
 
 <div align="center">
