@@ -1,66 +1,82 @@
-# Tesai · gemelo de salud para tripulación
+# Tesai · health twin for space crews
 
-Prototipo web de monitoreo de signos vitales de astronautas. Estilo "gemelo digital" (menta + teal, vidrio, números en mono) tomado del diseño de Claude Design, con semáforo **Normal / Atención / Avisar a cirujanos de vuelo**.
+Made by **Team Higía** (Ezequiel Alfaro, Sebastian Garay, Nataya Flores, Mateo Capararo) for the **NASA Space Apps Challenge 2026**: *Create Health Monitoring Software for Astronauts on Space Missions*. Built with Claude (Claude Design for the visual design, Claude Code for the implementation). It is an independent prototype, not affiliated with NASA.
 
-> **Todos los datos son simulados.** La insignia "DATOS SIMULADOS" está siempre visible. Los datos importados se rotulan "SIN VERIFICAR".
+Web prototype for monitoring astronaut vital signs. It uses a "digital twin" look (mint + teal, glass surfaces, mono numbers) taken from the Claude Design mockup, with a traffic-light scale: **Normal / Attention / Alert flight surgeons**.
 
-## Correr
+> **All data is simulated.** The "SIMULATED DATA" badge is always visible. Imported data is labeled "unverified".
 
-Es un solo `index.html` sin build. Conviene servirlo por HTTP:
+## Run
+
+It is a single `index.html` with no build step. Serving it over HTTP works best:
 
 ```bash
 cd src
 python -m http.server 8765
 ```
 
-Abrir `http://localhost:8765/`. Las fuentes están en `assets/fonts/`, así que funciona sin conexión.
+Open `http://localhost:8765/`. The fonts live in `assets/fonts/`, so it also works offline.
 
-## Estructura
+## Structure
 
 ```
 src/
-├─ index.html        # app completa: tokens CSS, HTML, esquema, config, proveedores, reglas, estado y UI
-├─ assets/fonts/     # Plus Jakarta Sans y JetBrains Mono (SIL OFL), locales
+├─ index.html        # the whole app: CSS tokens, HTML, schema, config, providers, rules, state and UI
+├─ assets/fonts/     # Plus Jakarta Sans and JetBrains Mono (SIL OFL), local
 └─ README.md
 ```
 
-### Secciones (navegación: 4 + Sistema)
+### Sections (navigation: 4 + About)
 
-| Sección | Qué muestra |
+| Section | What it shows |
 |---|---|
-| Resumen | Franja de estado y siguiente paso, gemelo con seis signos vitales conectados, detalle lateral, barra de acciones, misiones |
-| Biometría | Tarjetas con tendencia y calidad de lectura, entorno de cabina, sueño y actividad |
-| Diagnóstico | Avisos con ciclo de vida, sensores aparte de salud, enlace con Tierra simulado |
-| Historial | Gráfico con bandas del semáforo y línea base, calidad de señal, misiones y racha |
-| Sistema | Fuente de datos, importar/exportar, modo demostración, apariencia, umbrales (solo lectura), esquema |
+| Overview | Status strip and next step, twin with six connected vital signs, side detail panel, action bar, missions |
+| Biometrics | Vital-sign cards with trend and reading quality, cabin environment (CO₂, oxygen, pressure, temperature, humidity, radiation), sleep and activity |
+| Diagnostics | Alerts with a lifecycle, sensors separate from health, simulated ground link |
+| History | Chart with traffic-light bands and baseline, signal quality, missions and streak |
+| About | Team credits, the NASA challenge, how Claude was used, sources for the cabin ranges and notices |
+| Advanced (hidden) | Data source, import/export, demo mode, appearance, thresholds (read-only), schema. Not in the navigation: open `#/advanced` |
 
-### Capas dentro de `index.html`
+### Layers inside `index.html`
 
-| Capa | Contenido |
+| Layer | Contents |
 |---|---|
-| (a) `SCHEMA` + `CONFIG` | Esquema documentado y configuración centralizada (umbrales, enlace simulado, claves API vacías) |
-| (b) Proveedores | `DataProvider` (contrato), `SimulatedProvider`, `RemoteProvider` (esqueleto), `FileProvider`, adaptadores y normalizador |
-| (c) `RulesEngine` | Lecturas → `normal` / `atencion` / `cirujano` / `parcial` / `sindatos`. No sabe de dónde vienen los datos |
-| (d) Estado | Avisos con ciclo de vida, enlace con Tierra, misiones, puntos, racha |
-| (e) UI | Gemelo, tarjetas, drawer, vistas, gráficos SVG, toasts |
+| (a) `SCHEMA` + `CONFIG` | Documented schema and centralized configuration (thresholds, simulated link, empty API keys) |
+| (b) Providers | `DataProvider` (contract), `SimulatedProvider`, `RemoteProvider` (skeleton), `FileProvider`, adapters and normalizer |
+| (c) `RulesEngine` | Readings → `normal` / `attention` / `surgeon` / `partial` / `nodata`. It does not know where the data comes from |
+| (d) State | Alert lifecycle, ground link, missions, points, streak |
+| (e) UI | Twin, cards, drawer, views, SVG charts, toasts |
 
-## Tema
+## Theme
 
-Todo el color vive en variables CSS del bloque `:root` (paleta base, semáforo, superficies, gradientes, sombras, gráficos, tipografía, radios). Fuera de ese bloque no hay colores literales; los derivados usan `color-mix` sobre la paleta. Para re-tematizar basta cambiar esas variables (por ejemplo `--teal`, `--deep`, `--aqua`, `--bg`).
+All color lives in CSS variables in the `:root` block (base palette, traffic light, surfaces, gradients, shadows, charts, typography, radii). There are no literal colors outside that block; derived colors use `color-mix` on the palette. To re-theme, change those variables (for example `--teal`, `--deep`, `--aqua`, `--bg`).
 
-## Avisos (cambios de la auditoría)
+Alert levels also show a colored dot (green, amber, red, slate for sensors/reminders, gray for partial or no data) next to the level text, so status never relies on color alone.
 
-- Una alerta por condición, con ciclo activa → reconocida → resuelta. No se repite mientras la condición dure.
-- Las lecturas ruidosas o retrasadas no abren ni cierran avisos.
-- Un aviso crítico queda fijo hasta reconocerse. Reconocer no da puntos.
-- Salud y sensores se muestran por separado. Con métricas faltantes el estado es "Datos parciales", no "Normal".
-- Los umbrales son de solo lectura y no se guardan en el navegador. Son ilustrativos, sin validación clínica.
-- El enlace con Tierra es una simulación; no hay transmisión real.
+## Cabin environment
 
-## Accesibilidad y responsive
+Six cabin metrics are tracked with a trend, a reference range and a status: CO₂ (ppm), oxygen partial pressure (kPa), cabin pressure (kPa), temperature (°C), humidity (%) and radiation (µSv/h). The ranges come from public NASA material (ISS cabin design range around 101.3 kPa, ppO₂ 19.5–23.1 kPa, CO₂ operating target below 3 mmHg, temperature and humidity operating limits, and a typical ISS dose of 0.2–0.5 mSv per day). They are illustrative until checked against the current NASA-STD-3001 and JSC 20584 documents; the sources are listed in About. A real source can be added through `DataProvider.getEnvironment()`; `Adapters.adaptRestJson.issTelemetry` is a starting point for the public ISS Live feed (verify it is still active).
 
-`prefers-reduced-motion` y un interruptor para apagar las animaciones decorativas, foco visible, foco estable en las listas, drawer con foco gestionado, íconos SVG, estados con ícono y texto. Por debajo de 1000 px el gemelo queda arriba, las tarjetas pasan a grilla y la navegación se mueve a una barra inferior.
+## Alerts (audit changes)
 
-## Conectar datos reales
+- One alert per condition, with a lifecycle: active → acknowledged or snoozed → resolved. It is not repeated while the condition lasts.
+- Alerts are sorted by priority: P1 critical, P2 health and environment, P3 sensors, P4 reminders. Reminders do not open toasts.
+- A critical alert that stays unacknowledged for a minute is escalated (flag, new announcement and a second simulated notice to Earth). Non-critical alerts can be snoozed for 15 minutes and wake up again if the condition is still there. Critical alerts cannot be snoozed.
+- Filters show a count per state and can be limited to the selected crew member.
+- Noisy or delayed readings neither open nor close alerts.
+- A critical alert stays pinned until it is acknowledged. Acknowledging earns no points.
+- Health and sensors are shown separately. With missing metrics the status is "Partial data", not "Normal".
+- Thresholds are read-only and are not saved in the browser. They are illustrative, with no clinical validation.
+- The ground link is a simulation; nothing is actually transmitted.
 
-Ver "CÓMO CONECTAR DATOS REALES" al final de `index.html`. No existen datos fisiológicos en vivo públicos de astronautas; lo probable es combinar datos públicos agregados con simulación, siempre rotulando `source`.
+## Accessibility and responsive
+
+`prefers-reduced-motion` plus a switch to turn off decorative animations, visible focus, stable focus in lists, a drawer with managed focus, SVG icons, and status shown with an icon and text. Below 1000 px the twin moves to the top, the cards become a grid and the navigation moves to a bottom bar.
+
+## Data values
+
+Internal enum values (levels, reading quality, device status, event types) are English identifiers, for example `attention`, `surgeon`, `noisy`, `delayed`, `missing`, `tachycardia`. CSV and JSON imports must use the same values.
+
+## Connect real data
+
+See "HOW TO CONNECT REAL DATA" at the end of `index.html`. There is no public live physiological data for astronauts; the likely path is to combine aggregated public data with simulation, always labeling `source`.
