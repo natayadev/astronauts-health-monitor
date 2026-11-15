@@ -4,12 +4,13 @@ Sitio estático (sin build, sin framework) del proyecto **Tesai** de Team Higía
 
 ```
 src/
-├─ index.html · styles.css · main.js   Web central: portada, guía de sensores, cómo funciona, accesos (ES/EN)
+├─ index.html · styles.css · main.js   Web central: portada, el problema, la app, cómo funciona, sensores, accesos (ES/EN)
 ├─ shared/                              Lo común a las tres páginas: tokens.css (colores), fonts.css, buttons.css,
 │                                       lang.js (un solo idioma, inglés por defecto) y site-bar.js/.css (logo e idioma de la barra superior)
-├─ assets/                              Imágenes, tipografías (una sola carpeta) y logos
+├─ assets/                              Imágenes, tipografías (una sola carpeta), logos y capturas de Tesai (assets/tesai/)
 ├─ simulacion/                          Simulación inmersiva en primera persona (3 escenarios, con voz)
-│  ├─ index.html                        Un solo archivo; three.js se carga desde esm.sh
+│  ├─ index.html                        Un solo archivo
+│  ├─ vendor/                           three.js 0.170.0 (licencia MIT), incluido para que funcione sin conexión
 │  └─ img/
 └─ tesai/                               Prototipo Tesai: panel de la tripulación, Visor en primera persona,
                                         audio incorporado y segundo doctor (ver tesai/README.md)
