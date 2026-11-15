@@ -1,69 +1,66 @@
-# Astro Vitals · prototipo HUD (src/)
+# Tesai · gemelo de salud para tripulación
 
-Prototipo del NASA Space Apps Challenge 2026 *Health Monitoring Software*. Ver el [README del repositorio](../README.md) para el contexto, alcance y límites.
+Prototipo web de monitoreo de signos vitales de astronautas. Estilo "gemelo digital" (menta + teal, vidrio, números en mono) tomado del diseño de Claude Design, con semáforo **Normal / Atención / Avisar a cirujanos de vuelo**.
 
-Panel de monitoreo de signos vitales de astronautas con estética HUD (paleta azul profundo + cian), semáforo de alertas (**Normal / Atención / Avisar a cirujanos de vuelo**), recordatorios tipo notificación, misiones diarias con puntos y racha de objetivos.
-
-> **Todos los datos son simulados.** La insignia amarilla "DATOS SIMULADOS" se muestra mientras corre el simulador. Nunca se presentan datos simulados como reales.
+> **Todos los datos son simulados.** La insignia "DATOS SIMULADOS" está siempre visible. Los datos importados se rotulan "SIN VERIFICAR".
 
 ## Correr
 
-Es un solo archivo HTML sin build. Conviene servirlo por HTTP para que el navegador cargue la máscara del holograma desde `assets/`:
+Es un solo `index.html` sin build. Conviene servirlo por HTTP:
 
 ```bash
 cd src
 python -m http.server 8765
 ```
 
-y abrir `http://localhost:8765/`. (Abrir `index.html` con doble clic también funciona en la mayoría de los navegadores.)
+Abrir `http://localhost:8765/`. Las fuentes están en `assets/fonts/`, así que funciona sin conexión.
 
 ## Estructura
 
 ```
 src/
-├─ index.html          # toda la app: esquema, config, proveedores, reglas, estado, UI y docs
-├─ assets/
-│  └─ astronaut.png    # silueta en escala de grises usada como máscara del holograma
+├─ index.html        # app completa: tokens CSS, HTML, esquema, config, proveedores, reglas, estado y UI
+├─ assets/fonts/     # Plus Jakarta Sans y JetBrains Mono (SIL OFL), locales
 └─ README.md
 ```
 
+### Secciones (navegación: 4 + Sistema)
+
+| Sección | Qué muestra |
+|---|---|
+| Resumen | Franja de estado y siguiente paso, gemelo con seis signos vitales conectados, detalle lateral, barra de acciones, misiones |
+| Biometría | Tarjetas con tendencia y calidad de lectura, entorno de cabina, sueño y actividad |
+| Diagnóstico | Avisos con ciclo de vida, sensores aparte de salud, enlace con Tierra simulado |
+| Historial | Gráfico con bandas del semáforo y línea base, calidad de señal, misiones y racha |
+| Sistema | Fuente de datos, importar/exportar, modo demostración, apariencia, umbrales (solo lectura), esquema |
+
 ### Capas dentro de `index.html`
 
-| Capa | Qué contiene |
+| Capa | Contenido |
 |---|---|
-| (a) `SCHEMA` + `CONFIG` | Esquema único documentado (campos, unidades, rangos). Configuración centralizada: fuente de datos, semilla, tick, URLs/API keys (vacías), **umbrales del semáforo en un solo objeto**. |
-| (b) Proveedores | `DataProvider` (contrato), `SimulatedProvider` (activo), `RemoteProvider` (esqueleto con `fetchJson` que ya hace timeout/reintentos/caché), `FileProvider` (CSV/JSON local), `Adapters` + `Normalizer` + `validateVital`. |
-| (c) `RulesEngine` | Lecturas normalizadas → `normal` / `atencion` / `cirujano` / `sindatos`. Incluye regla de desviación respecto de la línea base personal. No sabe de dónde vienen los datos. |
-| (d) Estado | Store, notificaciones/recordatorios con dedupe y cooldown, misiones, puntos, rangos, racha (persistidos en `localStorage`). |
-| (e) UI | HUD, holograma, sparklines, historial con bandas, misiones, alertas, importador, ajustes. |
+| (a) `SCHEMA` + `CONFIG` | Esquema documentado y configuración centralizada (umbrales, enlace simulado, claves API vacías) |
+| (b) Proveedores | `DataProvider` (contrato), `SimulatedProvider`, `RemoteProvider` (esqueleto), `FileProvider`, adaptadores y normalizador |
+| (c) `RulesEngine` | Lecturas → `normal` / `atencion` / `cirujano` / `parcial` / `sindatos`. No sabe de dónde vienen los datos |
+| (d) Estado | Avisos con ciclo de vida, enlace con Tierra, misiones, puntos, racha |
+| (e) UI | Gemelo, tarjetas, drawer, vistas, gráficos SVG, toasts |
 
-### Contrato `DataProvider`
+## Tema
 
-```
-getCrew()                          → Astronaut[]
-getVitals(astronautId, from, to)   → VitalReading[]
-subscribeVitals(astronautId, cb)   → unsubscribe()
-getEnvironment()                   → Environment
-getDevices(astronautId)            → Device[]
-getSleepActivity(astronautId, day) → SleepActivity
-getAlerts() / pushEvent(event)
-```
+Todo el color vive en variables CSS del bloque `:root` (paleta base, semáforo, superficies, gradientes, sombras, gráficos, tipografía, radios). Fuera de ese bloque no hay colores literales; los derivados usan `color-mix` sobre la paleta. Para re-tematizar basta cambiar esas variables (por ejemplo `--teal`, `--deep`, `--aqua`, `--bg`).
 
-La UI **solo** llama a estas funciones.
+## Avisos (cambios de la auditoría)
 
-## Qué probar
+- Una alerta por condición, con ciclo activa → reconocida → resuelta. No se repite mientras la condición dure.
+- Las lecturas ruidosas o retrasadas no abren ni cierran avisos.
+- Un aviso crítico queda fijo hasta reconocerse. Reconocer no da puntos.
+- Salud y sensores se muestran por separado. Con métricas faltantes el estado es "Datos parciales", no "Normal".
+- Los umbrales son de solo lectura y no se guardan en el navegador. Son ilustrativos, sin validación clínica.
+- El enlace con Tierra es una simulación; no hay transmisión real.
 
-- **Tripulantes**: pestañas arriba a la derecha. Cada uno tiene línea base propia.
-- **Ajustes → Inyectar evento**: taquicardia, hipoxia, fiebre, hipertensión, ejercicio, desconectar sensor, pico de CO₂. Las tarjetas y el holograma cambian de color y se generan alertas.
-- **Ajustes → Fuente de datos → Remota**: muestra el error `NotImplementedError` y vuelve a simulada sin romper nada.
-- **Datos → Cargar datos**: arrastrá un CSV (hay plantilla descargable) o un JSON exportado; se valida contra el esquema y se usa como fuente (insignia cambia a "DATOS REALES · ARCHIVO").
-- **Misiones**: registro manual de ejercicio/hobby, recarga de baterías desde Dispositivos o desde la notificación, reconocer alertas → puntos, rangos y racha.
-- **Semilla**: misma semilla ⇒ misma secuencia de datos simulados.
+## Accesibilidad y responsive
 
-## Accesibilidad y calidad
-
-Auditado con los plugins **Impeccable** (`/impeccable audit index.html`) y **UI UX Pro Max** (estilo HUD / Sci-Fi FUI, riesgo a11y alto). Implementado: `prefers-reduced-motion`, foco visible por teclado, íconos SVG (sin emojis), estados que no dependen solo del color, live regions para alertas, targets táctiles ≥40px en pantallas táctiles, botón Pausar en el historial en vivo, layout sin scroll horizontal a 375px. Los halos cian, las scanlines y la grilla de fondo son decisiones del brief visual (referencia HUD), no descuidos.
+`prefers-reduced-motion` y un interruptor para apagar las animaciones decorativas, foco visible, foco estable en las listas, drawer con foco gestionado, íconos SVG, estados con ícono y texto. Por debajo de 1000 px el gemelo queda arriba, las tarjetas pasan a grilla y la navegación se mueve a una barra inferior.
 
 ## Conectar datos reales
 
-Ver la sección **"CÓMO CONECTAR DATOS REALES"** al final de `index.html`: pasos para implementar `RemoteProvider`, qué endpoint reemplaza a cada función, qué adaptadores completar, manejo de CORS/proxy y límites de uso. Fuentes candidatas (a verificar): NASA Open Data Portal, NASA Open APIs, OSDR/GeneLab, LSDA. No existen datos fisiológicos en vivo públicos de astronautas; lo probable es combinar datos públicos agregados con simulación, siempre etiquetando `source`.
+Ver "CÓMO CONECTAR DATOS REALES" al final de `index.html`. No existen datos fisiológicos en vivo públicos de astronautas; lo probable es combinar datos públicos agregados con simulación, siempre rotulando `source`.
