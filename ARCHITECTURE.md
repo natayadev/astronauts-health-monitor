@@ -46,7 +46,7 @@ astronauts-health-monitor/
 ├── tools/twin/                     Geometría de la figura (no se despliega): build.mjs, scene.mjs, stand.mjs, suit.mjs, overlays/, kit/
 ├── react/astronaut/                El astronauta como componentes React/Next.js (no se despliega ni lo usa el dashboard); ver su README
 └── src/
-    ├── index.html                  Web central de Higía: portada, guía de sensores, accesos
+    ├── index.html                  Web central de Tesai: portada, guía de sensores, accesos
     ├── main.js                     Idioma de la portada y enlaces a la simulación
     ├── styles.css                  Estilos de la portada
     ├── assets/                     hero.webp, astronaut.webp
@@ -57,7 +57,7 @@ astronauts-health-monitor/
         │   ├── fonts/                  Plus Jakarta Sans + JetBrains Mono (SIL OFL)
         │   │   ├── jetbrains-mono-*.woff2
         │   │   └── plus-jakarta-sans-*.woff2
-        │   ├── human.png               Astronauta PNG anterior (ya no lo usa la UI; se conserva)
+        │   ├── human.png               Astronauta original (traje crema, visor verde): la figura del Overview
         │   └── visor/                  Fondos del Visor (ship.webp, rover.webp)
         ├── styles/
         │   ├── tokens.css              Variables CSS (paleta, tipografía, radios)
@@ -90,7 +90,8 @@ astronauts-health-monitor/
             ├── guidance.js             Segundo doctor: guías paso a paso por aviso, EN/ES
             ├── twin/
             │   ├── twin.js             Componente público: createTwin(root) → update(props), scan(), destroy()
-            │   ├── figure.js           Dibujo + bucle de overlays; anchorOf(metric)
+            │   ├── astronaut.js        Figura en uso: assets/human.png + capas para overlays; anchorOf(metric)
+            │   ├── figure.js           Dibujo isométrico generado + bucle de overlays (conservado, sin uso)
             │   ├── plate.js            Placa: Fig 1, título y línea de lectura
             │   ├── spin.js             Vista 360°: caja con perspectiva que gira
             │   ├── scan.js             Barrido de escaneo
@@ -215,7 +216,8 @@ La única referencia circular es `ui.js → app.js` y `app.js → ui.js`. ES mod
 | `ui/checkin.js` | `CheckinUI`: formulario, panel "Quién ve esto", tira de 14 días por ítem y cruce de síntomas con el CO₂ de cabina (promedio de 30 min convertido a mmHg con la presión de cabina). |
 | `ui/ui.js` | Objeto `UI`: inicialización, navegación, todas las funciones de render (strip, stage, cards, drawer, vistas, misiones, score). Al astronauta solo le pasa props (`syncTwin()`, botones 360° y escaneo); el dibujo vive en `twin/`. |
 | `twin/twin.js` | Componente del astronauta: todo el centro del escenario. `createTwin(root)` monta, dentro de `#twin`, la placa, la caja de giro, la figura y el barrido; devuelve `update(props)`, `scan()` (promesa que termina con el barrido) y `destroy()`. No lee `State`: `UI.syncTwin()` le pasa `{ metrics, focus, pinned, motion }` y el botón 360° le pasa `{ spin }`. Reexporta `anchorOf(metric)`, el punto del cuerpo donde termina la línea de cada tarjeta. El botón, la etiqueta "Scanning…", el toast y `#stage.spinning` (que atenúa tarjetas y líneas) siguen en `ui.js`. |
-| `twin/figure.js` | Dibujo isométrico (`art.js`) y bucle de animación de los overlays (solo corre con la figura visible y la pestaña al frente). Avisa a la placa cuando cambia la línea de lectura. Define `FIGURE` y `anchorOf`. |
+| `twin/astronaut.js` | Figura en uso: el astronauta original (`assets/human.png`), montado como en el primer diseño (todo el escenario, centrado, opacidad 0,95). Define `FIGURE`, `ANCHORS` (puntos del cuerpo en píxeles de la imagen, 1920 × 1080) y `anchorOf`. Expone las capas `defs`, `body`, `live` y `overlays` para superposiciones futuras sobre el traje, que nunca se abre; su registro de overlays está vacío. Misma interfaz que `figure.js`. |
+| `twin/figure.js` | **Sin uso, conservado** (volver a usarlo es cambiar un import en `twin.js`). Dibujo isométrico (`art.js`) y bucle de animación de los overlays (solo corre con la figura visible y la pestaña al frente). Avisa a la placa cuando cambia la línea de lectura. Define `FIGURE` y `anchorOf`. |
 | `twin/plate.js`, `twin/spin.js`, `twin/scan.js` | Placa con título y lectura; caja con perspectiva para la vista 360°; barrido de escaneo (3,2 s, con su propio degradado y máscara; el brillo usa `#tz-glow`, compartido con los gráficos). |
 | `twin/overlays/index.js` | Registro métrica → overlay. Hoy solo `hr`. Cada overlay implementa `mount(ctx) → { update, tick, readout }`. |
 | `twin/overlays/heart.js` | Frecuencia cardíaca en vivo: aguja del dial, lámpara, traza en el display del pecho y, al enfocar la métrica, la mirilla del pecho que se abre sobre el corazón latiendo. Un único acumulador de fase (`fase += dt × bpm / 60`). |

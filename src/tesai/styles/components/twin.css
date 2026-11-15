@@ -25,6 +25,8 @@
 .twin-plate-title   { right: 20px; top: 18px; text-transform: uppercase }
 .twin-plate-readout { right: 20px; bottom: 18px; color: var(--color-ink); font-variant-numeric: tabular-nums }
 .twin[data-spinning] .twin-plate > span { opacity: .25 }
+/* The original astronaut picture stands on the stage as it did in the first design, without the plate. */
+.twin[data-figure="astronaut"] .twin-plate { display: none }
 
 /* The stage hint sits in the left column, clear of the plate. */
 #stage .hint { max-width: 300px; white-space: normal; align-items: flex-start; line-height: 1.35 }

@@ -1,7 +1,7 @@
 /**
  * visor.js · Visor view, situation notice and "second doctor".
  * Visor = every crew member's vital signs always in view (like the helmet
- * visor in the Higía simulation), plus a situation notice that, when an alert
+ * visor in the Tesai simulation), plus a situation notice that, when an alert
  * opens, guides the crew step by step, by voice and on screen.
  * Same visual system as the rest of Tesai (mint + teal glass).
  */

@@ -12,12 +12,12 @@
 /*I18N-DATA-START*/
 const ES_DICT = {
 "Built-in audio": "Audio incorporado",
-"Tesai warns by tone and voice, like the Higía simulation. Turn it on to hear it.": "Tesai avisa con un tono y por voz, como la simulación Higía. Activalo para escucharlo.",
+"Tesai warns by tone and voice, like the simulation. Turn it on to hear it.": "Tesai avisa con un tono y por voz, como la simulación. Activalo para escucharlo.",
 "Turn on audio": "Activar audio",
 "Second doctor": "Segundo doctor",
-"Tesai has audio built in, like the Higía simulation. When an alert opens it plays a tone, and for critical alerts a voice reads the situation aloud in English or Spanish.": "Tesai tiene audio incorporado, como la simulación Higía. Cuando se abre un aviso suena un tono y, en los avisos críticos, una voz lee la situación en español o en inglés.",
+"Tesai has audio built in, like the simulation. When an alert opens it plays a tone, and for critical alerts a voice reads the situation aloud in English or Spanish.": "Tesai tiene audio incorporado, como la simulación. Cuando se abre un aviso suena un tono y, en los avisos críticos, una voz lee la situación en español o en inglés.",
 "The second doctor on the Visor can read each step aloud. Sound needs one click or key press to start, and you can turn it off with the speaker button in the top bar.": "El segundo doctor del Visor puede leer cada paso en voz alta. El sonido necesita un clic o una tecla para empezar y se apaga con el botón del parlante en la barra superior.",
-"Open the Higía simulation": "Abrir la simulación Higía",
+"Open the simulation": "Abrir la simulación",
 "Check-in": "Chequeo",
 "Daily check-in": "Chequeo diario",
 "A short, private check-in about how you are today. It is not a clinical questionnaire and it does not diagnose anything. It never raises alerts and never earns points.": "Un chequeo breve y privado sobre cómo estás hoy. No es un cuestionario clínico y no diagnostica nada. Nunca genera avisos ni da puntos.",

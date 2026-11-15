@@ -1,6 +1,6 @@
 /**
  * audio.js · Built-in audio (tones + voice).
- * Same idea as the Higía simulation: the system talks to the crew.
+ * Same idea as the Tesai simulation: the system talks to the crew.
  *  - tone():  short Web Audio patterns per alert level (no files needed)
  *  - speak(): browser speech synthesis in the active language (ES / EN)
  * Browsers only allow sound after a user gesture, so unlock() is called from
