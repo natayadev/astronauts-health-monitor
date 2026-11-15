@@ -4,7 +4,7 @@ Made by **Team Higía** (Ezequiel Alfaro, Sebastian Garay, Nataya Flores, Mateo 
 
 Web prototype for monitoring astronaut vital signs. It uses a "digital twin" look (mint + teal, glass surfaces, mono numbers) taken from the Claude Design mockup, with a traffic-light scale: **Normal / Attention / Alert flight surgeons**.
 
-> **All data is simulated.** The "SIMULATED DATA" badge is always visible. Imported data is labeled "unverified".
+> **All data is simulated.** The About page and the startup notice say so; imported file or API data shows an "unverified" badge in the top bar.
 
 ## Run
 
@@ -26,13 +26,13 @@ src/
 └─ README.md
 ```
 
-### Sections (navigation: 4 + About)
+### Sections (navigation: Overview, Biometrics, History, About; Alerts opens from the bell)
 
 | Section | What it shows |
 |---|---|
 | Overview | Status strip and next step, twin with six connected vital signs, side detail panel, action bar, missions |
 | Biometrics | Vital-sign cards with trend and reading quality, cabin environment (CO₂, oxygen, pressure, temperature, humidity, radiation), sleep and activity |
-| Diagnostics | Alerts with a lifecycle, sensors separate from health, simulated ground link |
+| Alerts (from the bell) | Alerts with a lifecycle and priority, sensors separate from health, simulated ground link |
 | History | Chart with traffic-light bands and baseline, signal quality, missions and streak |
 | About | Team credits, the NASA challenge, how Claude was used, sources for the cabin ranges and notices |
 | Advanced (hidden) | Data source, import/export, demo mode, appearance, thresholds (read-only), schema. Not in the navigation: open `#/advanced` |
@@ -55,14 +55,32 @@ Alert levels also show a colored dot (green, amber, red, slate for sensors/remin
 
 ## Cabin environment
 
-Six cabin metrics are tracked with a trend, a reference range and a status: CO₂ (ppm), oxygen partial pressure (kPa), cabin pressure (kPa), temperature (°C), humidity (%) and radiation (µSv/h). The ranges come from public NASA material (ISS cabin design range around 101.3 kPa, ppO₂ 19.5–23.1 kPa, CO₂ operating target below 3 mmHg, temperature and humidity operating limits, and a typical ISS dose of 0.2–0.5 mSv per day). They are illustrative until checked against the current NASA-STD-3001 and JSC 20584 documents; the sources are listed in About. A real source can be added through `DataProvider.getEnvironment()`; `Adapters.adaptRestJson.issTelemetry` is a starting point for the public ISS Live feed (verify it is still active).
+Six cabin metrics are tracked with a trend, a reference range and a status: CO₂ (ppm), oxygen partial pressure (kPa), cabin pressure (kPa), temperature (°C), humidity (%) and radiation (µSv/h). The ranges come from public NASA material (see Evidence below); the red radiation limit is 54 µSv/h, the 1.3 mSv/day free-space galactic cosmic ray dose from NASA-STD-3001 Vol. 1. A real source can be added through `DataProvider.getEnvironment()`; `Adapters.adaptRestJson.issTelemetry` is a starting point for the public ISS Live feed (verify it is still active).
+
+## Evidence and sources (APA 7)
+
+Every number, goal and alert rule has a basis and sources:
+
+| Basis | Meaning |
+|---|---|
+| Based on a source | The value follows a published one |
+| Adapted from a source | Starts from a source, but Tesai changed it (the note says how) |
+| Team design value | Chosen by the team; no published source was found |
+| No real data source | Simulated data |
+
+- A **"!" button** sits next to each metric in Biometrics (vital cards, cabin cards, goals, and the side panel), and next to the alert, ground link, sensor and baseline panels. It opens the basis, a short note and the APA 7 references.
+- The **About** page lists the evidence by data point, the data provenance and the full alphabetical reference list. The Advanced thresholds table has a "Basis and sources" column.
+- Sources live in `SOURCES` (APA 7 HTML) and `EVIDENCE` (basis, note and source ids per data point) in `index.html`. To add or fix a source, edit those two objects.
+- Entries marked † have a title or date that could not be verified because the site blocked automated access. Numbers taken from sources were read with automatic extractors, so open the link and confirm a value before quoting it.
+- Not backed by a published source: HRV limits, core-temperature limits, the outer heart-rate limits, the sleep goal, the hobby goal, battery levels, hydration, the personal-baseline deviation, escalation timing and the ground-link delay profile.
 
 ## Alerts (audit changes)
 
 - One alert per condition, with a lifecycle: active → acknowledged or snoozed → resolved. It is not repeated while the condition lasts.
 - Alerts are sorted by priority: P1 critical, P2 health and environment, P3 sensors, P4 reminders. Reminders do not open toasts.
 - A critical alert that stays unacknowledged for a minute is escalated (flag, new announcement and a second simulated notice to Earth). Non-critical alerts can be snoozed for 15 minutes and wake up again if the condition is still there. Critical alerts cannot be snoozed.
-- Filters show a count per state and can be limited to the selected crew member.
+- You see all of your own alerts (and cabin alerts). Alerts about your teammates appear only when they are critical (red); the crew menu also shows a teammate's status only when it is critical.
+- Filters show a count per state.
 - Noisy or delayed readings neither open nor close alerts.
 - A critical alert stays pinned until it is acknowledged. Acknowledging earns no points.
 - Health and sensors are shown separately. With missing metrics the status is "Partial data", not "Normal".

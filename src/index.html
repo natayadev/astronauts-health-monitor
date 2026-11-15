@@ -109,6 +109,7 @@ svg{display:block}
 .on-dark .btn[aria-pressed="true"]{background:var(--mint); color:var(--forest); border-color:transparent}
 .on-dark .btn.primary{background:var(--grad-accent); border:0}
 .icon-btn{width:40px; height:40px; padding:0; border-radius:50%; position:relative}
+.icon-btn.on{background:var(--grad-brand); color:var(--white); border-color:transparent}
 .icon-btn::after{content:""; position:absolute; inset:-4px}
 
 /* ===== level pills / badges (icon + text: status never relies on color alone) ===== */
@@ -155,6 +156,7 @@ svg{display:block}
 .seg.lang button{padding:6px 10px; font-family:var(--font-mono); font-size:var(--fs-xs); letter-spacing:.02em}
 @media (max-width:460px){.brand-name{display:none}}
 .src .sm{display:none}
+.src[hidden]{display:none}
 .src.real{color:var(--deep); background:color-mix(in srgb,var(--deep) 10%,transparent); border-color:color-mix(in srgb,var(--deep) 30%,transparent)}
 .live{display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:var(--r-pill); background:color-mix(in srgb,var(--teal) 10%,transparent); color:var(--deep); font-size:var(--fs-sm); font-weight:600; white-space:nowrap}
 .ping{position:relative; width:10px; height:10px; flex:none}
@@ -303,6 +305,8 @@ input:focus-visible,select:focus-visible{outline:none; border-color:var(--teal);
 .dockbar .stat .v.mono{font-family:var(--font-mono)}
 .dockbar .acts{display:flex; flex-wrap:wrap; gap:8px}
 
+#view-overview{padding-bottom:24px}
+@media (max-width:1000px){#view-overview{padding-bottom:110px}}
 .today{width:100%; max-width:1180px; margin:20px auto 0; padding:0 24px 140px}
 
 /* ===== detail drawer (glass, slides in from the right) ===== */
@@ -367,6 +371,24 @@ input:focus-visible,select:focus-visible{outline:none; border-color:var(--teal);
 .links{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px}
 .links a{display:inline-block; padding:4px 0; font-weight:500}
 .links.plain li{color:var(--ink); line-height:1.55}
+/* the "!" button next to each data point: opens its sources */
+.evbtn{display:inline-grid; place-items:center; width:22px; height:22px; margin-left:6px; padding:0; flex:none; border-radius:50%; border:1.5px solid var(--eb,var(--deep)); background:var(--white); color:var(--eb,var(--deep)); font:700 13px/1 var(--font-ui); vertical-align:middle; position:relative; transition:background-color .15s var(--ease),color .15s var(--ease),scale .12s var(--ease)}
+.evbtn::after{content:""; position:absolute; inset:-8px}
+.evbtn:hover{background:var(--eb,var(--deep)); color:var(--white)} .evbtn:active{scale:.92}
+.evbtn[data-basis="source"]{--eb:var(--teal-ink)} .evbtn[data-basis="adapted"]{--eb:var(--sensor-ink)} .evbtn[data-basis="design"],.evbtn[data-basis="none"]{--eb:var(--warn-ink)}
+.vwrap{position:relative} .vwrap .evbtn{position:absolute; top:16px; right:16px; margin:0} .vwrap .vcard .top{padding-right:34px}
+.ecard .top .evbtn{margin-left:0}
+.mission .mt .evbtn{width:20px; height:20px; font-size:12px}
+.evscrim{display:none; position:fixed; inset:0; z-index:70; background:color-mix(in srgb,var(--ink) 35%,transparent)} .evscrim.on{display:block}
+.evpop{position:fixed; z-index:71; left:50%; top:50%; transform:translate(-50%,-50%); width:min(620px,calc(100vw - 24px)); max-height:calc(100vh - 40px); overflow:auto; padding:22px; border-radius:var(--r-xl); background:var(--glass-3); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid var(--white); box-shadow:var(--shadow-l); display:flex; flex-direction:column; gap:12px}
+.evpop[hidden]{display:none}
+.evpop .evh{display:flex; align-items:flex-start; justify-content:space-between; gap:12px} .evpop h2{font-size:var(--fs-xl); font-weight:700; letter-spacing:-.01em}
+.evpop .eyebrow{font-size:var(--fs-xs); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.evpop h3{font-size:var(--fs-lg); font-weight:700; margin-top:4px} .evnote{line-height:1.55; color:var(--ink)}
+.apa{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; font-size:var(--fs-sm); line-height:1.5; overflow-wrap:anywhere}
+.apa li{padding-left:2em; text-indent:-2em} .apa a{color:var(--teal-ink); text-decoration:underline; text-underline-offset:2px}
+.evrow{display:flex; flex-direction:column; gap:6px; padding:12px 14px; border-radius:16px; background:color-mix(in srgb,var(--white) 62%,transparent)}
+.evrow .top{display:flex; flex-wrap:wrap; align-items:center; gap:8px} .evrow .top b{font-weight:600; font-size:var(--fs-md)} .evrow p{font-size:var(--fs-sm); line-height:1.5} .evrow .cites{font-size:var(--fs-xs); color:var(--muted)}
 .prio{font-family:var(--font-mono); font-size:var(--fs-xs); font-weight:600; padding:2px 8px; border-radius:8px; background:color-mix(in srgb,var(--deep) 10%,transparent); color:var(--deep)}
 .arow[data-status="snoozed"]{opacity:.8}
 .status-chip[data-s="snoozed"]{background:var(--lv-bg); color:var(--lv-ink)}
@@ -477,6 +499,7 @@ html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-mo
 html[data-motion="reduced"] .metric:hover,html[data-motion="reduced"] .vcard:hover{transform:none}
 html[data-motion="reduced"] .drawer,html[data-motion="reduced"] .menu,html[data-motion="reduced"] #stage{transition-property:opacity,visibility,background-color,color,box-shadow}
 html[data-motion="reduced"] .toast{animation:none}
+@media (max-width:760px){.evpop{padding:16px}}
 </style>
 </head>
 <body>
@@ -493,7 +516,6 @@ html[data-motion="reduced"] .toast{animation:none}
       <div class="tabs" id="tabs">
         <button class="tab" data-view="overview" aria-current="page">Overview</button>
         <button class="tab" data-view="biometrics">Biometrics</button>
-        <button class="tab" data-view="diagnostics">Diagnostics<span class="bell-count" id="tab-count" style="position:static;border:0" data-level="attention"></span></button>
         <button class="tab" data-view="history">History</button>
         <button class="tab" data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>About</button>
       </div>
@@ -587,52 +609,26 @@ html[data-motion="reduced"] .toast{animation:none}
           <button class="btn primary" id="btn-export"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export report</button>
         </div>
       </div>
-
-      <div class="today">
-        <div class="grid g3">
-          <section class="panel" aria-labelledby="h-today">
-            <h3 id="h-today"><span class="grow">Today's missions</span><span class="pill" id="missions-summary">0/4</span></h3>
-            <div class="alist" id="missions-mini"></div>
-            <div class="toolbar"><button class="btn sm" data-go="history">View missions and streak</button></div>
-          </section>
-          <section class="panel" aria-labelledby="h-cabin">
-            <h3 id="h-cabin"><span class="grow">Cabin</span><span id="env-mini-pill"></span></h3>
-            <div class="alist" id="env-mini"></div>
-            <div class="toolbar"><button class="btn sm" data-go="biometrics">Cabin details</button></div>
-          </section>
-          <section class="panel" aria-labelledby="h-rank">
-            <h3 id="h-rank"><span class="grow">Points and streak</span><span class="pill solid" id="score-rank">CADETE</span></h3>
-            <div class="kv">
-              <div><div class="k">Points</div><div class="v"><span id="score-pts">0</span><small>pts</small></div></div>
-              <div><div class="k">Streak</div><div class="v"><span id="score-streak">0</span><small>days</small></div></div>
-            </div>
-            <p class="note">Points reward real habits: exercise, rest, free time and charged sensors. Acknowledging an alert does not earn points.</p>
-          </section>
-        </div>
-      </div>
     </section>
 
     <!-- ===================== BIOMETRICS ===================== -->
     <section class="view" id="view-biometrics" aria-labelledby="h-bio">
-      <div class="page-head"><div><h2 id="h-bio">Biometrics</h2><p>All vital signs for the selected person, their recent trend and the quality of each reading. Tap a card to open its detail.</p></div></div>
+      <div class="page-head"><div><h2 id="h-bio">Biometrics <span data-evslot="data.simulated"></span></h2><p>All your vital signs, their recent trend and the quality of each reading. Tap a card to open its detail.</p></div></div>
       <div class="vgrid" id="vgrid"></div>
       <section class="panel" style="margin-top:16px" aria-labelledby="h-env">
         <h3 id="h-env"><span class="grow">Cabin environment</span><span id="env-overall"></span></h3>
-        <p class="sub">Atmosphere and radiation in the habitat. Ranges come from public NASA material and are illustrative; see About for the sources. Out-of-range values raise alerts in Diagnostics.</p>
+        <p class="sub">Atmosphere and radiation in the habitat. Ranges come from public NASA material and are illustrative; see About for the sources. Out-of-range values raise alerts; open them from the bell.</p>
         <div class="vgrid" id="env-grid"></div>
         <p class="note" id="env-dose"></p>
       </section>
-      <section class="panel" style="margin-top:16px" aria-labelledby="h-act"><h3 id="h-act"><span class="grow">Sleep and activity</span></h3><div id="activity-block"></div></section>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-act"><h3 id="h-act"><span class="grow">Sleep and activity</span><span data-evslot="goal.sleep"></span><span data-evslot="goal.exercise"></span></h3><div id="activity-block"></div></section>
     </section>
 
-    <!-- ===================== DIAGNOSTICS ===================== -->
-    <section class="view" id="view-diagnostics" aria-labelledby="h-diag">
+    <!-- ===================== ALERTS (opened from the bell, not in the navigation) ===================== -->
+    <section class="view" id="view-alerts" aria-labelledby="h-diag">
       <div class="page-head">
-        <div><h2 id="h-diag">Diagnostics</h2><p>One alert per condition, with a lifecycle: active, acknowledged, resolved. Sensor problems are shown separately from health ones.</p></div>
+        <div><h2 id="h-diag">Alerts</h2><p>One alert per condition, with a lifecycle: active, acknowledged, resolved. Sensor problems are shown separately from health ones. You see all your own alerts, and your teammates' alerts only when they are critical (red).</p></div>
         <div class="toolbar">
-          <div class="seg" id="alert-scope" role="group" aria-label="Which crew members">
-            <button data-scope="all" aria-pressed="true">All crew</button><button data-scope="person" aria-pressed="false" id="scope-person">Selected person</button>
-          </div>
           <div class="seg" id="alert-filter" role="group" aria-label="Filter alerts by state">
             <button data-filter="active" data-label="Active" aria-pressed="true">Active</button><button data-filter="snoozed" data-label="Snoozed" aria-pressed="false">Snoozed</button><button data-filter="acknowledged" data-label="Acknowledged" aria-pressed="false">Acknowledged</button><button data-filter="resolved" data-label="Resolved" aria-pressed="false">Resolved</button><button data-filter="all" data-label="All" aria-pressed="false">All</button>
           </div>
@@ -640,22 +636,22 @@ html[data-motion="reduced"] .toast{animation:none}
       </div>
       <div class="grid diag-grid">
         <section class="panel" aria-labelledby="h-alerts">
-          <h3 id="h-alerts"><span class="grow">Alerts <span class="tag">(local time)</span></span><button class="btn sm" id="snooze-soft">Snooze non-critical</button><button class="btn sm" id="ack-soft">Acknowledge non-critical</button></h3>
+          <h3 id="h-alerts"><span class="grow">Alert list <span class="tag">(local time)</span></span><span data-evslot="rule.escalation"></span><span data-evslot="rule.quality"></span><button class="btn sm" id="snooze-soft">Snooze non-critical</button><button class="btn sm" id="ack-soft">Acknowledge non-critical</button></h3>
           <p class="sub" style="margin-top:0">Sorted by priority: <b>P1</b> critical, <b>P2</b> health and environment, <b>P3</b> sensors, <b>P4</b> reminders. A critical alert that stays unacknowledged for a minute is escalated. Non-critical alerts can be snoozed for 15 minutes.</p>
           <div class="key" aria-label="Level key"><span data-level="normal"><i class="lvdot"></i>Normal</span><span data-level="attention"><i class="lvdot"></i>Attention</span><span data-level="surgeon"><i class="lvdot"></i>Alert flight surgeons</span><span data-level="sensor"><i class="lvdot"></i>Sensor / reminder</span><span data-level="partial"><i class="lvdot"></i>Partial or no data</span></div>
           <div id="alerts-list"></div>
         </section>
         <div class="grid" style="align-content:start">
           <section class="dark-card on-dark" aria-labelledby="h-next"><div class="eyebrow" id="h-next">Next step</div><p id="next-step" style="font-size:var(--fs-md);line-height:1.55;margin-top:6px"></p><p class="note" style="color:var(--soft);margin-top:8px">System guidance, not a medical diagnosis.</p></section>
-          <section class="panel" aria-labelledby="h-uplink"><h3 id="h-uplink"><span class="grow">Ground link</span><span class="pill" data-level="sensor">SIMULATED</span></h3><div class="alist" id="uplink"></div></section>
-          <section class="panel" aria-labelledby="h-dev"><h3 id="h-dev"><span class="grow">Sensors</span><span class="tag" id="dev-note"></span></h3><div class="alist" id="dev-list"></div></section>
+          <section class="panel" aria-labelledby="h-uplink"><h3 id="h-uplink"><span class="grow">Ground link</span><span data-evslot="rule.groundlink"></span><span class="pill" data-level="sensor">SIMULATED</span></h3><div class="alist" id="uplink"></div></section>
+          <section class="panel" aria-labelledby="h-dev"><h3 id="h-dev"><span class="grow">Sensors</span><span data-evslot="goal.batteries"></span><span class="tag" id="dev-note"></span></h3><div class="alist" id="dev-list"></div></section>
         </div>
       </div>
     </section>
 
     <!-- ===================== HISTORY ===================== -->
     <section class="view" id="view-history" aria-labelledby="h-hist">
-      <div class="page-head"><div><h2 id="h-hist">History</h2><p>Recent series with the traffic-light bands and the personal baseline. Doubtful readings are marked with an empty circle and do not raise alerts. All times are local.</p></div></div>
+      <div class="page-head"><div><h2 id="h-hist">History</h2><p>Recent series with the traffic-light bands and your personal baseline. Doubtful readings are marked with an empty circle and do not raise alerts. All times are local.</p></div></div>
       <section class="panel" aria-labelledby="h-chart">
         <h3 id="h-chart"><span class="grow">Trend</span></h3>
         <div class="toolbar">
@@ -669,7 +665,7 @@ html[data-motion="reduced"] .toast{animation:none}
       </section>
       <div class="grid g2" style="margin-top:16px">
         <section class="panel" aria-labelledby="h-q"><h3 id="h-q"><span class="grow">Signal quality</span></h3><div class="kv" id="hist-quality"></div></section>
-        <section class="panel" aria-labelledby="h-bl"><h3 id="h-bl"><span class="grow">Personal baseline</span></h3><div class="kv" id="hist-baseline"></div><p class="note">A value is flagged as Attention if it deviates more than <b id="hist-dev">25</b>% from its baseline (except HRV).</p></section>
+        <section class="panel" aria-labelledby="h-bl"><h3 id="h-bl"><span class="grow">Your baseline</span><span data-evslot="rule.baseline"></span></h3><div class="kv" id="hist-baseline"></div><p class="note">A value is flagged as Attention if it deviates more than <b id="hist-dev">25</b>% from your baseline (except HRV).</p></section>
       </div>
 
       <div class="page-head" style="margin-top:34px"><div><h2 id="h-miss">Missions and streak</h2><p>Daily habit goals. Completing all of them keeps the streak going.</p></div></div>
@@ -678,8 +674,8 @@ html[data-motion="reduced"] .toast{animation:none}
           <div class="toolbar"><button class="btn sm" id="log-ex">+15 min exercise</button><button class="btn sm" id="log-hobby">+15 min hobby</button><button class="btn sm" id="log-water">I drank water (+10)</button></div>
         </section>
         <div class="grid" style="align-content:start">
-          <section class="panel"><h3><span class="grow">Goal streak</span><span class="pill solid"><span id="streak-n">0</span> days</span></h3><div class="streak" id="streak-days" aria-label="Last 7 days"></div><p class="note">Best streak: <b id="streak-best">0</b> days <span id="streak-demo"></span></p></section>
-          <section class="panel"><h3><span class="grow">Rank</span><span class="pill solid" id="rank-name">CADET</span></h3><div class="kv"><div><div class="k">Points</div><div class="v"><span id="rank-pts">0</span><small>pts</small></div></div></div><div class="mission" style="grid-template-columns:minmax(0,1fr)"><div class="md" id="rank-next"></div><div class="bar"><i id="rank-bar" style="width:0"></i></div></div></section>
+          <section class="panel"><h3><span class="grow">Goal streak</span><span class="pill solid"><span id="streak-n">0</span> days</span></h3><div class="streak" id="streak-days" aria-label="Last 7 days"></div><p class="note">Best streak: <b id="streak-best">0</b> days <span id="streak-demo"></span></p>
+          <p class="note">Points: <b><span id="score-pts">0</span> pts</b></p></section>
           <section class="panel"><h3><span class="grow">Recent achievements</span></h3><div class="alist" id="achievements"></div></section>
         </div>
       </div>
@@ -741,6 +737,7 @@ html[data-motion="reduced"] .toast{animation:none}
     <div class="dh">
       <span class="ico" id="dr-ico" aria-hidden="true"></span>
       <div style="flex:1"><h2 id="dr-title">Detail</h2><p id="dr-region"></p></div>
+      <span id="dr-ev"></span>
       <button class="btn icon-btn" id="dr-close" aria-label="Close detail"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="big"><div><b id="dr-value">--</b><small id="dr-unit"></small></div><span id="dr-badge"></span></div>
@@ -760,10 +757,15 @@ html[data-motion="reduced"] .toast{animation:none}
   <nav class="dock" id="dock" aria-label="Sections">
     <button data-view="overview" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12 12 3l9 9M5 10v10h14V10"/></svg>Overview</button>
     <button data-view="biometrics"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Biometrics</button>
-    <button data-view="diagnostics"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Diagnostics</button>
     <button data-view="history"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg>History</button>
     <button data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>About</button>
   </nav>
+</div>
+
+<div class="evscrim" id="evscrim"></div>
+<div class="evpop" id="evpop" role="dialog" aria-modal="true" aria-labelledby="ev-title" tabindex="-1" hidden>
+  <div class="evh"><div><div class="eyebrow">Evidence for this data point</div><h2 id="ev-title"></h2></div><button class="btn icon-btn" id="ev-close" aria-label="Close"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div id="ev-body"></div>
 </div>
 
 <script>
@@ -870,7 +872,7 @@ const CONFIG = {
       pressure:  { attention: [97.9, 102.7], surgeon: [90, 108] },    // kPa total pressure (nominal 101.3)
       temp:      { attention: [20, 25],     surgeon: [18, 27] },      // °C performance zone / operating limit
       humidity:  { attention: [30, 60],     surgeon: [25, 75] },      // % performance zone / operating limit
-      radiation: { attention: [0, 21],      surgeon: [0, 80] }        // µSv/h ≈ 0.5 mSv/day typical ISS effective dose rate
+      radiation: { attention: [0, 21],      surgeon: [0, 54] }        // µSv/h: ≈ 0.5 mSv/day typical ISS dose; 54 µSv/h = 1.3 mSv/day (NASA-STD-3001 V1 4033)
     },
     device: { batteryWarn: 20, batteryCrit: 8, signalWarn: 40 },
     raiseAfter: 2,                 // consecutive trusted out-of-band readings needed to open an alert (Critical opens with 1)
@@ -878,7 +880,6 @@ const CONFIG = {
     reminderExpireMs: 60 * 60000   // an unattended reminder is archived as resolved after this time
   },
   gamification: {
-    ranks: [ ['CADET', 0], ['OFFICER', 500], ['LIEUTENANT', 1500], ['COMMANDER', 3000], ['LEGEND', 6000] ],
     waterPoints: 10,                // acknowledging an alert earns NO points: only real habits count
     goals: { exerciseMin: 60, sleepHours: 7, hobbyMin: 30, batteryMin: 50 }
   },
@@ -889,11 +890,11 @@ const CONFIG = {
 
 const METRICS = {
   hr:    { label: 'Heart rate', short: 'HR',   unit: 'bpm',  dec: 0, icon: 'heart', region: 'Cardiac · left ventricle',
-           note: 'Resting rate. Brief peaks usually match physical activity or stress; what matters is how long they last and how far they are from the personal baseline.' },
+           note: 'Resting rate. Brief peaks usually match physical activity or stress; what matters is how long they last and how far they are from your personal baseline.' },
   spo2:  { label: 'Blood oxygen · SpO₂', short: 'SpO₂', unit: '%',    dec: 0, icon: 'o2', region: 'Pulmonary · both lobes',
            note: 'Peripheral saturation measured by the optical sensor. A noisy reading can show low values without a real problem, which is why it does not raise alerts.' },
   bp:    { label: 'Blood pressure',   short: 'BP',   unit: 'mmHg', dec: 0, icon: 'bp', composite: ['bpSys', 'bpDia'], region: 'Circulatory · peripheral',
-           note: 'Systolic / diastolic pressure. It changes with posture, hydration and exercise; it is compared with each person\'s baseline.' },
+           note: 'Systolic / diastolic pressure. It changes with posture, hydration and exercise; it is compared with your own baseline.' },
   temp:  { label: 'Core temperature', short: 'T°',   unit: '°C',   dec: 1, icon: 'temp', region: 'Abdominal · core',
            note: 'Follows a smooth circadian curve. A sustained deviation weighs more than an isolated value.' },
   resp:  { label: 'Respiration',         short: 'RR',   unit: 'rpm',  dec: 0, icon: 'lungs', region: 'Airways',
@@ -915,21 +916,12 @@ const CREDITS = {
   team: 'Higía',
   event: 'NASA Space Apps Challenge 2026',
   challenge: 'Create Health Monitoring Software for Astronauts on Space Missions',
-  members: ['Ezequiel Alfaro', 'Sebastian Garay', 'Nataya Flores', 'Mateo Capararo'],
-  references: [
-    { label: 'ISS cabin atmosphere design parameters (NASA NTRS)', url: 'https://ntrs.nasa.gov/api/citations/20120015343/downloads/20120015343.pdf' },
-    { label: 'NASA technical brief: habitable atmosphere', url: 'https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-003-habitable-atmosphere.pdf' },
-    { label: 'NASA technical brief: ECLSS (temperature, humidity, CO₂)', url: 'https://www.nasa.gov/wp-content/uploads/2023/07/eclss-technical-brief-ochmo.pdf' },
-    { label: 'NASA technical brief: radiation protection', url: 'https://www.nasa.gov/wp-content/uploads/2023/03/radiation-protection-technical-brief-ochmo.pdf' },
-    { label: 'JSC 20584: Spacecraft Maximum Allowable Concentrations (Rev C)', url: 'https://ntrs.nasa.gov/citations/20240007713' },
-    { label: 'Review of radiation dose on the ISS (PubMed Central)', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC10919966' },
-    { label: 'ISS Live telemetry client example (Lightstreamer)', url: 'https://github.com/Lightstreamer/Lightstreamer-example-ISSLive-client-javascript' }
-  ]
+  members: ['Ezequiel Alfaro', 'Sebastian Garay', 'Nataya Flores', 'Mateo Capararo']
 };
 const ENV_META = {
   co2:       { label: 'CO₂',            short: 'CO₂',  unit: 'ppm',   dec: 0, icon: 'wind',  src: 'NASA ISS ops target: below 3 mmHg (≈ 3,950 ppm). Older 180-day limit: 5.3 mmHg (≈ 7,000 ppm).' },
   oxygen:    { label: 'Oxygen (ppO₂)',  short: 'ppO₂', unit: 'kPa',   dec: 1, icon: 'o2',    src: 'ISS cabin design range for oxygen partial pressure.' },
-  pressure:  { label: 'Cabin pressure', short: 'Press.', unit: 'kPa', dec: 1, icon: 'gauge', src: 'ISS cabin design range around the nominal 101.3 kPa.' },
+  pressure:  { label: 'Cabin pressure', short: 'Press.', unit: 'kPa', dec: 1, icon: 'gauge' },
   temp:      { label: 'Temperature',    short: 'Temp.', unit: '°C',   dec: 1, icon: 'temp',  src: 'Crew performance zone 20–25 °C; operating limit 18–27 °C.' },
   humidity:  { label: 'Humidity',       short: 'Hum.', unit: '%',     dec: 0, icon: 'drop',  src: 'Crew performance zone 30–60 %; operating limit 25–75 %.' },
   radiation: { label: 'Radiation',      short: 'Rad.', unit: 'µSv/h', dec: 1, icon: 'rad',   src: 'ISS effective dose is typically 0.2–0.5 mSv per day (≈ 8–21 µSv/h). NASA career limit: 600 mSv.' }
@@ -1351,7 +1343,7 @@ const State = {
   latest: {}, shown: {}, history: {}, evals: {}, lastGood: {}, gap: {}, envHistory: [],
   env: null, envEval: null, devicesBy: {}, sleepBy: {}, sleepHistory: [],
   alerts: [], alertIndex: {}, cond: {}, uplink: [], toastByAlert: {},
-  view: 'overview', alertFilter: 'active', alertScope: 'all', sound: false, demo: true, motion: 'auto', histPaused: false, selMetric: null, drawerWin: 30,
+  view: 'overview', alertFilter: 'active', sound: false, demo: true, motion: 'auto', histPaused: false, selMetric: null, drawerWin: 30,
   gam: defaultGam(), unsub: [], startedAt: Date.now(), sourceNote: '', refreshing: false, lang: 'en',
   devicesOf(id) { return this.devicesBy[id] || []; },
   sleepOf(id) { return this.sleepBy[id] || null; },
@@ -1399,12 +1391,14 @@ function ackAlert(id) {
   const a = alertById(id); if (!a || (a.status !== 'active' && a.status !== 'snoozed')) return;
   a.status = 'acknowledged'; a.ackedAt = Date.now(); a.snoozedUntil = null; closeToastFor(id); UI.renderBadges(); UI.renderLive();   // acknowledging earns NO points
 }
-function ackNonCritical() { let n = 0; State.alerts.forEach(a => { if (a.status === 'active' && a.level !== 'surgeon') { a.status = 'acknowledged'; a.ackedAt = Date.now(); closeToastFor(a.id); n++; } }); UI.renderBadges(); UI.renderLive(); return n; }
-function activeAlerts() { return State.alerts.filter(a => a.status === 'active').sort((x, y) => x.priority - y.priority || y.openedAt - x.openedAt); }
+function ackNonCritical() { let n = 0; State.alerts.forEach(a => { if (a.status === 'active' && a.level !== 'surgeon' && visibleAlert(a)) { a.status = 'acknowledged'; a.ackedAt = Date.now(); closeToastFor(a.id); n++; } }); UI.renderBadges(); UI.renderLive(); return n; }
+// You see all of your own alerts and cabin alerts. Alerts about teammates are shown only when they are critical (red).
+const visibleAlert = a => !a.astronautId || a.astronautId === State.selectedId || a.level === 'surgeon';
+function activeAlerts() { return State.alerts.filter(a => a.status === 'active' && visibleAlert(a)).sort((x, y) => x.priority - y.priority || y.openedAt - x.openedAt); }
 // Snooze hides a NON-critical alert for a while; it wakes up again if the condition is still there. Critical alerts cannot be snoozed.
 function snoozeAlert(id) { const a = alertById(id); if (!a || a.status !== 'active' || a.priority === 1) return; a.status = 'snoozed'; a.snoozedUntil = Date.now() + CONFIG.alerts.snoozeMs; closeToastFor(id); UI.renderBadges(); UI.renderLive(); }
 function unsnoozeAlert(id) { const a = alertById(id); if (!a || a.status !== 'snoozed') return; a.status = 'active'; a.snoozedUntil = null; UI.renderBadges(); UI.renderLive(); }
-function snoozeNonCritical() { let n = 0; State.alerts.forEach(a => { if (a.status === 'active' && a.priority > 1) { a.status = 'snoozed'; a.snoozedUntil = Date.now() + CONFIG.alerts.snoozeMs; closeToastFor(a.id); n++; } }); UI.renderBadges(); UI.renderLive(); return n; }
+function snoozeNonCritical() { let n = 0; State.alerts.forEach(a => { if (a.status === 'active' && a.priority > 1 && visibleAlert(a)) { a.status = 'snoozed'; a.snoozedUntil = Date.now() + CONFIG.alerts.snoozeMs; closeToastFor(a.id); n++; } }); UI.renderBadges(); UI.renderLive(); return n; }
 // A critical alert that nobody acknowledged in time is escalated once: it is flagged, announced again and a second simulated notice goes to Earth.
 function checkEscalations() {
   const now = Date.now();
@@ -1418,6 +1412,7 @@ function checkEscalations() {
 }
 function say(msg, assertive) { const el = $(assertive ? '#live-assertive' : '#live-polite'); if (!el) return; el.textContent = ''; setTimeout(() => { el.textContent = msg; }, 30); }
 function announce(a, escalated) {
+  if (!visibleAlert(a)) return;                          // a teammate's non-critical alert: no toast, no announcement
   const who = a.astronautId ? ' · ' + personName(a.astronautId) : '';
   const warming = Date.now() - State.startedAt < 6000 && a.level !== 'surgeon';     // no toast avalanche at startup
   say(`${escalated ? 'Escalated' : 'New alert'}: ${LEVELS[a.level]?.label || a.title}. ${a.message}${who}`, a.level === 'surgeon');
@@ -1623,6 +1618,7 @@ async function refreshSecondary() {
 /*I18N-DATA-START*/
 const ES_DICT = {
 "% from its baseline (except HRV).": "% de su línea base (excepto HRV).",
+"% from your baseline (except HRV).": "% de tu línea base (excepto HRV).",
 "(initial demo streak, simulated)": "(racha inicial de demostración, simulada)",
 "(local time)": "(hora local)",
 "(not configured)": "(sin configurar)",
@@ -1630,8 +1626,11 @@ const ES_DICT = {
 "+15 min hobby": "+15 min de hobby",
 "+15 min of exercise.": "+15 min de ejercicio.",
 ". They are not validated clinical criteria: a medical source is needed before using them on a real mission. They are changed in code, not from the interface.": ". No son criterio clínico validado: hace falta una fuente médica antes de usarlos en una misión real. Se cambian en el código, no desde la interfaz.",
+"19.5–23.1 kPa is the ISS cabin design range for oxygen partial pressure. The outer limits (16 and 26 kPa) are illustrative: the table of inspired-oxygen exposure ranges in NASA-STD-3001 Vol. 2 was not read.": "19,5–23,1 kPa es el rango de diseño de la cabina de la ISS para la presión parcial de oxígeno. Los límites externos (16 y 26 kPa) son ilustrativos: no se leyó la tabla de rangos de exposición a oxígeno inspirado del NASA-STD-3001 Vol. 2.",
+"253 nights of wrist heart rate and movement with sleep stages (not astronauts)": "253 noches de pulso y movimiento de muñeca con etapas de sueño (no astronautas)",
 "30 min of hobby or recreation": "30 min de hobby o recreación",
 "360° view": "Vista 360°",
+"97.9–102.7 kPa is the ISS cabin design range (nominal 101.3 kPa). The outer limits (90 and 108 kPa) are illustrative. NASA lists 5.0 psia as the lowest reachable cabin pressure.": "97,9–102,7 kPa es el rango de diseño de la cabina de la ISS (nominal 101,3 kPa). Los límites externos (90 y 108 kPa) son ilustrativos. NASA indica 5,0 psia como la presión de cabina más baja alcanzable.",
 "A numeric field may be null (missing data). quality describes the whole reading.": "Un campo numérico puede ser null (dato faltante). quality describe la lectura completa.",
 "A simulated notice was logged to the flight surgeons over the ground link. Repeat the measurement in a few minutes and check that the sensor is well placed.": "Se registró un aviso simulado a cirujanos de vuelo por el enlace con Tierra. Repetí la medición en unos minutos y confirmá que el sensor esté bien colocado.",
 "A value is flagged as Attention if it deviates more than": "Un valor se marca como Atención si se desvía más de",
@@ -1646,11 +1645,14 @@ const ES_DICT = {
 "Active": "Activa",
 "Active alerts": "Avisos activos",
 "Active source": "Fuente activa",
+"Adapted from a source": "Adaptado de una fuente",
 "Advanced": "Avanzado",
 "Airways": "Vías respiratorias",
 "Alert flight surgeons": "Avisar a cirujanos de vuelo",
+"Alert list": "Lista de avisos",
 "Alert surgeons": "Avisar a cirujanos",
 "Alert surgeons (outside this)": "Avisar a cirujanos (fuera de esto)",
+"Alert timing (escalation, snooze, persistence)": "Tiempos de los avisos (escalamiento, posponer, persistencia)",
 "Alerts": "Avisos",
 "Alerts that need attention": "Avisos que requieren atención",
 "All": "Todas",
@@ -1658,32 +1660,43 @@ const ES_DICT = {
 "All good: no pending steps for now.": "Todo en orden: sin pasos pendientes por ahora.",
 "All in range": "Todo en rango",
 "All of today's goals are complete.": "Todos los objetivos de hoy completados.",
+"All sources are cited in APA 7 format. Open a link to read the original and confirm any number before quoting it.": "Todas las fuentes se citan en formato APA 7. Abrí el enlace para leer el original y confirmá cualquier número antes de citarlo.",
 "All vital signs for the selected person, their recent trend and the quality of each reading. Tap a card to open its detail.": "Todos los signos vitales de la persona elegida, su tendencia reciente y la calidad de cada lectura. Tocá una tarjeta para abrir el detalle.",
 "All your devices above 50%": "Todos tus dispositivos arriba del 50%",
+"All your vital signs, their recent trend and the quality of each reading. Tap a card to open its detail.": "Todos tus signos vitales, su tendencia reciente y la calidad de cada lectura. Tocá una tarjeta para abrir el detalle.",
 "Appearance and alerts": "Apariencia y avisos",
 "Atmosphere and radiation in the habitat. Ranges come from public NASA material and are illustrative; see About for the sources. Out-of-range values raise alerts in Diagnostics.": "Atmósfera y radiación en el hábitat. Los rangos salen de material público de NASA y son ilustrativos; mirá Acerca de para las fuentes. Los valores fuera de rango generan avisos en Diagnóstico.",
+"Atmosphere and radiation in the habitat. Ranges come from public NASA material and are illustrative; see About for the sources. Out-of-range values raise alerts; open them from the bell.": "Atmósfera y radiación en el hábitat. Los rangos salen de material público de NASA y son ilustrativos; mirá Acerca de para las fuentes. Los valores fuera de rango generan avisos; se abren desde la campana.",
 "Attention": "Atención",
 "Attention (outside normal)": "Atención (fuera de normal)",
 "Average": "Promedio",
 "Avg": "Prom",
 "BP": "PA",
+"Based on a source": "Basado en una fuente",
 "Baseline": "Línea base",
+"Basis": "Base",
+"Basis and sources": "Base y fuentes",
 "Best streak:": "Mejor racha:",
 "Biometric patch": "Parche biométrico",
 "Biometrics": "Biometría",
 "Blood oxygen": "Oxígeno en sangre",
+"Blood oxygen limits": "Límites de oxígeno en sangre",
 "Blood oxygen · SpO₂": "Oxígeno en sangre · SpO₂",
 "Blood pressure": "Presión arterial",
+"Blood pressure limits": "Límites de presión arterial",
 "Built with Claude": "Hecho con Claude",
 "CADET": "CADETE",
 "COMMANDER": "COMANDANTE",
 "CONFIG.api.baseUrl is empty: configure the endpoint or proxy.": "CONFIG.api.baseUrl vacío: configurá el endpoint o proxy.",
+"CO₂ limits": "Límites de CO₂",
 "CO₂ spike": "Pico de CO₂",
 "Cabin": "Cabina",
 "Cabin T°": "T° cabina",
 "Cabin details": "Detalle de cabina",
 "Cabin environment": "Entorno de cabina",
 "Cabin pressure": "Presión de cabina",
+"Cabin pressure limits": "Límites de presión de cabina",
+"Cabin temperature limits": "Límites de temperatura de cabina",
 "Cardiac · left ventricle": "Cardíaco · ventrículo izquierdo",
 "Charged sensors": "Sensores cargados",
 "Check the ventilation and the cabin equipment. If the value stays out of range, notify Earth.": "Revisá la ventilación y el equipo de cabina. Si el valor sigue fuera de rango, avisá a Tierra.",
@@ -1691,22 +1704,29 @@ const ES_DICT = {
 "Choose file": "Elegir archivo",
 "Circulatory": "Circulatorio",
 "Circulatory · peripheral": "Circulatorio · periférico",
+"Close": "Cerrar",
 "Close detail": "Cerrar detalle",
 "Commander": "Comandante",
+"Commercial crew health data": "Datos de salud de una tripulación comercial",
 "Complete 60 min of exercise": "Completar 60 min de ejercicio",
 "Connected": "Conectado",
 "Context": "Contexto",
 "Core temperature": "Temperatura central",
+"Core temperature limits": "Límites de temperatura central",
 "Crew member and actions": "Tripulante y acciones",
 "Crew overview": "Resumen de la tripulación",
 "Crew performance zone 20–25 °C; operating limit 18–27 °C.": "Zona de desempeño de la tripulación 20–25 °C; límite operativo 18–27 °C.",
 "Crew performance zone 30–60 %; operating limit 25–75 %.": "Zona de desempeño de la tripulación 30–60 %; límite operativo 25–75 %.",
+"Crew performance zone: 20–25 °C. Operating limit: from 18 °C at 75 % humidity to 27 °C at 25 % humidity (NASA-STD-3001 Vol. 2, 6012). Tesai shows the limits as separate ranges, a simplification of that coupled limit.": "Zona de desempeño de la tripulación: 20–25 °C. Límite operativo: de 18 °C con 75 % de humedad a 27 °C con 25 % de humedad (NASA-STD-3001 Vol. 2, 6012). Tesai muestra los límites como rangos separados, una simplificación de ese límite acoplado.",
+"Crew performance zone: 30–60 % humidity. Operating limit: 25–75 % (NASA-STD-3001 Vol. 2, 6012). Tesai shows the limits as separate ranges, a simplification of that coupled limit.": "Zona de desempeño de la tripulación: 30–60 % de humedad. Límite operativo: 25–75 % (NASA-STD-3001 Vol. 2, 6012). Tesai muestra los límites como rangos separados, una simplificación de ese límite acoplado.",
 "Critical": "Crítica",
 "Critical alerts are acknowledged one at a time.": "Los avisos críticos se reconocen de a uno.",
 "DATA": "SIMULADOS",
 "Daily habit goals. Completing all of them keeps the streak going.": "Objetivos diarios de hábitos. Cumplirlos todos mantiene la racha.",
 "Daily streak bonus": "Bonus de racha diaria",
 "Daily training": "Entrenamiento diario",
+"Data": "Datos",
+"Data provenance": "Procedencia de los datos",
 "Data schema": "Esquema de datos",
 "Data source": "Fuente de datos",
 "Data source, import and export, simulation and appearance. Clinical thresholds are read-only.": "Fuente de datos, importación y exportación, simulación y apariencia. Los umbrales clínicos son de solo lectura.",
@@ -1733,7 +1753,15 @@ const ES_DICT = {
 "Escalated to the flight surgeons over the ground link (simulated).": "Escalado a los cirujanos de vuelo por el enlace con Tierra (simulado).",
 "Event injected": "Evento inyectado",
 "Event not accepted": "Evento no aceptado",
+"Every number in Tesai is tagged with where it comes from. \"Based on a source\" means the value follows a published one. \"Adapted\" means it starts from a source but Tesai changed it, and the note says how. \"Team design value\" means the team chose it and no published source was found. \"No real data source\" marks simulated data.": "Cada número de Tesai indica de dónde sale. \"Basado en una fuente\" significa que el valor sigue uno publicado. \"Adaptado\" significa que parte de una fuente pero Tesai lo cambió, y la nota dice cómo. \"Valor de diseño del equipo\" significa que lo eligió el equipo y no se encontró una fuente publicada. \"Sin fuente de datos reales\" marca los datos simulados.",
+"Every reading in the app is simulated. The crew members, their personal baselines and the events are invented. The sources below back the ranges and rules, not the readings. The team's research found no public dataset of daily in-flight vital signs, so a real data source would have to be built from the options below or from a mission partner.": "Todas las lecturas de la app son simuladas. Los tripulantes, sus líneas base personales y los eventos son inventados. Las fuentes de abajo respaldan los rangos y las reglas, no las lecturas. La investigación del equipo no encontró un conjunto público de signos vitales diarios en vuelo, así que una fuente de datos real tendría que armarse con las opciones de abajo o con un socio de la misión.",
+"Every reading is simulated with a seeded random generator and invented baselines for fictional crew members. The team's research found no public dataset of daily in-flight vital signs. Real sources to explore are listed in About.": "Todas las lecturas son simuladas con un generador aleatorio con semilla y líneas base inventadas para tripulantes ficticios. La investigación del equipo no encontró un conjunto público de signos vitales diarios en vuelo. Las fuentes reales para explorar están en Acerca de.",
+"Evidence": "Respaldo",
+"Evidence and sources": "Respaldo y fuentes",
+"Evidence by data point": "Respaldo de cada dato",
+"Evidence for this data point": "Respaldo de este dato",
 "Exercise": "Ejercicio",
+"Exercise goal (60 min)": "Meta de ejercicio (60 min)",
 "Exercise minutes per day, last 7 days": "Minutos de ejercicio por día, últimos 7 días",
 "Exercise over the last 7 days (the brightest bar is today)": "Ejercicio de los últimos 7 días (la barra más clara es hoy)",
 "Exercise session": "Sesión de ejercicio",
@@ -1748,21 +1776,29 @@ const ES_DICT = {
 "Follows a smooth circadian curve. A sustained deviation weighs more than an isolated value.": "Sigue una curva circadiana suave. Una desviación sostenida pesa más que un valor aislado.",
 "Fonts: Plus Jakarta Sans and JetBrains Mono, under the SIL Open Font License 1.1.": "Tipografías: Plus Jakarta Sans y JetBrains Mono, bajo la licencia SIL Open Font License 1.1.",
 "Free time": "Tiempo libre",
+"Free-time goal (30 min)": "Meta de tiempo libre (30 min)",
+"General NASA open data; no daily in-flight vitals": "Datos abiertos generales de NASA; sin signos vitales diarios en vuelo",
 "General information, not a diagnosis.": "Información general, no es un diagnóstico.",
 "Goal streak": "Racha de objetivos",
+"Goals and alert rules": "Metas y reglas de avisos",
 "Ground link": "Enlace con Tierra",
 "HOW TO CONNECT REAL DATA": "CÓMO CONECTAR DATOS REALES",
 "HR": "FC",
 "Health and environment": "Salud y entorno",
 "Heart rate": "Frecuencia cardíaca",
 "Heart rate (bpm)": "Frecuencia cardíaca (bpm)",
+"Heart rate limits": "Límites de frecuencia cardíaca",
 "Heart rate variability": "Variabilidad cardíaca",
+"Heart rate variability limits": "Límites de variabilidad cardíaca",
+"Heart rate, actigraphy and sleep of 22 healthy adults (not astronauts)": "Pulso, actigrafía y sueño de 22 adultos sanos (no astronautas)",
 "Helmet sensor": "Sensor de casco",
 "History": "Historial",
 "Hum.": "Hum.",
 "Humidity": "Humedad",
+"Humidity limits": "Límites de humedad",
 "Hydration": "Hidratación",
 "Hydration logged": "Hidratación registrada",
+"Hydration reminder (2 L per day)": "Recordatorio de hidratación (2 L por día)",
 "Hypertension": "Hipertensión",
 "Hypoxia": "Hipoxia",
 "I drank water (+10)": "Registré agua (+10)",
@@ -1770,11 +1806,14 @@ const ES_DICT = {
 "ISS cabin atmosphere design parameters (NASA NTRS)": "Parámetros de diseño de la atmósfera de la cabina de la ISS (NASA NTRS)",
 "ISS cabin design range around the nominal 101.3 kPa.": "Rango de diseño de la cabina de la ISS en torno a los 101,3 kPa nominales.",
 "ISS cabin design range for oxygen partial pressure.": "Rango de diseño de la cabina de la ISS para la presión parcial de oxígeno.",
+"ISS crews exercise about 1.5 hours per day, 6–7 days per week. The 60-minute goal is a lighter team design value.": "Las tripulaciones de la ISS hacen ejercicio unas 1,5 horas por día, 6–7 días por semana. La meta de 60 minutos es un valor de diseño del equipo, más liviano.",
 "ISS effective dose is typically 0.2–0.5 mSv per day (≈ 8–21 µSv/h). NASA career limit: 600 mSv.": "La dosis efectiva en la ISS suele ser de 0,2–0,5 mSv por día (≈ 8–21 µSv/h). Límite de carrera de NASA: 600 mSv.",
+"ISS temperature, humidity, CO₂ and radiation": "Temperatura, humedad, CO₂ y radiación de la ISS",
 "Illustrative values defined in": "Valores ilustrativos definidos en",
 "Import data": "Importar datos",
 "Imported file": "Archivo importado",
 "In range": "En rango",
+"Interface features": "Funciones de la interfaz",
 "Interval (ms)": "Intervalo (ms)",
 "It is validated against the schema before use. File data is labeled \"unverified\".": "Se valida contra el esquema antes de usarse. Los datos de archivo se rotulan \"sin verificar\".",
 "JSC 20584: Spacecraft Maximum Allowable Concentrations (Rev C)": "JSC 20584: Concentraciones máximas admisibles en naves espaciales (Rev C)",
@@ -1784,6 +1823,7 @@ const ES_DICT = {
 "Last 7 days": "Últimos 7 días",
 "Latest": "Último",
 "Level key": "Leyenda de niveles",
+"Limits": "Límites",
 "Live": "En vivo",
 "Loading…": "Cargando…",
 "Logged": "Registrado",
@@ -1804,6 +1844,7 @@ const ES_DICT = {
 "NASA technical brief: ECLSS (temperature, humidity, CO₂)": "Resumen técnico de NASA: ECLSS (temperatura, humedad, CO₂)",
 "NASA technical brief: habitable atmosphere": "Resumen técnico de NASA: atmósfera habitable",
 "NASA technical brief: radiation protection": "Resumen técnico de NASA: protección contra la radiación",
+"NASA's crew limit is 3 mmHg as a 1-hour average, about 3,950 ppm at 101.3 kPa (the ppm conversion is ours). Symptoms start near 2.3 mmHg, and headaches are more likely above 2.8 mmHg (Law & Alexander, 2016, OCHMO-TB-004). The red limit of 7,000 ppm (5.3 mmHg) comes from an older long-duration figure and should be checked against the current JSC 20584.": "El límite de NASA para la tripulación es 3 mmHg como promedio de 1 hora, unas 3.950 ppm a 101,3 kPa (la conversión a ppm es nuestra). Los síntomas empiezan cerca de 2,3 mmHg y el dolor de cabeza es más probable sobre 2,8 mmHg (Law & Alexander, 2016, OCHMO-TB-004). El límite rojo de 7.000 ppm (5,3 mmHg) viene de una cifra anterior para larga duración y conviene contrastarlo con el JSC 20584 vigente.",
 "Needs attention": "Requiere atención",
 "Neural · autonomic system": "Neural · sistema autónomo",
 "New alert": "Nuevo aviso",
@@ -1824,10 +1865,16 @@ const ES_DICT = {
 "No environment data in this source.": "Sin datos de entorno en esta fuente.",
 "No environment data.": "Sin datos de entorno.",
 "No file loaded. Use \"Import data\" in System.": "No hay archivo cargado. Usá \"Importar datos\" en Sistema.",
+"No published normal or alert range for astronaut core temperature was found, so the limits are a team design value based on general adult ranges that were not verified. Core temperature rises about 1 °C at rest during long missions and can exceed 40 °C during exercise (Stahn et al., 2017), so Earth ranges should not be copied to flight without a warning. Skin or wrist temperature is not core temperature.": "No se encontró un rango normal ni de alerta publicado para la temperatura central de astronautas, así que los límites son un valor de diseño del equipo basado en rangos generales de adultos que no se verificaron. La temperatura central sube cerca de 1 °C en reposo durante misiones largas y puede superar los 40 °C al hacer ejercicio (Stahn et al., 2017), por eso no conviene copiar rangos terrestres al vuelo sin avisarlo. La temperatura de piel o de muñeca no es temperatura central.",
+"No published source found.": "No se encontró una fuente publicada.",
 "No reading belongs to a real person.": "Ninguna lectura corresponde a una persona real.",
+"No real data source": "Sin fuente de datos reales",
 "No role in file": "Sin rol en archivo",
 "No sleep and activity data in this source.": "Sin datos de sueño y actividad en esta fuente.",
+"No source was found in the team's research for heart rate variability thresholds. The limits are a design value, and HRV is left out of the personal-baseline rule because it varies so much on its own.": "No se encontró en la investigación del equipo una fuente para umbrales de variabilidad cardíaca. Los límites son un valor de diseño y la HRV queda fuera de la regla de línea base personal porque varía mucho por sí sola.",
 "No trusted readings in this window": "Sin lecturas confiables en esta ventana",
+"Noisy readings never raise alerts": "Las lecturas ruidosas nunca generan avisos",
+"Noisy, delayed or disconnected readings do not open or close alerts. The reference sensor shirt reports signal-quality channels for electrode disconnection, 50–60 Hz noise, saturation and motion artifact.": "Las lecturas ruidosas, retrasadas o desconectadas no abren ni cierran avisos. La camisa de referencia informa canales de calidad de señal para desconexión de electrodos, ruido de 50–60 Hz, saturación y artefacto de movimiento.",
 "Normal": "Normal",
 "Normal band": "Banda normal",
 "Not acknowledged for over a minute.": "Sin reconocer hace más de un minuto.",
@@ -1837,19 +1884,25 @@ const ES_DICT = {
 "Notices": "Avisos legales",
 "Now": "Ahora",
 "OFFICER": "OFICIAL",
+"Omics and clinical data from space missions": "Datos ómicos y clínicos de misiones espaciales",
 "One alert per condition, with a lifecycle: active, acknowledged, resolved. Sensor problems are shown separately from health ones.": "Un aviso por condición, con ciclo de vida: activa, reconocida, resuelta. Los problemas de sensores se muestran aparte de los de salud.",
+"One alert per condition, with a lifecycle: active, acknowledged, resolved. Sensor problems are shown separately from health ones. You see all your own alerts, and your teammates' alerts only when they are critical (red).": "Un aviso por condición, con ciclo de vida: activa, reconocida, resuelta. Los problemas de sensores se muestran aparte de los de salud. Ves todos tus avisos y los de tus compañeros solo cuando son críticos (rojos).",
 "Optimal rest": "Descanso óptimo",
 "Overview": "Resumen",
 "Oxygen (ppO₂)": "Oxígeno (ppO₂)",
+"Oxygen (ppO₂) limits": "Límites de oxígeno (ppO₂)",
 "Partial data": "Datos parciales",
 "Partial or no data": "Datos parciales o ausentes",
 "Pause": "Pausar",
 "Peripheral saturation measured by the optical sensor. A noisy reading can show low values without a real problem, which is why it does not raise alerts.": "Saturación periférica medida por el sensor óptico. Una lectura ruidosa puede mostrar valores bajos sin que haya un problema real: por eso no dispara avisos.",
 "Personal baseline": "Línea base personal",
+"Personal baseline rule (25 %)": "Regla de línea base personal (25 %)",
 "Pick a vital sign or a point on the body to open its history": "Elegí un signo vital o un punto del cuerpo para abrir su historial",
 "Points": "Puntos",
 "Points and streak": "Puntos y racha",
 "Points reward real habits: exercise, rest, free time and charged sensors. Acknowledging an alert does not earn points.": "Los puntos premian hábitos reales: ejercicio, descanso, tiempo libre y sensores cargados. Reconocer un aviso no suma puntos.",
+"Points reward real habits: exercise, rest, free time and charged sensors. Acknowledging an alert does not earn points. You move up a rank as your points grow.": "Los puntos premian hábitos reales: ejercicio, descanso, tiempo libre y sensores cargados. Reconocer un aviso no suma puntos. Subís de rango a medida que crecen tus puntos.",
+"Points:": "Puntos:",
 "Press.": "Pres.",
 "Pressure": "Presión",
 "Provider technical details": "Detalle técnico del proveedor",
@@ -1859,17 +1912,22 @@ const ES_DICT = {
 "RR": "FR",
 "Rad.": "Rad.",
 "Radiation": "Radiación",
+"Radiation limits": "Límites de radiación",
 "Rank": "Rango",
 "Reading": "Leyendo",
 "Reading file": "Leyendo archivo",
 "Readings": "Lecturas",
+"Real data sources to explore (not used yet)": "Fuentes de datos reales para explorar (todavía no se usan)",
 "Recent achievements": "Logros recientes",
 "Recent series with the traffic-light bands and the personal baseline. Doubtful readings are marked with an empty circle and do not raise alerts. All times are local.": "Serie reciente con las bandas del semáforo y la línea base personal. Las lecturas dudosas se marcan con un círculo vacío y no generan avisos. Todas las horas son locales.",
+"Recent series with the traffic-light bands and your personal baseline. Doubtful readings are marked with an empty circle and do not raise alerts. All times are local.": "Serie reciente con las bandas del semáforo y tu línea base personal. Las lecturas dudosas se marcan con un círculo vacío y no generan avisos. Todas las horas son locales.",
 "Recharge": "Recargar",
 "Recharge sensor": "Recargar sensor",
 "Reconnect": "Reconectar",
 "Reduce decorative animations": "Reducir animaciones decorativas",
 "Reference range": "Rango de referencia",
+"References": "Referencias",
+"References (APA 7)": "Referencias (APA 7)",
 "Reminder": "Recordatorio",
 "Reminder resolved:": "Recordatorio resuelto:",
 "Reminders": "Recordatorios",
@@ -1884,8 +1942,10 @@ const ES_DICT = {
 "Resolved": "Resuelta",
 "Respiration": "Respiración",
 "Respiration (rpm)": "Respiración (rpm)",
+"Respiration limits": "Límites de respiración",
 "Restart simulation": "Reiniciar simulación",
 "Resting rate. Brief peaks usually match physical activity or stress; what matters is how long they last and how far they are from the personal baseline.": "Frecuencia en reposo. Los picos breves suelen coincidir con actividad física o estrés; lo que importa es cuánto dura y qué tan lejos queda de la línea base personal.",
+"Resting rate. Brief peaks usually match physical activity or stress; what matters is how long they last and how far they are from your personal baseline.": "Frecuencia en reposo. Los picos breves suelen coincidir con actividad física o estrés; lo que importa es cuánto duran y qué tan lejos quedan de tu línea base personal.",
 "Resting respiratory rate. It rises with exercise and with high CO₂ levels in the cabin.": "Frecuencia respiratoria en reposo. Sube con el ejercicio y con niveles altos de CO₂ en cabina.",
 "Resume": "Reanudar",
 "Review of radiation dose on the ISS (PubMed Central)": "Revisión de la dosis de radiación en la ISS (PubMed Central)",
@@ -1899,6 +1959,7 @@ const ES_DICT = {
 "Selected person": "Persona elegida",
 "Sensor": "Sensor",
 "Sensor / reminder": "Sensor / recordatorio",
+"Sensor battery and signal limits": "Límites de batería y señal de los sensores",
 "Sensor disconnected": "Sensor desconectado",
 "Sensor recharged": "Sensor recargado",
 "Sensor reconnected": "Sensor reconectado",
@@ -1907,6 +1968,7 @@ const ES_DICT = {
 "Signal quality": "Calidad de señal",
 "Simulated": "Simulado",
 "Simulated (default)": "Simulada (activa por defecto)",
+"Simulated readings": "Lecturas simuladas",
 "Simulated · notice": "Simulado · aviso",
 "Simulated · notice delivered": "Simulado · aviso entregado",
 "Simulation restarted": "Simulación reiniciada",
@@ -1914,28 +1976,47 @@ const ES_DICT = {
 "Sleep": "Sueño",
 "Sleep and activity": "Sueño y actividad",
 "Sleep at least 7 h": "Dormir al menos 7 h",
+"Sleep goal (7 h)": "Meta de sueño (7 h)",
 "Snooze non-critical": "Posponer no críticos",
 "Snoozed": "Pospuesta",
 "Sorted by priority:": "Ordenados por prioridad:",
 "Sound on critical alerts": "Sonido en avisos críticos",
 "Source changed": "Fuente cambiada",
 "Source not available": "Fuente no disponible",
+"Sources": "Fuentes",
+"Sources (APA 7)": "Fuentes (APA 7)",
 "Sources for the cabin ranges": "Fuentes de los rangos de cabina",
+"Sources for the limits": "Fuentes de los límites",
+"Sources:": "Fuentes:",
 "SpO₂/BP wristband": "Pulsera SpO₂/PA",
 "Streak": "Racha",
 "Sys. BP": "PA sist.",
 "System": "Sistema",
 "System guidance, not a medical diagnosis.": "Orientación del sistema, no es un diagnóstico médico.",
 "Systolic / diastolic pressure. It changes with posture, hydration and exercise; it is compared with each person's baseline.": "Presión sistólica / diastólica. Cambia con la postura, la hidratación y el ejercicio; se compara con la línea base de cada persona.",
+"Systolic / diastolic pressure. It changes with posture, hydration and exercise; it is compared with your own baseline.": "Presión sistólica / diastólica. Cambia con la postura, la hidratación y el ejercicio; se compara con tu propia línea base.",
 "Systolic BP": "PA sistólica",
 "Systolic BP (mmHg)": "PA sistólica (mmHg)",
 "Systolic pressure": "Presión sistólica",
 "Tachycardia": "Taquicardia",
+"Team design value · no published source": "Valor de diseño del equipo · sin fuente publicada",
 "Temperature": "Temperatura",
 "Temperature (°C)": "Temperatura (°C)",
+"The 2 L per day water guideline is an illustrative value. No source was found in the team's research.": "La guía de 2 L de agua por día es un valor ilustrativo. No se encontró una fuente en la investigación del equipo.",
+"The 25 % deviation from a personal baseline is a team design value with no published threshold. The idea of alerting against a personal baseline is supported by flight data: heart rate and blood pressure change little in flight, and core temperature drifts about 1 °C.": "El desvío de 25 % respecto de la línea base personal es un valor de diseño del equipo, sin umbral publicado. La idea de alertar contra una línea base personal tiene respaldo en datos de vuelo: la frecuencia cardíaca y la presión cambian poco en vuelo y la temperatura central deriva cerca de 1 °C.",
+"The 30 minutes of free time is a team design value. NASA lists a personal journal, gardening, windows and more privacy as countermeasures for isolation, but gives no number of minutes.": "Los 30 minutos de tiempo libre son un valor de diseño del equipo. NASA menciona un diario personal, la jardinería, ventanas y más privacidad como contramedidas del aislamiento, pero no da una cantidad de minutos.",
+"The 60-second escalation, the 15-minute snooze and the number of readings needed to open (2) or close (3) an alert are team design values. The sources only support the general idea: with delayed communication the crew will have to respond on its own.": "El escalamiento a los 60 segundos, la pausa de 15 minutos y la cantidad de lecturas para abrir (2) o cerrar (3) un aviso son valores de diseño del equipo. Las fuentes solo respaldan la idea general: con comunicación demorada la tripulación tendrá que responder por su cuenta.",
+"The 7-hour goal is a team design value. For reference, NASA schedules a recommended sleep period of 8.5 hours (including 2 hours before and 1.5 hours after sleeping), and astronauts on the ISS slept about 6 hours per night (Barger et al., 2014).": "La meta de 7 horas es un valor de diseño del equipo. Como referencia, NASA programa un período de sueño recomendado de 8,5 horas (incluidas 2 horas antes y 1,5 horas después de dormir) y los astronautas de la ISS durmieron cerca de 6 horas por noche (Barger et al., 2014).",
+"The battery limits (20 % low, 8 % critical), the 40 % signal limit and the 50 % charge goal are team design values for the demo. No published source applies.": "Los límites de batería (20 % baja, 8 % crítica), el límite de señal de 40 % y la meta de carga de 50 % son valores de diseño del equipo para la demo. No hay una fuente publicada que aplique.",
 "The cabin environment ranges come from public NASA material. They are illustrative: check them against the current documents before relying on any value.": "Los rangos del entorno de cabina salen de material público de NASA. Son ilustrativos: contrastalos con los documentos vigentes antes de confiar en cualquier valor.",
 "The file could not be used as a source.": "No se pudo usar el archivo como fuente.",
+"The ground link is a simulation and nothing is transmitted. The 1.3 s delay is about the Earth–Moon one-way light time, our own illustration. NASA says the delay to Mars can reach 20 minutes one way. Today part of the flow is manual (the crew reports data verbally); CHP-IDSP proposes loading vitals into an electronic medical record.": "El enlace con Tierra es una simulación y no se transmite nada. El retardo de 1,3 s es aproximadamente el tiempo de luz Tierra–Luna en un sentido, una ilustración propia. NASA indica que el retraso a Marte puede llegar a 20 minutos en un sentido. Hoy parte del flujo es manual (la tripulación informa los datos de forma verbal); CHP-IDSP propone cargar los signos vitales en un registro médico electrónico.",
+"The numbers in the sources were read with automatic extractors and summaries. Open the link and confirm a value before quoting it.": "Los números de las fuentes se leyeron con extractores automáticos y resúmenes. Abrí el enlace y confirmá un valor antes de citarlo.",
 "The provider returned no crew": "El proveedor no devolvió tripulación",
+"The source gives 12–20 breaths per minute as normal. Tesai relaxes the lower bound to 10. The outer limits (8 and 28) are a team design value.": "La fuente da 12–20 respiraciones por minuto como normal. Tesai baja el límite inferior a 10. Los límites externos (8 y 28) son un valor de diseño del equipo.",
+"The sources give 60–100 bpm as the normal resting range. Tesai relaxes the lower bound to 50 bpm so fit people are not flagged all the time. The outer limits (40 and 130 bpm) have no published astronaut threshold: they are a team design value. In flight, heart rate changes little, so a personal baseline matters more than a population range.": "Las fuentes dan 60–100 lpm como rango normal en reposo. Tesai baja el límite inferior a 50 lpm para no marcar siempre a personas entrenadas. Los límites externos (40 y 130 lpm) no tienen un umbral publicado para astronautas: son un valor de diseño del equipo. En vuelo la frecuencia cardíaca cambia poco, así que importa más la línea base personal que un rango poblacional.",
+"The sources give 95–100 % as normal, 92 % or less as a value to report, and 88 % or less as urgent. Tesai uses 94 % and 90 % as its two limits, a little more relaxed than the sources. A pulse oximeter can differ 2–4 % from the true value, and noisy readings never raise alerts.": "Las fuentes dan 95–100 % como normal, 92 % o menos como valor a reportar y 88 % o menos como urgente. Tesai usa 94 % y 90 % como sus dos límites, algo más flexibles que las fuentes. Un oxímetro puede diferir 2–4 % del valor real y las lecturas ruidosas nunca generan avisos.",
+"The sources give a normal pressure below 120/80 and above 90/60 mmHg. Tesai tolerates up to 140/90 before flagging, a design choice. In flight, ambulatory blood pressure is lower (Norsk et al., 2015), and the reference sensor shirt estimates systolic pressure from pulse transit time instead of using a cuff. Treat this value as an estimate.": "Las fuentes dan una presión normal menor a 120/80 y mayor a 90/60 mmHg. Tesai tolera hasta 140/90 antes de marcar, una decisión de diseño. En vuelo la presión arterial ambulatoria es más baja (Norsk et al., 2015) y la camisa de referencia estima la sistólica por el tiempo de tránsito del pulso, sin manguito. Tomá este valor como una estimación.",
 "There are no trusted readings yet.": "No hay lecturas confiables todavía.",
 "They wake up again if the condition is still there.": "Vuelven a sonar si la condición sigue.",
 "This data comes from outside and has not been verified by Tesai.": "Los datos vienen de afuera y no fueron verificados por Tesai.",
@@ -1944,14 +2025,17 @@ const ES_DICT = {
 "Time window": "Ventana de tiempo",
 "Today's missions": "Misiones de hoy",
 "Top rank reached": "Rango máximo alcanzado",
+"Traffic-light colors, reminders, gamification, trend charts, plain explanations and a body figure are optional considerations listed in the challenge description.": "Los colores de semáforo, los recordatorios, la gamificación, los gráficos de tendencia, las explicaciones simples y la figura del cuerpo son consideraciones opcionales que plantea la descripción del desafío.",
 "Traffic-light thresholds": "Umbrales del semáforo",
 "Trend": "Evolución",
 "Trend chart": "Gráfico de evolución",
+"Typical ISS crew exposure is 0.2–0.5 mSv per day (about 8–21 µSv/h), the normal band here. The red limit of 54 µSv/h is NASA's galactic cosmic ray limit of 1.3 mSv per day in free space (NASA-STD-3001 Vol. 1, V1 4033). Career limit: 600 mSv. These numbers were read with an automatic extractor: check them in the original.": "La exposición típica de la tripulación en la ISS es de 0,2–0,5 mSv por día (unos 8–21 µSv/h), la banda normal de aquí. El límite rojo de 54 µSv/h es el límite de NASA para rayos cósmicos galácticos de 1,3 mSv por día en espacio libre (NASA-STD-3001 Vol. 1, V1 4033). Límite de carrera: 600 mSv. Estos números se leyeron con un extractor automático: verificalos en el original.",
 "UNVERIFIED": "SIN VERIFICAR",
 "UNVERIFIED DATA": "DATOS SIN VERIFICAR",
 "Unacknowledged": "Sin reconocer",
 "Unverified": "Sin verificar",
 "Use as data source": "Usar como fuente de datos",
+"Used for": "Se usa en",
 "Using simulated data with seed": "Usando datos simulados con semilla",
 "Validation errors": "Errores de validación",
 "Variability between heartbeats (RMSSD). It is naturally very variable, so it is not compared with the baseline like the others.": "Variabilidad entre latidos (RMSSD). Es naturalmente muy variable, por eso no se compara con la línea base como las demás.",
@@ -1966,6 +2050,7 @@ const ES_DICT = {
 "Which crew members": "Qué tripulantes",
 "Window": "Ventana",
 "With demo mode on, events can be injected into the simulation to test alerts. With real or file data, events are not available.": "Con el modo activo se pueden inyectar eventos en la simulación para probar avisos. Con datos reales o de archivo, los eventos no están disponibles.",
+"Your baseline": "Tu línea base",
 "[Tesai] source not available:": "[Tesai] fuente no disponible:",
 "alert": "aviso",
 "alerts": "avisos",
@@ -2014,10 +2099,23 @@ const ES_DICT = {
 "the metrics": "las métricas",
 "the selected person": "la persona elegida",
 "transmitting": "transmitiendo",
-"· the chart shows systolic": "· el gráfico muestra la sistólica"
+"· the chart shows systolic": "· el gráfico muestra la sistólica",
+"† Some bibliographic details (title or date) could not be verified because the site blocked automated access.": "† Algunos datos bibliográficos (título o fecha) no se pudieron verificar porque el sitio bloqueó el acceso automático."
 };
 const ES_COUNT = {"Active": "Activas", "Snoozed": "Pospuestas", "Acknowledged": "Reconocidas", "Resolved": "Resueltas", "All": "Todas"};
 const ES_PATTERNS = [
+[
+"^Sources: (.*)$",
+"Fuentes: $1"
+],
+[
+"^Used for: (.*)$",
+"Se usa en: $1"
+],
+[
+"^Sources for (.+)$",
+"Fuentes de $1"
+],
 [
 "^(.+) was made with Claude, an AI assistant by Anthropic\\. The visual design comes from Claude Design, and Claude Code helped write, review and test the code\\. Team (.+) chose what to build, directed the work and made the product decisions\\.$",
 "$1 se hizo con Claude, un asistente de IA de Anthropic. El diseño visual viene de Claude Design y Claude Code ayudó a escribir, revisar y probar el código. El equipo $2 eligió qué construir, dirigió el trabajo y tomó las decisiones de producto."
@@ -2107,6 +2205,10 @@ const ES_PATTERNS = [
 "Todos los parámetros de $1 están en rango."
 ],
 [
+"^Your rank is (.+)\\. Top rank reached\\.$",
+"Tu rango es $1. Llegaste al rango máximo."
+],
+[
 "^Using simulated data with seed (.+)\\.$",
 "Usando datos simulados con semilla $1."
 ],
@@ -2117,6 +2219,10 @@ const ES_PATTERNS = [
 [
 "^Partial\\ data\\ ·\\ (.+?)\\ of\\ (.+?)\\ metrics$",
 "Datos parciales · $1 de $2 métricas"
+],
+[
+"^Your rank is (.+)\\. (\\d+) pts to (.+)\\.$",
+"Tu rango es $1. Te faltan $2 pts para $3."
 ],
 [
 "^(\\d+) alerts? snoozed for (\\d+) min$",
@@ -2449,6 +2555,566 @@ const I18N = {
 };
 
 /* =============================================================================
+   EVIDENCE · where each number comes from. Every limit, goal and rule has a basis ("Based on a source",
+   "Adapted from a source", "Team design value · no published source" or "No real data source") and its
+   sources, cited in APA 7. A "!" button next to each data point opens them. To add or fix a source edit
+   SOURCES / EVIDENCE below.
+   ============================================================================= */
+/*EVIDENCE-DATA-START*/
+const SOURCES = {
+"barger2014": {
+"cite": "Barger et al., 2014",
+"type": "paper",
+"apa": "Barger, L. K., Flynn-Evans, E. E., Kubey, A., Walsh, L., Ronda, J. M., Wang, W., Wright, K. P., &amp; Czeisler, C. A. (2014). Prevalence of sleep deficiency and use of hypnotic drugs in astronauts before, during, and after spaceflight: An observational study. <i>The Lancet Neurology, 13</i>(9), 904–912. <a href=\"https://doi.org/10.1016/S1474-4422(14)70122-X\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.1016/S1474-4422(14)70122-X</a>",
+"unverified": false,
+"sort": "barger, l. k., flynn-evans, e. e., kubey, a., walsh, l., ronda, j. m., wang, w., wright, k. p., &amp; czeisler, c. a. (2014). prevalence of sleep deficiency and use of hypnotic drugs in astronauts before, during, and after spaceflight: an observational study. the lancet neurology, 13(9), 904–912. https://doi.org/10.1016/s1474-4422(14)70122-x"
+},
+"stahn2017": {
+"cite": "Stahn et al., 2017",
+"type": "paper",
+"apa": "Stahn, A. C., Werner, A., Opatz, O., Maggioni, M. A., Steinach, M., von Ahlefeld, V. W., Moore, A., Crucian, B. E., Smith, S. M., Zwart, S. R., Schlabs, T., Mendt, S., Trippel, T., Koralewski, E., Koch, J., Choukèr, A., Reitz, G., Shang, P., Röcker, L., . . . Gunga, H.-C. (2017). Increased core body temperature in astronauts during long-duration space missions. <i>Scientific Reports, 7</i>(1), Article 16180. <a href=\"https://doi.org/10.1038/s41598-017-15560-w\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.1038/s41598-017-15560-w</a>",
+"unverified": false,
+"sort": "stahn, a. c., werner, a., opatz, o., maggioni, m. a., steinach, m., von ahlefeld, v. w., moore, a., crucian, b. e., smith, s. m., zwart, s. r., schlabs, t., mendt, s., trippel, t., koralewski, e., koch, j., choukèr, a., reitz, g., shang, p., röcker, l., . . . gunga, h.-c. (2017). increased core body temperature in astronauts during long-duration space missions. scientific reports, 7(1), article 16180. https://doi.org/10.1038/s41598-017-15560-w"
+},
+"norsk2015": {
+"cite": "Norsk et al., 2015",
+"type": "paper",
+"apa": "Norsk, P., Asmar, A., Damgaard, M., &amp; Christensen, N. J. (2015). Fluid shifts, vasodilatation and ambulatory blood pressure reduction during long duration spaceflight. <i>The Journal of Physiology, 593</i>(3), 573–584. <a href=\"https://doi.org/10.1113/jphysiol.2014.284869\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.1113/jphysiol.2014.284869</a>",
+"unverified": false,
+"sort": "norsk, p., asmar, a., damgaard, m., &amp; christensen, n. j. (2015). fluid shifts, vasodilatation and ambulatory blood pressure reduction during long duration spaceflight. the journal of physiology, 593(3), 573–584. https://doi.org/10.1113/jphysiol.2014.284869"
+},
+"mars500": {
+"cite": "Basner et al., 2014",
+"type": "paper",
+"apa": "Basner, M., Dinges, D. F., Mollicone, D. J., Savelev, I., Ecker, A. J., Di Antonio, A., Jones, C. W., Hyder, E. C., Kan, K., Morukov, B. V., &amp; Sutton, J. P. (2014). Psychological and behavioral changes during confinement in a 520-day simulated interplanetary mission to Mars. <i>PLOS ONE, 9</i>(3), Article e93298. <a href=\"https://doi.org/10.1371/journal.pone.0093298\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.1371/journal.pone.0093298</a>",
+"unverified": false,
+"sort": "basner, m., dinges, d. f., mollicone, d. j., savelev, i., ecker, a. j., di antonio, a., jones, c. w., hyder, e. c., kan, k., morukov, b. v., &amp; sutton, j. p. (2014). psychological and behavioral changes during confinement in a 520-day simulated interplanetary mission to mars. plos one, 9(3), article e93298. https://doi.org/10.1371/journal.pone.0093298"
+},
+"cvdmodel": {
+"cite": "Huff et al., 2022",
+"type": "paper",
+"apa": "Huff, J. L., Plante, I., Blattnig, S. R., Norman, R. B., Little, M. P., Khera, A., Simonsen, L. C., &amp; Patel, Z. S. (2022). Cardiovascular disease risk modeling for astronauts: Making the leap from Earth to space. <i>Frontiers in Cardiovascular Medicine, 9</i>, Article 873597. <a href=\"https://doi.org/10.3389/fcvm.2022.873597\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.3389/fcvm.2022.873597</a>",
+"unverified": false,
+"sort": "huff, j. l., plante, i., blattnig, s. r., norman, r. b., little, m. p., khera, a., simonsen, l. c., &amp; patel, z. s. (2022). cardiovascular disease risk modeling for astronauts: making the leap from earth to space. frontiers in cardiovascular medicine, 9, article 873597. https://doi.org/10.3389/fcvm.2022.873597"
+},
+"thermo2026": {
+"cite": "Gimunová et al., 2026",
+"type": "paper",
+"apa": "Gimunová, M., Beníčková, M., Wagner, A., Kučera, J., &amp; Bienertova-Vasku, J. (2026). The effect of spaceflight and simulated microgravity exposure on thermoregulation in humans: A systematic review. <i>npj Microgravity, 12</i>(1), Article 64. <a href=\"https://doi.org/10.1038/s41526-026-00601-4\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.1038/s41526-026-00601-4</a>",
+"unverified": false,
+"sort": "gimunová, m., beníčková, m., wagner, a., kučera, j., &amp; bienertova-vasku, j. (2026). the effect of spaceflight and simulated microgravity exposure on thermoregulation in humans: a systematic review. npj microgravity, 12(1), article 64. https://doi.org/10.1038/s41526-026-00601-4"
+},
+"cardioreview": {
+"cite": "Sharma et al., 2023",
+"type": "paper",
+"apa": "Sharma, S. N., Meller, L. L. T., Sharma, A. N., &amp; Amsterdam, E. A. (2023). Cardiovascular adaptations of space travel: A systematic review. <i>Cardiology, 148</i>(5), 434–440. <a href=\"https://doi.org/10.1159/000531466\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.1159/000531466</a>",
+"unverified": false,
+"sort": "sharma, s. n., meller, l. l. t., sharma, a. n., &amp; amsterdam, e. a. (2023). cardiovascular adaptations of space travel: a systematic review. cardiology, 148(5), 434–440. https://doi.org/10.1159/000531466"
+},
+"raddose": {
+"cite": "Shavers et al., 2024",
+"type": "paper",
+"apa": "Shavers, M., Semones, E., Tomi, L., Chen, J., Straube, U., Komiyama, T., Shurshakov, V., Li, C., &amp; Rühm, W. (2024). Space agency-specific standards for crew dose and risk assessment of ionising radiation exposures for the International Space Station. <i>Zeitschrift für Medizinische Physik, 34</i>(1), 14–30. <a href=\"https://doi.org/10.1016/j.zemedi.2023.06.005\" target=\"_blank\" rel=\"noopener noreferrer\">https://doi.org/10.1016/j.zemedi.2023.06.005</a>",
+"unverified": false,
+"sort": "shavers, m., semones, e., tomi, l., chen, j., straube, u., komiyama, t., shurshakov, v., li, c., &amp; rühm, w. (2024). space agency-specific standards for crew dose and risk assessment of ionising radiation exposures for the international space station. zeitschrift für medizinische physik, 34(1), 14–30. https://doi.org/10.1016/j.zemedi.2023.06.005"
+},
+"law2015": {
+"cite": "Law & Alexander, 2016",
+"type": "paper",
+"apa": "Law, J., &amp; Alexander, D. (2016, April). <i>CO2 on the International Space Station: An operations update</i> [Conference abstract]. Aerospace Medical Association Annual Scientific Meeting. NASA Technical Reports Server (JSC-CN-34542). <a href=\"https://ntrs.nasa.gov/citations/20150019624\" target=\"_blank\" rel=\"noopener noreferrer\">https://ntrs.nasa.gov/citations/20150019624</a>",
+"unverified": false,
+"sort": "law, j., &amp; alexander, d. (2016, april). co2 on the international space station: an operations update [conference abstract]. aerospace medical association annual scientific meeting. nasa technical reports server (jsc-cn-34542). https://ntrs.nasa.gov/citations/20150019624"
+},
+"isscabin": {
+"cite": "Perry et al., 2012",
+"type": "paper",
+"apa": "Perry, J. L., Abney, M. B., Knox, J. C., Parrish, K. J., Roman, M. C., &amp; Jan, D. L. (2012). <i>Integrated atmosphere resource recovery and environmental monitoring technology demonstration for deep space exploration</i> [Conference paper]. AIAA International Conference on Environmental Systems. NASA Technical Reports Server (M12-1807). <a href=\"https://ntrs.nasa.gov/citations/20120015343\" target=\"_blank\" rel=\"noopener noreferrer\">https://ntrs.nasa.gov/citations/20120015343</a>",
+"unverified": false,
+"sort": "perry, j. l., abney, m. b., knox, j. c., parrish, k. j., roman, m. c., &amp; jan, d. l. (2012). integrated atmosphere resource recovery and environmental monitoring technology demonstration for deep space exploration [conference paper]. aiaa international conference on environmental systems. nasa technical reports server (m12-1807). https://ntrs.nasa.gov/citations/20120015343"
+},
+"jsc20584": {
+"cite": "Langford, 2024",
+"type": "paper",
+"apa": "Langford, S. (2024). <i>Spacecraft maximum allowable concentrations for airborne contaminants: Revision C</i> (JSC-20584/REVC). National Aeronautics and Space Administration. <a href=\"https://ntrs.nasa.gov/citations/20240007713\" target=\"_blank\" rel=\"noopener noreferrer\">https://ntrs.nasa.gov/citations/20240007713</a>",
+"unverified": false,
+"sort": "langford, s. (2024). spacecraft maximum allowable concentrations for airborne contaminants: revision c (jsc-20584/revc). national aeronautics and space administration. https://ntrs.nasa.gov/citations/20240007713"
+},
+"cdss": {
+"cite": "Krihak et al., 2021",
+"type": "paper",
+"apa": "Krihak, M., Russell, B., Shetye, S., &amp; Shaw, T. L. (2021). <i>Exploration medical capability clinical decision support system concept of operations</i> (HRP-48033). NASA Ames Research Center. <a href=\"https://ntrs.nasa.gov/citations/20220017856\" target=\"_blank\" rel=\"noopener noreferrer\">https://ntrs.nasa.gov/citations/20220017856</a>",
+"unverified": false,
+"sort": "krihak, m., russell, b., shetye, s., &amp; shaw, t. l. (2021). exploration medical capability clinical decision support system concept of operations (hrp-48033). nasa ames research center. https://ntrs.nasa.gov/citations/20220017856"
+},
+"eimo": {
+"cite": "Parker et al., 2025",
+"type": "paper",
+"apa": "Parker, M., Krihak, M., Laing, C., Bardina, J., Parmar, P., &amp; Anderson, A. (2025). <i>Earth-independent medical operations (EIMO) concept of operations</i> [Conference presentation]. Human Research Program Investigators’ Workshop. NASA Technical Reports Server. <a href=\"https://ntrs.nasa.gov/citations/20250000009\" target=\"_blank\" rel=\"noopener noreferrer\">https://ntrs.nasa.gov/citations/20250000009</a>",
+"unverified": false,
+"sort": "parker, m., krihak, m., laing, c., bardina, j., parmar, p., &amp; anderson, a. (2025). earth-independent medical operations (eimo) concept of operations [conference presentation]. human research program investigators’ workshop. nasa technical reports server. https://ntrs.nasa.gov/citations/20250000009"
+},
+"chpidsp": {
+"cite": "Smith, 2025",
+"type": "paper",
+"apa": "Smith, A. (2025). <i>Crew health and performance integrated data system platform (CHP-IDSP) project updates</i> [Conference presentation]. Aerospace Medical Association–Undersea and Hyperbaric Medical Society Annual Scientific Meeting. NASA Technical Reports Server. <a href=\"https://ntrs.nasa.gov/api/citations/20250004859/downloads/CHP-IDSP_AsMA%202025.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://ntrs.nasa.gov/api/citations/20250004859/downloads/CHP-IDSP_AsMA%202025.pdf</a>",
+"unverified": false,
+"sort": "smith, a. (2025). crew health and performance integrated data system platform (chp-idsp) project updates [conference presentation]. aerospace medical association–undersea and hyperbaric medical society annual scientific meeting. nasa technical reports server. https://ntrs.nasa.gov/api/citations/20250004859/downloads/chp-idsp_asma%202025.pdf"
+},
+"std3001v1": {
+"cite": "NASA, 2023",
+"type": "standard",
+"apa": "NASA. (2023). <i>NASA spaceflight human-system standard: Vol. 1. Crew health</i> (NASA-STD-3001, Vol. 1, Rev. C). <a href=\"https://standards.nasa.gov/sites/default/files/standards/NASA/C//nasa-std-3001-vol-1-rev-c-signature.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://standards.nasa.gov/sites/default/files/standards/NASA/C//nasa-std-3001-vol-1-rev-c-signature.pdf</a>",
+"unverified": false,
+"sort": "nasa. (2023). nasa spaceflight human-system standard: vol. 1. crew health (nasa-std-3001, vol. 1, rev. c). https://standards.nasa.gov/sites/default/files/standards/nasa/c//nasa-std-3001-vol-1-rev-c-signature.pdf"
+},
+"std3001v2": {
+"cite": "NASA, n.d.",
+"type": "standard",
+"apa": "NASA. (n.d.). <i>NASA spaceflight human-system standard: Vol. 2. Human factors, habitability, and environmental health</i> (NASA-STD-3001, Vol. 2). <a href=\"https://www.nasa.gov/?p=808212\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.nasa.gov/?p=808212</a>",
+"unverified": true,
+"sort": "nasa. ({y}). nasa spaceflight human-system standard: vol. 2. human factors, habitability, and environmental health (nasa-std-3001, vol. 2). https://www.nasa.gov/?p=808212"
+},
+"ochmo002": {
+"cite": "OCHMO, n.d.-b",
+"type": "brief",
+"apa": "NASA Office of the Chief Health and Medical Officer. (n.d.-b). <i>Environmental control and life support systems (ECLSS)</i> (OCHMO-TB-002) [Technical brief]. <a href=\"https://www.nasa.gov/wp-content/uploads/2023/07/eclss-technical-brief-ochmo.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.nasa.gov/wp-content/uploads/2023/07/eclss-technical-brief-ochmo.pdf</a>",
+"unverified": true,
+"sort": "nasa office of the chief health and medical officer. ({y}). environmental control and life support systems (eclss) (ochmo-tb-002) [technical brief]. https://www.nasa.gov/wp-content/uploads/2023/07/eclss-technical-brief-ochmo.pdf"
+},
+"ochmo003": {
+"cite": "OCHMO, n.d.-c",
+"type": "brief",
+"apa": "NASA Office of the Chief Health and Medical Officer. (n.d.-c). <i>Habitable atmosphere</i> (OCHMO-TB-003) [Technical brief]. <a href=\"https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-003-habitable-atmosphere.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-003-habitable-atmosphere.pdf</a>",
+"unverified": true,
+"sort": "nasa office of the chief health and medical officer. ({y}). habitable atmosphere (ochmo-tb-003) [technical brief]. https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-003-habitable-atmosphere.pdf"
+},
+"ochmo004": {
+"cite": "OCHMO, n.d.-a",
+"type": "brief",
+"apa": "NASA Office of the Chief Health and Medical Officer. (n.d.-a). <i>Carbon dioxide</i> (OCHMO-TB-004) [Technical brief]. <a href=\"https://nasa.gov/wp-content/uploads/2023/03/co2-technical-brief-ochmo.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://nasa.gov/wp-content/uploads/2023/03/co2-technical-brief-ochmo.pdf</a>",
+"unverified": true,
+"sort": "nasa office of the chief health and medical officer. ({y}). carbon dioxide (ochmo-tb-004) [technical brief]. https://nasa.gov/wp-content/uploads/2023/03/co2-technical-brief-ochmo.pdf"
+},
+"nasacardio": {
+"cite": "NASA HRP, n.d.-e",
+"type": "page",
+"apa": "NASA Human Research Program. (n.d.-e). <i>Risk of cardiovascular adaptations</i>. <a href=\"https://www.nasa.gov/reference/risk-of-cardiovascular-adaptations/\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.nasa.gov/reference/risk-of-cardiovascular-adaptations/</a>",
+"unverified": false,
+"sort": "nasa human research program. ({y}). risk of cardiovascular adaptations. https://www.nasa.gov/reference/risk-of-cardiovascular-adaptations/"
+},
+"nasafitness": {
+"cite": "NASA HRP, n.d.-f",
+"type": "page",
+"apa": "NASA Human Research Program. (n.d.-f). <i>Risk of reduced cardiorespiratory and musculoskeletal fitness</i>. <a href=\"https://www.nasa.gov/reference/risk-of-reduced-cardiorespiratory-and-musculoskeletal-fitness/\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.nasa.gov/reference/risk-of-reduced-cardiorespiratory-and-musculoskeletal-fitness/</a>",
+"unverified": false,
+"sort": "nasa human research program. ({y}). risk of reduced cardiorespiratory and musculoskeletal fitness. https://www.nasa.gov/reference/risk-of-reduced-cardiorespiratory-and-musculoskeletal-fitness/"
+},
+"nasabehav": {
+"cite": "NASA HRP, n.d.-d",
+"type": "page",
+"apa": "NASA Human Research Program. (n.d.-d). <i>Risk of behavioral conditions and psychiatric disorders</i>. <a href=\"https://www.nasa.gov/reference/risk-of-behavioral-conditions-and-psychiatric-disorders/\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.nasa.gov/reference/risk-of-behavioral-conditions-and-psychiatric-disorders/</a>",
+"unverified": false,
+"sort": "nasa human research program. ({y}). risk of behavioral conditions and psychiatric disorders. https://www.nasa.gov/reference/risk-of-behavioral-conditions-and-psychiatric-disorders/"
+},
+"nasasleep": {
+"cite": "NASA HRP, n.d.-c",
+"type": "page",
+"apa": "NASA Human Research Program. (n.d.-c). <i>Risk from inadequate sleep and irregular schedules</i>. <a href=\"https://www.nasa.gov/reference/risk-from-inadequate-sleep-and-irregular-schedules/\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.nasa.gov/reference/risk-from-inadequate-sleep-and-irregular-schedules/</a>",
+"unverified": false,
+"sort": "nasa human research program. ({y}). risk from inadequate sleep and irregular schedules. https://www.nasa.gov/reference/risk-from-inadequate-sleep-and-irregular-schedules/"
+},
+"hrpdistance": {
+"cite": "NASA HRP, n.d.-b",
+"type": "page",
+"apa": "NASA Human Research Program. (n.d.-b). <i>Hazard: Distance from Earth</i>. <a href=\"https://www.nasa.gov/hrp/hazard-distance-from-earth/\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.nasa.gov/hrp/hazard-distance-from-earth/</a>",
+"unverified": false,
+"sort": "nasa human research program. ({y}). hazard: distance from earth. https://www.nasa.gov/hrp/hazard-distance-from-earth/"
+},
+"archer": {
+"cite": "NASA HRP, n.d.-a",
+"type": "page",
+"apa": "NASA Human Research Program. (n.d.-a). <i>Artemis Research for Crew Health &amp; Readiness (ARCHeR)</i>. <a href=\"https://www.nasa.gov/reference/archer/\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.nasa.gov/reference/archer/</a>",
+"unverified": false,
+"sort": "nasa human research program. ({y}). artemis research for crew health &amp; readiness (archer). https://www.nasa.gov/reference/archer/"
+},
+"csarad": {
+"cite": "Canadian Space Agency, 2026",
+"type": "page",
+"apa": "Canadian Space Agency. (2026, February 26). <i>Monitoring radiation for astronaut health</i>. <a href=\"https://www.asc-csa.gc.ca/eng/news/articles/2026/2026-02-26-monitoring-radiation-astronaut-health.asp\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.asc-csa.gc.ca/eng/news/articles/2026/2026-02-26-monitoring-radiation-astronaut-health.asp</a>",
+"unverified": false,
+"sort": "canadian space agency. (2026, february 26). monitoring radiation for astronaut health. https://www.asc-csa.gc.ca/eng/news/articles/2026/2026-02-26-monitoring-radiation-astronaut-health.asp"
+},
+"biomonitor": {
+"cite": "Canadian Space Agency, n.d.",
+"type": "page",
+"apa": "Canadian Space Agency. (n.d.). <i>Bio-Monitor</i>. <a href=\"https://www.asc-csa.gc.ca/eng/sciences/bio-monitor.asp\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.asc-csa.gc.ca/eng/sciences/bio-monitor.asp</a>",
+"unverified": false,
+"sort": "canadian space agency. (n.d.). bio-monitor. https://www.asc-csa.gc.ca/eng/sciences/bio-monitor.asp"
+},
+"astroskin": {
+"cite": "Carré Technologies, 2018",
+"type": "page",
+"apa": "Carré Technologies. (2018). <i>Astroskin technical sheet</i> [Product specification]. <a href=\"https://cdn.shopify.com/s/files/1/0284/7802/files/Astroskin.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">https://cdn.shopify.com/s/files/1/0284/7802/files/Astroskin.pdf</a>",
+"unverified": false,
+"sort": "carré technologies. (2018). astroskin technical sheet [product specification]. https://cdn.shopify.com/s/files/1/0284/7802/files/astroskin.pdf"
+},
+"mlppox": {
+"cite": "National Library of Medicine, n.d.-a",
+"type": "clinical",
+"apa": "National Library of Medicine. (n.d.-a). <i>Pulse oximetry</i>. MedlinePlus. <a href=\"https://medlineplus.gov/lab-tests/pulse-oximetry/\" target=\"_blank\" rel=\"noopener noreferrer\">https://medlineplus.gov/lab-tests/pulse-oximetry/</a>",
+"unverified": false,
+"sort": "national library of medicine. ({y}). pulse oximetry. medlineplus. https://medlineplus.gov/lab-tests/pulse-oximetry/"
+},
+"mlpvitals": {
+"cite": "National Library of Medicine, n.d.-b",
+"type": "clinical",
+"apa": "National Library of Medicine. (n.d.-b). <i>Vital signs</i>. MedlinePlus. <a href=\"https://medlineplus.gov/vitalsigns.html\" target=\"_blank\" rel=\"noopener noreferrer\">https://medlineplus.gov/vitalsigns.html</a>",
+"unverified": false,
+"sort": "national library of medicine. ({y}). vital signs. medlineplus. https://medlineplus.gov/vitalsigns.html"
+},
+"ahahr": {
+"cite": "American Heart Association, n.d.",
+"type": "clinical",
+"apa": "American Heart Association. (n.d.). <i>All about heart rate (pulse)</i>. <a href=\"https://www.heart.org/en/health-topics/high-blood-pressure/the-facts-about-high-blood-pressure/all-about-heart-rate-pulse\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.heart.org/en/health-topics/high-blood-pressure/the-facts-about-high-blood-pressure/all-about-heart-rate-pulse</a>",
+"unverified": false,
+"sort": "american heart association. (n.d.). all about heart rate (pulse). https://www.heart.org/en/health-topics/high-blood-pressure/the-facts-about-high-blood-pressure/all-about-heart-rate-pulse"
+},
+"ahabp": {
+"cite": "American Heart Association, 2023",
+"type": "clinical",
+"apa": "American Heart Association. (2023, May 17). <i>Are heart rate and blood pressure the same?</i> <a href=\"https://www.heart.org/en/news/2023/05/17/are-heart-rate-and-blood-pressure-the-same\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.heart.org/en/news/2023/05/17/are-heart-rate-and-blood-pressure-the-same</a>",
+"unverified": false,
+"sort": "american heart association. (2023, may 17). are heart rate and blood pressure the same? https://www.heart.org/en/news/2023/05/17/are-heart-rate-and-blood-pressure-the-same"
+},
+"statpearls": {
+"cite": "StatPearls, n.d.",
+"type": "clinical",
+"apa": "National Center for Biotechnology Information. (n.d.). <i>StatPearls: Adult vital signs, heart rate and respiratory rate</i> (NBK553213). NCBI Bookshelf. <a href=\"https://www.ncbi.nlm.nih.gov/books/NBK553213/\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.ncbi.nlm.nih.gov/books/NBK553213/</a>",
+"unverified": true,
+"sort": "national center for biotechnology information. (n.d.). statpearls: adult vital signs, heart rate and respiratory rate (nbk553213). ncbi bookshelf. https://www.ncbi.nlm.nih.gov/books/nbk553213/"
+},
+"ncbiresp": {
+"cite": "NCBI, n.d.",
+"type": "clinical",
+"apa": "National Center for Biotechnology Information. (n.d.). <i>Respiratory assessment</i> (NBK593192). NCBI Bookshelf. <a href=\"https://www.ncbi.nlm.nih.gov/books/NBK593192/\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.ncbi.nlm.nih.gov/books/NBK593192/</a>",
+"unverified": true,
+"sort": "national center for biotechnology information. (n.d.). respiratory assessment (nbk593192). ncbi bookshelf. https://www.ncbi.nlm.nih.gov/books/nbk593192/"
+},
+"spaceapps": {
+"cite": "NASA Space Apps Challenge, 2026",
+"type": "page",
+"apa": "NASA Space Apps Challenge. (2026). <i>Create health monitoring software for astronauts on space missions</i>. <a href=\"https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/</a>",
+"unverified": false,
+"sort": "nasa space apps challenge. (2026). create health monitoring software for astronauts on space missions. https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/"
+},
+"dossier": {
+"cite": "Team Higía, 2026a",
+"type": "team",
+"apa": "Team Higía. (2026a, November 14). <i>Higía research dossier: NASA Space Apps Challenge 2026</i> [Unpublished research report]. <a href=\"https://claude.ai/artifact/LJtu9sqstPv7xRUa9xauR5\" target=\"_blank\" rel=\"noopener noreferrer\">https://claude.ai/artifact/LJtu9sqstPv7xRUa9xauR5</a>",
+"unverified": false,
+"sort": "team higía. (2026a, november 14). higía research dossier: nasa space apps challenge 2026 [unpublished research report]. https://claude.ai/artifact/ljtu9sqstpv7xrua9xaur5"
+},
+"alertnotes": {
+"cite": "Team Higía, 2026b",
+"type": "team",
+"apa": "Team Higía. (2026b, November 14). <i>When a value needs the attention of the crew or the flight surgeons</i> [Unpublished team notes, private]. Notion.",
+"unverified": false,
+"sort": "team higía. (2026b, november 14). when a value needs the attention of the crew or the flight surgeons [unpublished team notes, private]. notion."
+}
+};
+const EVIDENCE = {
+"hr": {
+"group": "Vital signs",
+"label": "Heart rate limits",
+"basis": "adapted",
+"refs": [
+"statpearls",
+"ahahr",
+"nasacardio",
+"cardioreview"
+],
+"note": "The sources give 60–100 bpm as the normal resting range. Tesai relaxes the lower bound to 50 bpm so fit people are not flagged all the time. The outer limits (40 and 130 bpm) have no published astronaut threshold: they are a team design value. In flight, heart rate changes little, so a personal baseline matters more than a population range."
+},
+"spo2": {
+"group": "Vital signs",
+"label": "Blood oxygen limits",
+"basis": "adapted",
+"refs": [
+"mlppox",
+"ncbiresp",
+"astroskin"
+],
+"note": "The sources give 95–100 % as normal, 92 % or less as a value to report, and 88 % or less as urgent. Tesai uses 94 % and 90 % as its two limits, a little more relaxed than the sources. A pulse oximeter can differ 2–4 % from the true value, and noisy readings never raise alerts."
+},
+"bp": {
+"group": "Vital signs",
+"label": "Blood pressure limits",
+"basis": "adapted",
+"refs": [
+"mlpvitals",
+"ahabp",
+"nasacardio",
+"norsk2015",
+"astroskin",
+"biomonitor"
+],
+"note": "The sources give a normal pressure below 120/80 and above 90/60 mmHg. Tesai tolerates up to 140/90 before flagging, a design choice. In flight, ambulatory blood pressure is lower (Norsk et al., 2015), and the reference sensor shirt estimates systolic pressure from pulse transit time instead of using a cuff. Treat this value as an estimate."
+},
+"temp": {
+"group": "Vital signs",
+"label": "Core temperature limits",
+"basis": "design",
+"refs": [
+"stahn2017",
+"thermo2026"
+],
+"note": "No published normal or alert range for astronaut core temperature was found, so the limits are a team design value based on general adult ranges that were not verified. Core temperature rises about 1 °C at rest during long missions and can exceed 40 °C during exercise (Stahn et al., 2017), so Earth ranges should not be copied to flight without a warning. Skin or wrist temperature is not core temperature."
+},
+"resp": {
+"group": "Vital signs",
+"label": "Respiration limits",
+"basis": "adapted",
+"refs": [
+"statpearls"
+],
+"note": "The source gives 12–20 breaths per minute as normal. Tesai relaxes the lower bound to 10. The outer limits (8 and 28) are a team design value."
+},
+"hrv": {
+"group": "Vital signs",
+"label": "Heart rate variability limits",
+"basis": "design",
+"refs": [],
+"note": "No source was found in the team's research for heart rate variability thresholds. The limits are a design value, and HRV is left out of the personal-baseline rule because it varies so much on its own."
+},
+"env.co2": {
+"group": "Cabin environment",
+"label": "CO₂ limits",
+"basis": "adapted",
+"refs": [
+"ochmo004",
+"std3001v2",
+"law2015",
+"jsc20584"
+],
+"note": "NASA's crew limit is 3 mmHg as a 1-hour average, about 3,950 ppm at 101.3 kPa (the ppm conversion is ours). Symptoms start near 2.3 mmHg, and headaches are more likely above 2.8 mmHg (Law & Alexander, 2016, OCHMO-TB-004). The red limit of 7,000 ppm (5.3 mmHg) comes from an older long-duration figure and should be checked against the current JSC 20584."
+},
+"env.oxygen": {
+"group": "Cabin environment",
+"label": "Oxygen (ppO₂) limits",
+"basis": "adapted",
+"refs": [
+"isscabin",
+"ochmo003"
+],
+"note": "19.5–23.1 kPa is the ISS cabin design range for oxygen partial pressure. The outer limits (16 and 26 kPa) are illustrative: the table of inspired-oxygen exposure ranges in NASA-STD-3001 Vol. 2 was not read."
+},
+"env.pressure": {
+"group": "Cabin environment",
+"label": "Cabin pressure limits",
+"basis": "adapted",
+"refs": [
+"isscabin",
+"std3001v2"
+],
+"note": "97.9–102.7 kPa is the ISS cabin design range (nominal 101.3 kPa). The outer limits (90 and 108 kPa) are illustrative. NASA lists 5.0 psia as the lowest reachable cabin pressure."
+},
+"env.temp": {
+"group": "Cabin environment",
+"label": "Cabin temperature limits",
+"basis": "source",
+"refs": [
+"ochmo002",
+"std3001v2"
+],
+"note": "Crew performance zone: 20–25 °C. Operating limit: from 18 °C at 75 % humidity to 27 °C at 25 % humidity (NASA-STD-3001 Vol. 2, 6012). Tesai shows the limits as separate ranges, a simplification of that coupled limit."
+},
+"env.humidity": {
+"group": "Cabin environment",
+"label": "Humidity limits",
+"basis": "source",
+"refs": [
+"ochmo002",
+"std3001v2"
+],
+"note": "Crew performance zone: 30–60 % humidity. Operating limit: 25–75 % (NASA-STD-3001 Vol. 2, 6012). Tesai shows the limits as separate ranges, a simplification of that coupled limit."
+},
+"env.radiation": {
+"group": "Cabin environment",
+"label": "Radiation limits",
+"basis": "adapted",
+"refs": [
+"raddose",
+"std3001v1",
+"cvdmodel",
+"csarad"
+],
+"note": "Typical ISS crew exposure is 0.2–0.5 mSv per day (about 8–21 µSv/h), the normal band here. The red limit of 54 µSv/h is NASA's galactic cosmic ray limit of 1.3 mSv per day in free space (NASA-STD-3001 Vol. 1, V1 4033). Career limit: 600 mSv. These numbers were read with an automatic extractor: check them in the original."
+},
+"rule.baseline": {
+"group": "Goals and alert rules",
+"label": "Personal baseline rule (25 %)",
+"basis": "design",
+"refs": [
+"nasacardio",
+"stahn2017"
+],
+"note": "The 25 % deviation from a personal baseline is a team design value with no published threshold. The idea of alerting against a personal baseline is supported by flight data: heart rate and blood pressure change little in flight, and core temperature drifts about 1 °C."
+},
+"rule.quality": {
+"group": "Goals and alert rules",
+"label": "Noisy readings never raise alerts",
+"basis": "adapted",
+"refs": [
+"astroskin",
+"alertnotes"
+],
+"note": "Noisy, delayed or disconnected readings do not open or close alerts. The reference sensor shirt reports signal-quality channels for electrode disconnection, 50–60 Hz noise, saturation and motion artifact."
+},
+"rule.escalation": {
+"group": "Goals and alert rules",
+"label": "Alert timing (escalation, snooze, persistence)",
+"basis": "design",
+"refs": [
+"cdss",
+"eimo",
+"alertnotes"
+],
+"note": "The 60-second escalation, the 15-minute snooze and the number of readings needed to open (2) or close (3) an alert are team design values. The sources only support the general idea: with delayed communication the crew will have to respond on its own."
+},
+"rule.groundlink": {
+"group": "Goals and alert rules",
+"label": "Ground link",
+"basis": "design",
+"refs": [
+"hrpdistance",
+"chpidsp"
+],
+"note": "The ground link is a simulation and nothing is transmitted. The 1.3 s delay is about the Earth–Moon one-way light time, our own illustration. NASA says the delay to Mars can reach 20 minutes one way. Today part of the flow is manual (the crew reports data verbally); CHP-IDSP proposes loading vitals into an electronic medical record."
+},
+"goal.exercise": {
+"group": "Goals and alert rules",
+"label": "Exercise goal (60 min)",
+"basis": "adapted",
+"refs": [
+"nasafitness"
+],
+"note": "ISS crews exercise about 1.5 hours per day, 6–7 days per week. The 60-minute goal is a lighter team design value."
+},
+"goal.sleep": {
+"group": "Goals and alert rules",
+"label": "Sleep goal (7 h)",
+"basis": "design",
+"refs": [
+"barger2014",
+"nasasleep",
+"std3001v1",
+"archer"
+],
+"note": "The 7-hour goal is a team design value. For reference, NASA schedules a recommended sleep period of 8.5 hours (including 2 hours before and 1.5 hours after sleeping), and astronauts on the ISS slept about 6 hours per night (Barger et al., 2014)."
+},
+"goal.hobby": {
+"group": "Goals and alert rules",
+"label": "Free-time goal (30 min)",
+"basis": "design",
+"refs": [
+"nasabehav",
+"mars500"
+],
+"note": "The 30 minutes of free time is a team design value. NASA lists a personal journal, gardening, windows and more privacy as countermeasures for isolation, but gives no number of minutes."
+},
+"goal.batteries": {
+"group": "Goals and alert rules",
+"label": "Sensor battery and signal limits",
+"basis": "design",
+"refs": [],
+"note": "The battery limits (20 % low, 8 % critical), the 40 % signal limit and the 50 % charge goal are team design values for the demo. No published source applies."
+},
+"goal.hydration": {
+"group": "Goals and alert rules",
+"label": "Hydration reminder (2 L per day)",
+"basis": "design",
+"refs": [],
+"note": "The 2 L per day water guideline is an illustrative value. No source was found in the team's research."
+},
+"data.simulated": {
+"group": "Data",
+"label": "Simulated readings",
+"basis": "none",
+"refs": [
+"dossier"
+],
+"note": "Every reading is simulated with a seeded random generator and invented baselines for fictional crew members. The team's research found no public dataset of daily in-flight vital signs. Real sources to explore are listed in About."
+},
+"feature.ui": {
+"group": "Data",
+"label": "Interface features",
+"basis": "source",
+"refs": [
+"spaceapps"
+],
+"note": "Traffic-light colors, reminders, gamification, trend charts, plain explanations and a body figure are optional considerations listed in the challenge description."
+}
+};
+const REAL_SOURCES = [
+{
+"title": "NASA OSDR: Inspiration4 mission datasets",
+"url": "https://www.nasa.gov/osdr-latest-news-i4-mission-datasets/",
+"note": "Commercial crew health data"
+},
+{
+"title": "NASA OSDR environmental data (RadLab, EDA)",
+"url": "https://visualization.osdr.nasa.gov/eda",
+"note": "ISS temperature, humidity, CO₂ and radiation"
+},
+{
+"title": "PhysioNet MMASH",
+"url": "https://physionet.org/content/mmash/",
+"note": "Heart rate, actigraphy and sleep of 22 healthy adults (not astronauts)"
+},
+{
+"title": "PhysioNet BIDSleep dataset",
+"url": "https://www.physionet.org/content/bidsleep-dataset/",
+"note": "253 nights of wrist heart rate and movement with sleep stages (not astronauts)"
+},
+{
+"title": "SOMA (Space Omics and Medical Atlas)",
+"url": "https://soma.weill.cornell.edu/",
+"note": "Omics and clinical data from space missions"
+},
+{
+"title": "NASA open data (data.nasa.gov) and NASA APIs (api.nasa.gov)",
+"url": "https://data.nasa.gov/",
+"note": "General NASA open data; no daily in-flight vitals"
+}
+];
+const BASIS_LABEL = {
+"source": "Based on a source",
+"adapted": "Adapted from a source",
+"design": "Team design value · no published source",
+"none": "No real data source"
+};
+const EVIDENCE_LEGEND = "† Some bibliographic details (title or date) could not be verified because the site blocked automated access.";
+/*EVIDENCE-DATA-END*/
+const evCell = key => `${basisPill(EVIDENCE[key].basis)}<div class="cites" data-i18n="off" style="font-size:var(--fs-xs);color:var(--muted);margin-top:4px">${esc(citeText(key) || '')}</div>${evBtn(key)}`;
+const BASIS_LEVEL = { source: 'normal', adapted: 'sensor', design: 'partial', none: 'partial' };
+const basisPill = b => pillHtml(BASIS_LEVEL[b], BASIS_LABEL[b]);
+const citeText = key => (EVIDENCE[key]?.refs || []).map(id => SOURCES[id].cite).join('; ');
+// The "!" button that sits next to a data point and opens its sources
+function evBtn(key) {
+  const e = EVIDENCE[key]; if (!e) return '';
+  return `<button type="button" class="evbtn" data-ev="${key}" data-basis="${e.basis}" data-fk="ev:${key}" aria-label="Sources for ${esc(e.label)}" title="Sources for ${esc(e.label)}">!</button>`;
+}
+// APA reference list: alphabetical by the first author
+const apaItems = ids => [...new Set(ids)].sort((a, b) => SOURCES[a].sort.localeCompare(SOURCES[b].sort)).map(id => `<li>${SOURCES[id].apa}${SOURCES[id].unverified ? ' †' : ''}</li>`).join('');
+const hasUnverified = ids => ids.some(id => SOURCES[id].unverified);
+function evidenceBody(key) {
+  const e = EVIDENCE[key]; if (!e) return '';
+  return `${basisPill(e.basis)}<p class="evnote">${esc(e.note)}</p><h3>Sources (APA 7)</h3>`
+    + (e.refs.length ? `<ul class="apa" data-i18n="off">${apaItems(e.refs)}</ul>` : '<p class="note">No published source found.</p>')
+    + (hasUnverified(e.refs) ? `<p class="note">${esc(EVIDENCE_LEGEND)}</p>` : '');
+}
+
+/* =============================================================================
    (e) UI · twin, connected cards, drawer, views
    ============================================================================= */
 const $ = s => document.querySelector(s);
@@ -2590,18 +3256,17 @@ const UI = {
     // menus
     this.bindMenu('#bell', '#notif-pop', () => this.renderNotifPop()); this.bindMenu('#who-btn', '#who-menu', () => this.renderCrewMenu());
     document.addEventListener('click', e => { if (this.menuOpen && !e.target.closest('.who')) this.closeMenu(); });
-    document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (this.menuOpen) { const t = $(this.menuOpen.btn); this.closeMenu(); t?.focus(); } else if (State.selMetric) this.closeDrawer(); });
+    document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (this.evOpen) { this.closeEvidence(); return; } if (this.menuOpen) { const t = $(this.menuOpen.btn); this.closeMenu(); t?.focus(); } else if (State.selMetric) this.closeDrawer(); });
     // bottom bar (actions)
     $('#btn-spin').onclick = () => { const on = !$('#twin-spin').classList.contains('on'); $('#twin-spin').classList.toggle('on', on); $('#stage').classList.toggle('spinning', on); $('#btn-spin').setAttribute('aria-pressed', String(on)); };
     $('#btn-scan').onclick = () => this.runScan();
     $('#btn-export').onclick = () => this.exportReport();
     // alerts
     $$('#lang button').forEach(b => b.onclick = () => { State.lang = b.dataset.lang; State.save(); this.syncLang(); });
-    $$('#alert-scope button').forEach(b => b.onclick = () => { State.alertScope = b.dataset.scope; $$('#alert-scope button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); this.renderDiag(); });
     $('#snooze-soft').onclick = () => { const n = snoozeNonCritical(); showToast({ level: 'normal', title: n ? `${n} alert${n > 1 ? 's' : ''} snoozed for ${CONFIG.alerts.snoozeMs / 60000} min` : 'No active non-critical alerts to snooze', message: 'They wake up again if the condition is still there.' }); };
     $$('#alert-filter button').forEach(b => b.onclick = () => { State.alertFilter = b.dataset.filter; $$('#alert-filter button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); this.renderDiag(); });
     $('#ack-soft').onclick = () => { const n = ackNonCritical(); showToast({ level: 'normal', title: n ? `${n} alert${n > 1 ? 's' : ''} acknowledged` : 'No active non-critical alerts', message: 'Critical alerts are acknowledged one at a time.' }); };
-    const actionClicks = e => { const b = e.target.closest('[data-act]'); if (!b) return; const id = b.dataset.id; if (b.dataset.act === 'ack') ackAlert(id); else if (b.dataset.act === 'snooze') snoozeAlert(id); else if (b.dataset.act === 'unsnooze') unsnoozeAlert(id); else if (b.dataset.act === 'run') runAlertAction(id); else if (b.dataset.act === 'dev') this.deviceAction(b.dataset.type, b.dataset.dev); else if (b.dataset.act === 'goto') { this.closeMenu(); this.go('diagnostics'); } };
+    const actionClicks = e => { const b = e.target.closest('[data-act]'); if (!b) return; const id = b.dataset.id; if (b.dataset.act === 'ack') ackAlert(id); else if (b.dataset.act === 'snooze') snoozeAlert(id); else if (b.dataset.act === 'unsnooze') unsnoozeAlert(id); else if (b.dataset.act === 'run') runAlertAction(id); else if (b.dataset.act === 'dev') this.deviceAction(b.dataset.type, b.dataset.dev); else if (b.dataset.act === 'goto') { this.closeMenu(); this.go('alerts'); } };
     ['#alerts-list', '#strip', '#notif-pop', '#dev-list'].forEach(s => $(s).addEventListener('click', actionClicks));
     // biometrics
     $('#vgrid').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (b) { this.go('overview'); setTimeout(() => this.openDrawer(b.dataset.m, document.getElementById('m-' + b.dataset.m)), 60); } });
@@ -2614,6 +3279,9 @@ const UI = {
     $('#log-hobby').onclick = async () => { await State.provider.pushEvent({ type: 'hobby', astronautId: State.selectedId, params: { minutes: 15 } }); await refreshSecondary(); checkMissions(); this.renderLive(); };
     $('#log-water').onclick = () => addPoints(CONFIG.gamification.waterPoints, 'Hydration logged');
     this.initSystem();
+    $$('[data-evslot]').forEach(el => { el.innerHTML = evBtn(el.dataset.evslot); });
+    document.addEventListener('click', e => { const b = e.target.closest('.evbtn'); if (b) { e.preventDefault(); this.openEvidence(b.dataset.ev, b); } });
+    $('#ev-close').onclick = () => this.closeEvidence(); $('#evscrim').onclick = () => this.closeEvidence();
     // stage layout
     const ro = new ResizeObserver(() => this.layoutStage()); ro.observe($('#stage-wrap')); ro.observe($('#strip')); ro.observe($('#dockbar'));
     window.addEventListener('resize', () => { this.layoutStage(); if (State.view === 'history') this.renderHistory(); });
@@ -2625,7 +3293,7 @@ const UI = {
   syncLang() { I18N.setLang(State.lang); $$('#lang button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.lang === State.lang))); },
   go(view, fromHash) {
     if (!VIEWS.includes(view)) view = 'overview';
-    State.view = view; $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+    State.view = view; $('#bell').classList.toggle('on', view === 'alerts'); $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
     $$('#tabs [data-view], #dock [data-view]').forEach(b => { if (b.dataset.view === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     if (!fromHash) try { history.replaceState(null, '', '#/' + view); } catch (e) { }
     this.closeMenu(); if (view !== 'overview') this.closeDrawer(true);
@@ -2672,7 +3340,7 @@ const UI = {
     this.renderMet(); this.renderSourceBadge(); this.renderBadges(); this.renderWho();
     if (State.view === 'overview') { this.renderStrip(); this.renderStage(); this.renderDockbar(); this.renderMissions(true); this.renderScore(); this.renderEnv(); }
     if (State.view === 'biometrics') this.renderBio();
-    if (State.view === 'diagnostics') this.renderDiag();
+    if (State.view === 'alerts') this.renderDiag();
     if (State.view === 'history') { if (!State.histPaused) this.renderHistory(); this.renderMissions(false); this.renderScore(); }
     if (State.view === 'advanced') this.renderSystemLive();
     if (State.selMetric) this.renderDrawer();
@@ -2685,7 +3353,8 @@ const UI = {
   renderSourceBadge() {
     const b = $('#badge-source'), d = State.provider?.describe() || {};
     if (d.source === 'real') { b.className = 'src real'; const file = d.kind === 'FileProvider'; setHtml(b, `<span aria-hidden="true">●</span><span class="lg">${file ? 'FILE DATA · UNVERIFIED' : 'API DATA · UNVERIFIED'}</span><span class="sm">UNVERIFIED</span>`); b.title = 'This data comes from outside and has not been verified by Tesai.'; }
-    else { b.className = 'src'; setHtml(b, '<span aria-hidden="true">●</span><span class="lg">SIMULATED DATA</span><span class="sm">SIMULATED</span>'); b.title = 'No reading belongs to a real person.'; }
+    else { b.className = 'src'; setHtml(b, ''); b.title = ''; }   // simulated data: no badge in the top bar (the About page and the startup notice still say so)
+    b.hidden = d.source !== 'real';
     const live = $('#live'), isFile = d.kind === 'FileProvider';
     setText($('#live-label'), isFile ? 'Replaying' : 'Live'); setText($('#live-rate'), (1000 / CONFIG.tickMs).toFixed(1) + ' Hz');
     live.dataset.state = State.provider ? 'live' : 'paused';
@@ -2694,15 +3363,13 @@ const UI = {
     const act = activeAlerts(), n = act.length, top = act[0], lv = !top ? '' : top.level === 'info' ? 'normal' : top.level;
     const bc = $('#bell-count'); setText(bc, n ? String(n) : ''); if (lv) bc.dataset.level = lv; else delete bc.dataset.level;
     $('#bell').setAttribute('aria-label', n ? `Active alerts: ${n}` : 'No active alerts');
-    const tc = $('#tab-count'); setText(tc, n ? String(n) : ''); if (lv) tc.dataset.level = lv === 'surgeon' ? 'surgeon' : 'attention';
-    const dd = $('#dock [data-view="diagnostics"]'); let dot = dd.querySelector('.dot'); if (n && !dot) { dot = document.createElement('i'); dot.className = 'dot'; dd.prepend(dot); } if (dot) { if (n) dot.dataset.level = lv === 'surgeon' ? 'surgeon' : 'attention'; else dot.remove(); }
   },
   renderWho() {
     const c = State.crew.find(x => x.id === State.selectedId); if (!c) return; const lv = levelOf(c.id);
     const av = $('#who-av'); setText(av, c.avatar || '?'); av.dataset.level = lv; setText($('#who-name'), c.name); setText($('#who-sid'), c.role || '');
   },
   renderCrewMenu() {
-    setHtml($('#who-menu'), `<h3>Monitored crew</h3>` + State.crew.map(c => `<button class="menu-item" role="menuitemradio" aria-checked="${c.id === State.selectedId}" data-crew="${c.id}" data-fk="crew:${c.id}"><span class="avatar" data-level="${levelOf(c.id)}">${esc(c.avatar || '?')}</span><span class="t"><b>${esc(c.name)}</b><span>${esc(c.role || '')} · ${LEVELS[levelOf(c.id)].short}</span></span></button>`).join(''));
+    setHtml($('#who-menu'), `<h3>Monitored crew</h3>` + State.crew.map(c => { const lv = c.id === State.selectedId || levelOf(c.id) === 'surgeon' ? levelOf(c.id) : ''; return `<button class="menu-item" role="menuitemradio" aria-checked="${c.id === State.selectedId}" data-crew="${c.id}" data-fk="crew:${c.id}"><span class="avatar"${lv ? ` data-level="${lv}"` : ''}>${esc(c.avatar || '?')}</span><span class="t"><b>${esc(c.name)}</b><span>${esc(c.role || '')}${lv ? ' · ' + LEVELS[lv].short : ''}</span></span></button>`; }).join(''));
     $('#who-menu').onclick = async e => { const b = e.target.closest('[data-crew]'); if (!b) return; State.selectedId = b.dataset.crew; this.closeMenu(); $('#who-btn').focus(); await refreshSecondary(); if (State.selMetric) this.renderDrawer(); this.renderLive(); };
   },
   renderNotifPop() {
@@ -2710,7 +3377,7 @@ const UI = {
     setHtml($('#notif-pop'), `<h3>Needs attention</h3>` + (act.length ? act.map(a => `<div class="arow" style="grid-template-columns:auto minmax(0,1fr) auto;margin:2px 4px" data-level="${alertLevelData(a)}" data-status="active"><span class="tile">${alertIcon(a)}</span><div class="body"><b class="ttl"><i class="lvdot"></i>${esc(a.title)}</b><span>${esc(a.message)}</span></div><button class="btn sm" data-act="ack" data-id="${a.id}" data-fk="pa:${a.id}">Acknowledge</button></div>`).join('') : '<div class="empty" style="margin:4px">No active alerts.</div>') + `<button class="menu-item" data-act="goto" data-fk="goto" style="justify-content:center;font-weight:600;color:var(--teal-ink)">View all alerts</button>`);
   }
 };
-const VIEWS = ['overview', 'biometrics', 'diagnostics', 'history', 'about', 'advanced'];   // 'advanced' is reachable only through #/advanced
+const VIEWS = ['overview', 'biometrics', 'alerts', 'history', 'about', 'advanced'];   // 'alerts' opens from the bell; 'advanced' only through #/advanced
 
 Object.assign(UI, {
   /* ---------- Overview ---------- */
@@ -2762,7 +3429,7 @@ Object.assign(UI, {
   },
   missionRow(def, full) {
     const ms = missionState(def);
-    return `<div class="mission ${ms.done ? 'done' : ''}"><span class="mi">${ICONS[def.icon]}</span><div><div class="mt">${def.title}</div>${full ? `<div class="md">${def.desc}</div>` : ''}<div class="bar"><i style="width:${ms.pct}%"></i></div></div><div class="mp">${ms.done ? ICONS.tick.replace('class="ic"', 'class="ic" style="display:inline;width:13px;height:13px;vertical-align:-2px"') + ' ' : ''}${def.points} pts<br><span style="color:var(--muted);font-family:var(--font-ui)">${round(ms.prog, def.unit === 'h' ? 1 : 0)}/${round(ms.goal)} ${def.unit}</span></div></div>`;
+    return `<div class="mission ${ms.done ? 'done' : ''}"><span class="mi">${ICONS[def.icon]}</span><div><div class="mt">${def.title}${evBtn('goal.' + def.id)}</div>${full ? `<div class="md">${def.desc}</div>` : ''}<div class="bar"><i style="width:${ms.pct}%"></i></div></div><div class="mp">${ms.done ? ICONS.tick.replace('class="ic"', 'class="ic" style="display:inline;width:13px;height:13px;vertical-align:-2px"') + ' ' : ''}${def.points} pts<br><span style="color:var(--muted);font-family:var(--font-ui)">${round(ms.prog, def.unit === 'h' ? 1 : 0)}/${round(ms.goal)} ${def.unit}</span></div></div>`;
   },
   renderMissions(mini) {
     const done = MISSION_DEFS.filter(d => missionState(d).done).length; setText($('#missions-summary'), `${done}/${MISSION_DEFS.length} completed`);
@@ -2773,9 +3440,7 @@ Object.assign(UI, {
     setHtml($('#streak-days'), days.join('')); setText($('#streak-n'), String(State.gam.streak)); setText($('#streak-best'), String(State.gam.bestStreak)); setText($('#streak-demo'), State.gam.demo ? '(initial demo streak, simulated)' : '');
   },
   renderScore() {
-    const g = State.gam, ranks = CONFIG.gamification.ranks; let ri = 0; ranks.forEach((r, i) => { if (g.points >= r[1]) ri = i; }); const next = ranks[ri + 1];
-    setText($('#score-pts'), String(g.points)); setText($('#score-streak'), String(g.streak)); setText($('#score-rank'), ranks[ri][0]);
-    setText($('#rank-pts'), String(g.points)); setText($('#rank-name'), ranks[ri][0]); setText($('#rank-next'), next ? `${next[1] - g.points} pts to ${next[0]}` : 'Top rank reached'); const bar = $('#rank-bar'); if (bar) bar.style.width = (next ? (g.points - ranks[ri][1]) / (next[1] - ranks[ri][1]) * 100 : 100) + '%';
+    setText($('#score-pts'), String(State.gam.points)); setText($('#score-streak'), String(State.gam.streak));
   },
 
   /* ---------- detail drawer ---------- */
@@ -2790,7 +3455,7 @@ Object.assign(UI, {
   },
   renderDrawer() {
     const g = State.selMetric; if (!g) return; const m = METRICS[g], id = State.selectedId, ev = State.evals[id], r = State.shown[id], c = State.crew.find(x => x.id === id), key = metricKey(g), th = CONFIG.thresholds[key], lvl = ev?.metrics[g]?.level || 'nodata';
-    $('#dr-ico').innerHTML = ICONS[m.icon]; setText($('#dr-title'), m.label); setText($('#dr-region'), m.region + (g === 'bp' ? ' · the chart shows systolic' : ''));
+    $('#dr-ico').innerHTML = ICONS[m.icon]; setText($('#dr-title'), m.label); setHtml($('#dr-ev'), evBtn(g)); setText($('#dr-region'), m.region + (g === 'bp' ? ' · the chart shows systolic' : ''));
     const text = g === 'bp' ? (r?.bpSys == null ? '--' : `${fmtVal(r.bpSys, 0)}/${fmtVal(r.bpDia, 0)}`) : fmtVal(r?.[g], m.dec);
     setText($('#dr-value'), text); setText($('#dr-unit'), text === '--' ? '' : m.unit); setHtml($('#dr-badge'), pillHtml(lvl, LEVELS[lvl].label));
     const rows = histRows(id, State.drawerWin), chart = $('#dr-chart'); chart.setAttribute('aria-label', `Trend of ${m.label}, last ${State.drawerWin} minutes. Latest value ${text} ${m.unit}.`);
@@ -2807,7 +3472,7 @@ Object.assign(UI, {
     setHtml($('#vgrid'), GROUPS.map(g => {
       const m = METRICS[g], key = metricKey(g), lvl = ev.metrics[g]?.level || 'nodata', text = g === 'bp' ? (r?.bpSys == null ? '--' : `${fmtVal(r.bpSys, 0)}/${fmtVal(r.bpDia, 0)}`) : fmtVal(r?.[g], m.dec);
       const rows = (State.history[id] || []).slice(-45);
-      return `<button class="vcard" data-m="${g}" data-level="${lvl}" data-fk="v:${g}"><span class="top"><span style="color:var(--teal)">${ICONS[m.icon]}</span><b>${m.label}</b>${pillHtml(lvl)}</span><span class="v">${text}<small>${m.unit}</small></span><svg class="chart" viewBox="0 0 280 54" width="100%" height="54" role="img" aria-label="Trend of ${m.short}: latest value ${text} ${m.unit}">${chartInner({ rows, key, W: 280, H: 54, L: 2, R: 2, T: 4, B: 4, th: CONFIG.thresholds[key], baseline: c?.baseline?.[key], labels: false })}</svg><span class="q">${q === 'ok' ? `source: ${esc(r?.source || '—')} · ${r ? fmtTime(r.timestamp) : ''}` : `${QUALITY_LABEL[q] || q} reading · ${r ? fmtTime(r.timestamp) : ''}`}</span></button>`;
+      return `<div class="vwrap"><button class="vcard" data-m="${g}" data-level="${lvl}" data-fk="v:${g}"><span class="top"><span style="color:var(--teal)">${ICONS[m.icon]}</span><b>${m.label}</b>${pillHtml(lvl)}</span><span class="v">${text}<small>${m.unit}</small></span><svg class="chart" viewBox="0 0 280 54" width="100%" height="54" role="img" aria-label="Trend of ${m.short}: latest value ${text} ${m.unit}">${chartInner({ rows, key, W: 280, H: 54, L: 2, R: 2, T: 4, B: 4, th: CONFIG.thresholds[key], baseline: c?.baseline?.[key], labels: false })}</svg><span class="q">${q === 'ok' ? `source: ${esc(r?.source || '—')} · ${r ? fmtTime(r.timestamp) : ''}` : `${QUALITY_LABEL[q] || q} reading · ${r ? fmtTime(r.timestamp) : ''}`}</span></button>${evBtn(g)}</div>`;
     }).join(''));
     this.renderEnv();
     const s = State.sleepOf(id), gl = CONFIG.gamification.goals;
@@ -2823,16 +3488,16 @@ Object.assign(UI, {
     setHtml($('#env-overall'), e ? pillHtml(ee.overall, ee.overall === 'normal' ? 'All in range' : LEVELS[ee.overall].label) : pillHtml('nodata'));
     setHtml($('#env-grid'), e ? Object.keys(ENV_META).map(k => {
       const m = ENV_META[k], lvl = ee.metrics[k] || 'nodata', th = CONFIG.thresholds.env[k], v = e[k] == null ? '--' : Number(e[k]).toFixed(m.dec);
-      return `<article class="ecard" data-level="${lvl}"><div class="top"><span style="color:var(--teal)">${ICONS[m.icon]}</span><b>${m.label}</b>${pillHtml(lvl)}</div><div class="v">${v}<small>${m.unit}</small></div>` +
+      return `<article class="ecard" data-level="${lvl}"><div class="top"><span style="color:var(--teal)">${ICONS[m.icon]}</span><b>${m.label}</b>${evBtn('env.' + k)}${pillHtml(lvl)}</div><div class="v">${v}<small>${m.unit}</small></div>` +
         `<svg class="chart" viewBox="0 0 280 54" width="100%" height="54" role="img" aria-label="Trend of ${m.label}: latest ${v} ${m.unit}">${chartInner({ rows: State.envHistory.slice(-120), key: k, W: 280, H: 54, L: 2, R: 2, T: 4, B: 4, th, labels: false })}</svg>` +
-        `<div class="q">Reference: ${this.envRange(k)}</div><div class="ref">${esc(m.src)}</div></article>`;
+        `<div class="q">Reference: ${this.envRange(k)}</div></article>`;
     }).join('') : '<div class="empty" style="grid-column:1/-1">No environment data in this source.</div>');
     const r = e?.radiation; setText($('#env-dose'), r == null ? '' : `At ${r.toFixed(1)} µSv/h the equivalent dose is about ${(r * 24 / 1000).toFixed(2)} mSv per day. Typical ISS crew exposure is 0.2–0.5 mSv per day, with a NASA career limit of 600 mSv.`);
     setHtml($('#env-mini'), e ? Object.keys(ENV_META).map(k => { const m = ENV_META[k], lvl = ee.metrics[k] || 'nodata'; return `<div class="envrow" data-level="${lvl}"><i class="lvdot"></i><b>${m.label}</b><span class="mono">${e[k] == null ? '--' : Number(e[k]).toFixed(m.dec)} ${m.unit}</span></div>`; }).join('') : '<div class="empty">No environment data.</div>');
     setHtml($('#env-mini-pill'), e ? pillHtml(ee.overall, ee.overall === 'normal' ? 'In range' : LEVELS[ee.overall].short) : '');
   },
 
-  /* ---------- Diagnostics ---------- */
+  /* ---------- Alerts ---------- */
   alertRow(a) {
     const lvl = alertLevelData(a), who = a.astronautId ? personName(a.astronautId) : 'Cabin', tm = ms => fmtTime(new Date(ms).toISOString());
     const btns = (a.status === 'active' || a.status === 'snoozed' ? `<button class="btn sm ${a.level === 'surgeon' ? 'brand' : ''}" data-act="ack" data-id="${a.id}" data-fk="ack:${a.id}">Acknowledge</button>` : '')
@@ -2844,9 +3509,8 @@ Object.assign(UI, {
     return `<li class="arow" data-level="${lvl}" data-status="${a.status}"><span class="tile">${alertIcon(a)}</span><div class="body"><b class="ttl"><i class="lvdot"></i>${esc(a.title)}</b><span>${esc(a.message)}</span><div class="meta"><span class="prio" title="${PRIORITY_LABEL[a.priority]}">P${a.priority}</span><span class="pill" data-level="${lvl}">${esc(alertPillText(a))}</span>${a.escalatedAt ? '<span class="pill" data-level="surgeon">Escalated</span>' : ''}<span class="tag">${esc(who)} · ${when}</span></div></div><div class="side"><span class="status-chip" data-s="${a.status}">${stLabel}</span>${btns}</div></li>`;
   },
   renderDiag() {
-    const f = State.alertFilter, scope = State.alertScope || 'all', sel = State.selectedId;
-    setText($('#scope-person'), personName(sel) ? personName(sel).split(' ')[0] + ' only' : 'Selected person');
-    const inScope = State.alerts.filter(a => scope === 'all' || a.astronautId === sel || !a.astronautId);
+    const f = State.alertFilter;
+    const inScope = State.alerts.filter(visibleAlert);
     $$('#alert-filter button').forEach(b => { const n = b.dataset.filter === 'all' ? inScope.length : inScope.filter(a => a.status === b.dataset.filter).length; setText(b, `${b.dataset.label} (${n})`); });
     const list = inScope.filter(a => f === 'all' || a.status === f).sort((x, y) => x.priority - y.priority || y.openedAt - x.openedAt);
     const empty = { active: 'No active alerts. Each out-of-range condition appears once and closes by itself when it returns to normal.', snoozed: 'Nothing is snoozed.', acknowledged: 'No acknowledged alerts are waiting to be resolved.', resolved: 'No alert has been resolved yet.', all: 'No alerts yet.' }[f];
@@ -2880,10 +3544,22 @@ Object.assign(UI, {
     setText($('#hist-dev'), String(CONFIG.thresholds.baselineDeviationPct));
   },
 
+  /* ---------- Evidence: the sources behind a data point ---------- */
+  openEvidence(key, trigger) {
+    const e = EVIDENCE[key]; if (!e) return;
+    this.evKey = key; this.evTrigger = trigger || null; this.evOpen = true;
+    setText($('#ev-title'), e.label); $('#ev-body').innerHTML = evidenceBody(key);
+    $('#evpop').hidden = false; $('#evscrim').classList.add('on'); $('#app').inert = true; $('#evpop').scrollTop = 0; $('#evpop').focus({ preventScroll: true });
+  },
+  closeEvidence() {
+    if (!this.evOpen) return; this.evOpen = false; $('#evpop').hidden = true; $('#evscrim').classList.remove('on'); $('#app').inert = false;
+    const back = document.querySelector(`[data-ev="${this.evKey}"]`) || this.evTrigger; if (back && document.contains(back)) back.focus({ preventScroll: true });
+  },
   /* ---------- About ---------- */
   renderAbout() {
-    const C = CREDITS, ini = n => n.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase();
+    const C = CREDITS, ini = n => n.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(), groups = ['Vital signs', 'Cabin environment', 'Goals and alert rules', 'Data'];
     setText($('#about-tag'), `${C.app} is a health twin for astronauts, built by Team ${C.team} for the ${C.event}.`);
+    const used = {}; Object.entries(EVIDENCE).forEach(([k, e]) => e.refs.forEach(id => (used[id] ||= []).push(e.label)));
     setHtml($('#about-body'), `
       <section class="dark-card on-dark about-hero"><div class="eyebrow">${esc(C.event)}</div><h3>${esc(C.challenge)}</h3><p>${esc(C.app)} brings an astronaut's vital signs, cabin environment, alerts and daily habits into one calm view. It shows what needs attention first, keeps sensor problems apart from health ones, and every alert has a clear lifecycle.</p></section>
       <div class="grid g2">
@@ -2891,13 +3567,23 @@ Object.assign(UI, {
         <section class="panel" aria-labelledby="h-claude"><h3 id="h-claude"><span class="grow">Built with Claude</span></h3>
           <p>${esc(C.app)} was made with Claude, an AI assistant by Anthropic. The visual design comes from Claude Design, and Claude Code helped write, review and test the code. Team ${esc(C.team)} chose what to build, directed the work and made the product decisions.</p></section>
       </div>
-      <section class="panel" aria-labelledby="h-refs"><h3 id="h-refs"><span class="grow">Sources for the cabin ranges</span></h3>
-        <p class="note">The cabin environment ranges come from public NASA material. They are illustrative: check them against the current documents before relying on any value.</p>
-        <ul class="links">${C.references.map(r => `<li><a href="${r.url}" target="_blank" rel="noopener noreferrer">${esc(r.label)}</a></li>`).join('')}</ul></section>
+      <section class="panel" aria-labelledby="h-evid"><h3 id="h-evid"><span class="grow">Evidence by data point</span></h3>
+        <p class="note">Every number in Tesai is tagged with where it comes from. "Based on a source" means the value follows a published one. "Adapted" means it starts from a source but Tesai changed it, and the note says how. "Team design value" means the team chose it and no published source was found. "No real data source" marks simulated data.</p>
+        <p class="note">All sources are cited in APA 7 format. Open a link to read the original and confirm any number before quoting it.</p>
+        ${groups.map(g => `<div class="group-title">${g}</div><div class="alist">${Object.entries(EVIDENCE).filter(([k, e]) => e.group === g).map(([k, e]) => `<div class="evrow"><div class="top"><b>${esc(e.label)}</b>${basisPill(e.basis)}${evBtn(k)}</div><p>${esc(e.note)}</p><div class="cites">${e.refs.length ? `Sources: <span data-i18n="off">${esc(citeText(k))}</span>` : 'No published source found.'}</div></div>`).join('')}</div>`).join('')}
+      </section>
+      <section class="panel" aria-labelledby="h-prov"><h3 id="h-prov"><span class="grow">Data provenance</span><span data-evslot-static></span></h3>
+        <p>Every reading in the app is simulated. The crew members, their personal baselines and the events are invented. The sources below back the ranges and rules, not the readings. The team's research found no public dataset of daily in-flight vital signs, so a real data source would have to be built from the options below or from a mission partner.</p>
+        <div class="group-title">Real data sources to explore (not used yet)</div>
+        <ul class="links">${REAL_SOURCES.map(r => `<li><a href="${r.url}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a> <span class="tag">${esc(r.note)}</span></li>`).join('')}</ul></section>
+      <section class="panel" aria-labelledby="h-refs"><h3 id="h-refs"><span class="grow">References (APA 7)</span></h3>
+        <ul class="apa" data-i18n="off">${Object.keys(SOURCES).sort((a, b) => SOURCES[a].sort.localeCompare(SOURCES[b].sort)).map(id => `<li>${SOURCES[id].apa}${SOURCES[id].unverified ? ' †' : ''}<div class="cites" style="text-indent:0;margin-top:2px">Used for: ${esc((used[id] || []).join('; '))}</div></li>`).join('')}</ul>
+        <p class="note">${esc(EVIDENCE_LEGEND)}</p></section>
       <section class="panel" aria-labelledby="h-notes"><h3 id="h-notes"><span class="grow">Notices</span></h3>
         <ul class="links plain"><li>${esc(C.app)} is an independent prototype made for the ${esc(C.event)}. It is not affiliated with, endorsed by or sponsored by NASA.</li>
         <li>All the data you see is simulated. No reading belongs to a real person, and nothing here is a medical diagnosis or advice.</li>
         <li>Fonts: Plus Jakarta Sans and JetBrains Mono, under the SIL Open Font License 1.1.</li></ul></section>`);
+    $$('#about-body [data-evslot-static]').forEach(el => { el.outerHTML = evBtn('data.simulated'); });
   },
 
   /* ---------- Advanced (hidden view) ---------- */
@@ -2923,9 +3609,9 @@ Object.assign(UI, {
     const rows = [['hr', 'Heart rate (bpm)'], ['spo2', 'SpO₂ (%)'], ['bpSys', 'Systolic BP (mmHg)'], ['bpDia', 'Diastolic BP (mmHg)'], ['temp', 'Temperature (°C)'], ['resp', 'Respiration (rpm)'], ['hrv', 'HRV (ms)']];
     const env = Object.keys(CONFIG.thresholds.env).map(k => [k, `Environment · ${k} (${SCHEMA.Environment[k].unit})`]);
     const range = a => `${a[0]} – ${a[1]}`;
-    setHtml($('#thr-table'), `<thead><tr><th scope="col">Metric</th><th scope="col">Normal</th><th scope="col">Attention (outside normal)</th><th scope="col">Alert surgeons (outside this)</th></tr></thead><tbody>` +
-      rows.map(([k, l]) => `<tr><th scope="row" style="text-transform:none;letter-spacing:0;color:var(--ink)">${l}</th><td class="n">${range(CONFIG.thresholds[k].attention)}</td><td class="n">${range(CONFIG.thresholds[k].attention)}</td><td class="n">${range(CONFIG.thresholds[k].surgeon)}</td></tr>`).join('') +
-      env.map(([k, l]) => `<tr><th scope="row" style="text-transform:none;letter-spacing:0;color:var(--ink)">${l}</th><td class="n">${range(CONFIG.thresholds.env[k].attention)}</td><td class="n">${range(CONFIG.thresholds.env[k].attention)}</td><td class="n">${range(CONFIG.thresholds.env[k].surgeon)}</td></tr>`).join('') + '</tbody>');
+    setHtml($('#thr-table'), `<thead><tr><th scope="col">Metric</th><th scope="col">Normal</th><th scope="col">Attention (outside normal)</th><th scope="col">Alert surgeons (outside this)</th><th scope="col">Basis and sources</th></tr></thead><tbody>` +
+      rows.map(([k, l]) => `<tr><th scope="row" style="text-transform:none;letter-spacing:0;color:var(--ink)">${l}</th><td class="n">${range(CONFIG.thresholds[k].attention)}</td><td class="n">${range(CONFIG.thresholds[k].attention)}</td><td class="n">${range(CONFIG.thresholds[k].surgeon)}</td><td>${evCell(k === 'bpSys' || k === 'bpDia' ? 'bp' : k)}</td></tr>`).join('') +
+      env.map(([k, l]) => `<tr><th scope="row" style="text-transform:none;letter-spacing:0;color:var(--ink)">${l}</th><td class="n">${range(CONFIG.thresholds.env[k].attention)}</td><td class="n">${range(CONFIG.thresholds.env[k].attention)}</td><td class="n">${range(CONFIG.thresholds.env[k].surgeon)}</td><td>${evCell('env.' + k)}</td></tr>`).join('') + '</tbody>');
     this.renderSystemLive();
   },
   renderSystemLive() {
