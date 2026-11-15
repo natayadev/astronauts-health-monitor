@@ -12,8 +12,9 @@ import { RulesEngine, GROUPS } from '../rules.js';
 import { I18N } from '../i18n.js';
 import { EVIDENCE, SOURCES, REAL_SOURCES, BASIS_LABEL, BASIS_LEVEL, EVIDENCE_LEGEND, citeText, apaItems, hasUnverified, evBtn, evidenceBody, evCell, basisPill } from '../evidence.js';
 import { refreshSecondary, startProvider, runAlertAction } from '../app.js';
+import { CheckinUI } from './checkin.js';
 
-const VIEWS = ['overview', 'biometrics', 'alerts', 'history', 'about', 'advanced'];
+const VIEWS = ['overview', 'biometrics', 'checkin', 'alerts', 'history', 'about', 'advanced'];
 
 /* ===== Twin geometry ===== */
 /* Astronaut suit silhouette — used only for the scan-line mask.
@@ -148,6 +149,7 @@ export const UI = {
     $('#log-water').onclick = () => addPoints(CONFIG.gamification.waterPoints, 'Hydration logged');
 
     this.initSystem();
+    CheckinUI.init();
 
     // Evidence buttons in static HTML slots
     $$('[data-evslot]').forEach(el => { el.innerHTML = _evBtn(el.dataset.evslot); });
@@ -176,6 +178,7 @@ export const UI = {
     if (view === 'history')  this.renderHistory();
     if (view === 'advanced') this.renderSystem();
     if (view === 'about')    this.renderAbout();
+    if (view === 'checkin')  CheckinUI.render();
     this.renderLive(); this.placeToasts();
   },
   bindMenu(btnSel, menuSel, render) {
@@ -220,6 +223,7 @@ export const UI = {
     this.renderMet(); this.renderSourceBadge(); this.renderBadges(); this.renderWho();
     if (State.view === 'overview')   { this.renderStrip(); this.renderStage(); this.renderDockbar(); this.renderMissions(true); this.renderScore(); this.renderEnv(); }
     if (State.view === 'biometrics') this.renderBio();
+    if (State.view === 'checkin')    CheckinUI.render();
     if (State.view === 'alerts')     this.renderDiag();
     if (State.view === 'history')    { if (!State.histPaused) this.renderHistory(); this.renderMissions(false); this.renderScore(); }
     if (State.view === 'advanced')   this.renderSystemLive();
