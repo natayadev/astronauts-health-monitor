@@ -228,6 +228,6 @@ const VIEWS = ['overview', 'visor', 'biometrics', 'checkin', 'alerts', 'history'
   if (CONFIG.dataSource === 'simulated') setTimeout(() => showToast({ level: 'attention', icon: 'sensor', title: 'Demo mode', message: `All data is simulated (seed ${CONFIG.seed}). No reading belongs to a real person.` }), 800);
   // Built-in audio: browsers need one gesture before any sound, so the first click or key press unlocks it.
   ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { Sound.unlock(); }, { once: true, capture: true }));
-  if (State.sound) setTimeout(() => showToast({ level: 'normal', title: 'Built-in audio', message: 'Tesai warns by tone and voice, like the Higía simulation. Turn it on to hear it.',
+  if (State.sound) setTimeout(() => showToast({ level: 'normal', title: 'Built-in audio', message: 'Tesai warns by tone and voice, like the Tesai simulation. Turn it on to hear it.',
     action: { label: 'Turn on audio', run: () => { Sound.unlock(); Sound.setEnabled(true); Sound.tone('ok'); Sound.speak(State.lang === 'es' ? 'Audio activado. Tesai te avisa con un tono y por voz.' : 'Audio on. Tesai will warn you by tone and voice.'); UI.syncAudioBtn(); } } }), 1600);
 })();

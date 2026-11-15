@@ -3,17 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tesai · Crew health monitoring</title>
+<title>Dashboard · Tesai</title>
 <meta name="description" content="Tesai: health twin for space crews. Simulated data, with an abstract data layer ready for real sources.">
-<meta name="theme-color" content="#ECF6F7">
+<link rel="icon" href="../assets/logo/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="../assets/logo/tesai-logo.svg">
+<link rel="apple-touch-icon" href="../assets/logo/tesai-logo-180.png">
+<meta name="theme-color" content="#C8E8EB">
 <meta name="author" content="Team Higía">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23138D75'/%3E%3Cpath d='M26 16h-5l-3 9-6-18-3 9H6' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta property="og:site_name" content="Tesai">
+
+<link rel="stylesheet" href="../shared/fonts.css">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/site-bar.css">
+<script src="../shared/lang.js"></script>
+<script src="../shared/site-bar.js" defer></script>
 
 <!-- Design system: tokens → base → layout → components -->
-<link rel="stylesheet" href="styles/tokens.css">
 <link rel="stylesheet" href="styles/base.css">
 <link rel="stylesheet" href="styles/layout.css">
-<link rel="stylesheet" href="styles/components/buttons.css">
+<link rel="stylesheet" href="../shared/buttons.css">
 <link rel="stylesheet" href="styles/components/nav.css">
 <link rel="stylesheet" href="styles/components/cards.css">
 <link rel="stylesheet" href="styles/components/badges.css">
@@ -26,18 +34,17 @@
 <link rel="stylesheet" href="styles/components/visor.css">
 <link rel="stylesheet" href="styles/components/checkin.css">
 <link rel="stylesheet" href="styles/components/twin.css">
+<link rel="stylesheet" href="styles/responsive.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div id="app">
 
+
   <!-- ===================== TOP BAR ===================== -->
   <header class="nav-wrap">
     <nav class="nav" aria-label="Main">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
-        <span class="brand-name">Tesai</span>
-      </div>
+      <tesai-brand root="../"></tesai-brand>
       <div class="tabs" id="tabs">
         <button class="tab" data-view="overview" aria-current="page">Overview</button>
         <button class="tab" data-view="visor">Visor</button>
@@ -48,10 +55,7 @@
       </div>
       <div class="spacer"></div>
       <span class="src" id="badge-source" role="status"></span>
-      <div class="seg lang" id="lang" role="group" aria-label="Language">
-        <button data-lang="en" lang="en" aria-label="English" aria-pressed="true">EN</button>
-        <button data-lang="es" lang="es" aria-label="Español" aria-pressed="false">ES</button>
-      </div>
+      <tesai-lang></tesai-lang>
       <div class="live" id="live" data-state="live">
         <span class="ping" aria-hidden="true"></span>
         <span id="live-label">Live</span>
@@ -173,7 +177,7 @@
     <section class="view" id="view-biometrics" aria-labelledby="h-bio">
       <div class="page-head">
         <div>
-          <h2 id="h-bio">Biometrics <span data-evslot="data.simulated"></span></h2>
+          <h2 id="h-bio">Biometrics</h2>
           <p>All your vital signs, their recent trend and the quality of each reading. Tap a card to open its detail.</p>
         </div>
       </div>
@@ -193,8 +197,7 @@
       <section class="panel" style="margin-top:16px" aria-labelledby="h-act">
         <h3 id="h-act">
           <span class="grow">Sleep and activity</span>
-          <span data-evslot="goal.sleep"></span>
-          <span data-evslot="goal.exercise"></span>
+          <span data-evslot="goal.activity"></span>
         </h3>
         <div id="activity-block"></div>
       </section>

@@ -1,7 +1,7 @@
 /**
  * visor.js · Visor view, situation notice and "second doctor".
  * Visor = every crew member's vital signs always in view (like the helmet
- * visor in the Higía simulation), plus a situation notice that, when an alert
+ * visor in the Tesai simulation), plus a situation notice that, when an alert
  * opens, guides the crew step by step, by voice and on screen.
  * Same visual system as the rest of Tesai (mint + teal glass).
  */
@@ -81,7 +81,7 @@ export const Visor = {
           `<button class="vz-chip" type="button" data-vz="scene" data-scene="${k}" data-fk="scene-${k}" aria-pressed="${V.scene === k}"><span>${esc(t(en, es))}</span></button>`).join('')}</span>
         <button class="vz-chip" type="button" data-vz="audio" data-fk="vz-audio" aria-pressed="${on}">${AUDIO_ICON}<span>${esc(on ? t('Audio on', 'Audio activado') : t('Audio off', 'Audio apagado'))}</span></button>
         <span class="vz-chip static" title="${esc(t('Simulated one-way delay', 'Demora simulada de ida'))}">${ICONS.link}<span>${esc(t('Earth link', 'Enlace con la Tierra'))} · ${String(d).replace('.', t('.', ','))} s</span></span>
-        <a class="vz-chip" href="../simulacion/index.html" data-i18n="off">${ICONS.play ? ICONS.play : ''}<span>${esc(t('Open the simulation', 'Abrir la simulación'))}</span></a>
+        <a class="vz-chip" href="../simulacion/" data-i18n="off">${ICONS.play ? ICONS.play : ''}<span>${esc(t('Open the simulation', 'Abrir la simulación'))}</span></a>
       </div>`;
   },
 

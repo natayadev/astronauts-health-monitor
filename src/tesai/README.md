@@ -15,7 +15,7 @@ cd src            # sirve el sitio completo; Tesai queda en /tesai/
 python -m http.server 8765
 ```
 
-Open `http://localhost:8765/tesai/`. The fonts live in `assets/fonts/`, so it also works offline.
+Open `http://localhost:8765/tesai/`. The fonts live in `../assets/fonts/` (loaded by `../shared/fonts.css`), so it also works offline.
 
 ## Structure
 
@@ -37,7 +37,6 @@ src/tesai/
 │  ├─ twin/              # astronaut: twin.js (component), figure/plate/spin/scan.js, overlays/ (one per metric), art.js (generated)
 │  └─ ui/                # UI controller, Visor, check-in view, helpers, icons, toasts
 └─ assets/
-   ├─ fonts/             # Plus Jakarta Sans and JetBrains Mono (SIL OFL), local
    └─ visor/             # first-person backgrounds for the Visor (ship, rover)
 ```
 
@@ -81,7 +80,7 @@ node tools/twin/build.mjs --audit    # also check contacts, clearances and paint
 
 ## Theme
 
-All color lives in CSS variables in `styles/tokens.css` (base palette, traffic light, surfaces, gradients, shadows, charts, typography, radii). There are no literal colors outside that file; derived colors use `color-mix` on the palette.
+All color lives in CSS variables in `../shared/tokens.css`, shared with the landing and the simulation, (base palette, traffic light, surfaces, gradients, shadows, charts, typography, radii). There are no literal colors outside that file; derived colors use `color-mix` on the palette.
 
 Alert levels also show a colored dot next to the level text, so status never relies on color alone.
 

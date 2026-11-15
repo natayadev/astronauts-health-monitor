@@ -1,4 +1,4 @@
-/* Higía · interacciones mínimas: idioma ES/EN y guía de sensores. */
+/* Tesai · interacciones mínimas: idioma ES/EN y guía de sensores. */
 (function () {
   var root = document.documentElement;
   function save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -11,17 +11,14 @@
     document.querySelectorAll('[data-es-alt]').forEach(function (el) { el.alt = el.getAttribute('data-' + l + '-alt'); });
     document.querySelectorAll('.pin[data-l-es]').forEach(function (p) { p.setAttribute('aria-label', p.getAttribute('data-l-' + l)); });
     document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === l)); });
-    document.title = l === 'en' ? 'Higía · A second doctor inside your visor' : 'Higía · Un segundo médico dentro de tu visor';
+    document.title = l === 'en' ? 'Tesai · A second doctor inside your visor' : 'Tesai · Un segundo médico dentro de tu visor';
     /* la simulación hereda el idioma: por almacenamiento compartido y, de respaldo, por ?lang= */
     document.querySelectorAll('a[href^="simulacion/"]').forEach(function (a) {
       if (!a.dataset.base) a.dataset.base = a.getAttribute('href').split('?')[0];
       a.setAttribute('href', a.dataset.base + '?lang=' + l);
     });
-    save('higia.lang', l);
   }
-  document.querySelectorAll('.lang button').forEach(function (b) { b.addEventListener('click', function () { setLang(b.dataset.lang); }); });
-  var saved = load('higia.lang');
-  setLang(saved === 'en' || (!saved && /^en/i.test(navigator.language || '')) ? 'en' : 'es');
+  TesaiLang.on(setLang);   /* the switch lives in the site bar (shared/site-bar.js); English by default */
 
   /* ---- guía de sensores: punto del astronauta <-> tarjeta ---- */
   var sens = document.getElementById('sens');

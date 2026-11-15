@@ -1,11 +1,13 @@
-# Higía · sitio
+# Tesai · sitio
 
-Sitio estático (sin build, sin framework) del proyecto **Higía** de Team Higía para el **NASA Space Apps Challenge 2026**. Todos los datos son simulados.
+Sitio estático (sin build, sin framework) del proyecto **Tesai** de Team Higía para el **NASA Space Apps Challenge 2026**. Todos los datos son simulados.
 
 ```
 src/
 ├─ index.html · styles.css · main.js   Web central: portada, guía de sensores, cómo funciona, accesos (ES/EN)
-├─ assets/                              Imágenes y tipografías de la web central
+├─ shared/                              Lo común a las tres páginas: tokens.css (colores), fonts.css, buttons.css,
+│                                       lang.js (un solo idioma, inglés por defecto) y site-bar.js/.css (logo e idioma de la barra superior)
+├─ assets/                              Imágenes, tipografías (una sola carpeta) y logos
 ├─ simulacion/                          Simulación inmersiva en primera persona (3 escenarios, con voz)
 │  ├─ index.html                        Un solo archivo; three.js se carga desde esm.sh
 │  └─ img/
@@ -16,7 +18,7 @@ src/
 ## Cómo se conectan
 
 - La web central enlaza a `simulacion/` y a `tesai/` con rutas relativas.
-- **Idioma:** la web central guarda el idioma elegido (`higia.lang`) y lo pasa a la simulación; si se cambia dentro de la simulación, la web central lo sigue.
+- **Idioma:** la web central guarda el idioma elegido (`tesai.lang`) y lo pasa a la simulación; si se cambia dentro de la simulación, la web central lo sigue.
 - **Menú de la simulación:** botón *Menú* o tecla Esc durante la simulación → continuar, elegir otra simulación o volver a la web central.
 - Tesai abre la simulación desde el Visor y desde *Acerca de*.
 

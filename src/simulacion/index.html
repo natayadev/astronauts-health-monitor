@@ -1,9 +1,21 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>Higía — Simulaciones</title>
+<title>Simulation · Tesai</title>
+<link rel="icon" href="../assets/logo/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="../assets/logo/tesai-logo.svg">
+<link rel="apple-touch-icon" href="../assets/logo/tesai-logo-180.png">
+<meta name="theme-color" content="#C8E8EB">
+<meta name="author" content="Team Higía">
+<meta property="og:site_name" content="Tesai">
+<link rel="stylesheet" href="../shared/fonts.css">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/site-bar.css">
+<link rel="stylesheet" href="../shared/buttons.css">
+<script src="../shared/lang.js"></script>
+<script src="../shared/site-bar.js" defer></script>
 <style>
 :root{--ink:#f5f5f7;--dim:rgba(245,245,247,.64);--faint:rgba(245,245,247,.42);--glass:rgba(22,24,28,.42);--line:rgba(255,255,255,.14);--blue:#0a84ff;--red:#ff453a;--green:#30d158}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -146,11 +158,9 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
 .panel p{font-size:14px;color:var(--dim);line-height:1.55}
 .stat{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
 .stat span{color:var(--dim)}
-.btn{appearance:none;border:0;border-radius:999px;background:var(--ink);color:#0b0c0e;font:600 16px "Geist",system-ui;padding:14px 22px;cursor:pointer}
-.btn:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
-.btn.ghost{background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--line);text-decoration:none;text-align:center;display:block}
-.btn.ghost:hover{background:rgba(255,255,255,.14)}
+#menu .tesai-bar{width:100%;margin:0 0 14px}
 .btns{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.btns .btn,#menu .btn,#pause .btn,#end .btn{min-height:46px;font-size:15px}
 .back{display:inline-flex;align-items:center;gap:8px;font:600 13px "Geist",system-ui;color:var(--ink);text-decoration:none;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05)}
 .back:hover{background:rgba(255,255,255,.14)}
 .back:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
@@ -164,11 +174,8 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
 @media (max-width:820px){.levels,.features{grid-template-columns:1fr}.col{width:170px}#ai .msg{display:none}#objective{max-width:90vw;min-width:0}}
 @media (prefers-reduced-motion:reduce){#med.cpr #metro,#alertGlow.on,#watch.buzz{animation:none}}
 
-/* ===== Estética Higía para menú, pausa y resumen (la simulación en sí queda oscura e inmersiva) ===== */
-@font-face{font-family:'Plus Jakarta Sans';font-weight:400 700;font-display:swap;src:url(../assets/fonts/plus-jakarta-sans-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215}
-@font-face{font-family:'Plus Jakarta Sans';font-weight:400 700;font-display:swap;src:url(../assets/fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+2020,U+20A0-20AB,U+2113,U+2C60-2C7F}
-@font-face{font-family:'JetBrains Mono';font-weight:400 500;font-display:swap;src:url(../assets/fonts/jetbrains-mono-latin.woff2) format('woff2')}
-#menu,#pause,#end{--ink:#0D2B26;--dim:#42655F;--faint:#5f7d77;--line:rgba(11,85,107,.16);--teal:#138D75;--teal-ink:#0B6E5B;--deep:#0B556B;--blue:#138D75;
+/* ===== Estética Tesai para menú, pausa y resumen (la simulación en sí queda oscura e inmersiva) ===== */
+#menu,#pause,#end{--ink:var(--color-ink);--dim:var(--color-muted);--faint:#5f7d77;--line:color-mix(in srgb,var(--color-deep) 16%,transparent);--teal:var(--color-teal);--teal-ink:var(--color-teal-ink);--deep:var(--color-deep);--blue:#138D75;
   --glass-l:rgba(255,255,255,.78);--grad:linear-gradient(135deg,#169873 0%,#0B556B 100%);
   font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink)}
 #menu kbd,#pause kbd,#end kbd{font-family:'JetBrains Mono',ui-monospace,monospace;background:rgba(11,85,107,.08);border-color:var(--line);color:var(--ink)}
@@ -207,9 +214,6 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
 #pause .panel,#end .panel{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:32px;box-shadow:0 30px 80px rgba(6,28,34,.4);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
 #pause .panel h1,#end .panel h1{font-weight:700;letter-spacing:-.03em;color:var(--ink)}
 #pause .panel p,#end .panel p{color:var(--dim)}
-#pause .btn,#end .btn{background:var(--grad);color:#fff;font-family:inherit;font-weight:700;box-shadow:0 10px 26px rgba(11,85,107,.28)}
-#pause .btn.ghost,#end .btn.ghost{background:rgba(255,255,255,.7);color:var(--ink);border:1px solid var(--line);box-shadow:none}
-#pause .btn.ghost:hover,#end .btn.ghost:hover{background:#fff}
 #pause .btn:focus-visible,#end .btn:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
 #end .stat span{color:var(--dim)}
 @media (max-width:640px){#menu .heroTop .label{display:none}#menu .back{white-space:nowrap}}
@@ -244,7 +248,7 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
       </div>
     </div>
     <div id="ai" class="card">
-      <div class="row"><span class="label">Higía · segundo médico</span><span class="label mono" id="voiceState">Voz · M</span></div>
+      <div class="row"><span class="label">Tesai · segundo médico</span><span class="label mono" id="voiceState">Voz · M</span></div>
       <p class="msg" id="aiMsg">Listo.</p>
       <ul id="aiSteps"></ul>
     </div>
@@ -307,16 +311,9 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
 <div id="menu" class="overlay">
   <div class="menuWrap">
     <header class="hero">
-      <div class="heroTop">
-        <a class="back" href="../index.html"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg></span>Volver a Higía</a>
-        <span class="label">Higía · NASA Space Apps 2026</span>
-        <div class="langSwitch" role="group" aria-label="Idioma / Language">
-          <button type="button" data-lang="es" aria-pressed="true">ES</button>
-          <button type="button" data-lang="en" aria-pressed="false">EN</button>
-        </div>
-      </div>
+      <div class="tesai-bar"><tesai-brand root="../"></tesai-brand><span class="bar-label">NASA Space Apps 2026</span><div class="bar-right"><tesai-lang></tesai-lang></div></div>
       <h1>Un segundo médico dentro de tu visor.</h1>
-      <p>Higía lee los signos vitales de toda la tripulación, te guía paso a paso en una emergencia y envía todo a la Tierra automáticamente, porque desde Marte la Tierra tarda hasta 20 minutos en enterarse.</p>
+      <p>Tesai lee los signos vitales de toda la tripulación, te guía paso a paso en una emergencia y envía todo a la Tierra automáticamente, porque desde Marte la Tierra tarda hasta 20 minutos en enterarse.</p>
     </header>
     <div class="levels">
       <button class="lv" data-level="eva">
@@ -325,7 +322,7 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
       </button>
       <button class="lv" data-level="rover">
         <img src="./img/rover.webp" alt="Interior de un rover presurizado con vista al desierto marciano" />
-        <div class="body"><span class="label">Simulación 2</span><h2>Rover presurizado</h2><p>Luis se desploma al volante. Higía detiene el rover, avisa a todos y te guía con el DEA y la RCP dentro de la cabina.</p><div class="tags"><span class="tag">Retardo 20 min</span><span class="tag">RCP guiada</span><span class="tag">DEA</span></div><span class="go">Iniciar simulación</span></div>
+        <div class="body"><span class="label">Simulación 2</span><h2>Rover presurizado</h2><p>Luis se desploma al volante. Tesai detiene el rover, avisa a todos y te guía con el DEA y la RCP dentro de la cabina.</p><div class="tags"><span class="tag">Retardo 20 min</span><span class="tag">RCP guiada</span><span class="tag">DEA</span></div><span class="go">Iniciar simulación</span></div>
       </button>
       <button class="lv" data-level="ship">
         <img src="./img/ship.webp" alt="Interior blanco de una nave espacial con una ventana redonda que muestra Marte" />
@@ -348,11 +345,11 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
   <div class="panel">
     <span class="label">Pausa</span>
     <h1 id="pauseT">Simulación en pausa</h1>
-    <p>El reloj y la guía están detenidos. Tu progreso en esta simulación se pierde si cambias de simulación o vuelves a Higía.</p>
+    <p>El reloj y la guía están detenidos. Tu progreso en esta simulación se pierde si cambias de simulación o vuelves a Tesai.</p>
     <div class="btns">
-      <button class="btn" id="resume" type="button">Continuar</button>
-      <button class="btn ghost" id="pAgain" type="button">Elegir otra simulación</button>
-      <a class="btn ghost" href="../index.html">Volver a Higía</a>
+      <button class="btn brand" id="resume" type="button">Continuar</button>
+      <button class="btn" id="pAgain" type="button">Elegir otra simulación</button>
+      <a class="btn" href="../">Volver a Tesai</a>
     </div>
   </div>
 </div>
@@ -369,21 +366,21 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
       <div class="stat"><span>Dispositivos alertados</span><b id="sDev">—</b></div>
     </div>
     <p id="endBody"></p>
-    <div class="btns"><button class="btn" id="again">Elegir otra simulación</button><a class="btn ghost" href="../index.html">Volver a Higía</a></div>
+    <div class="btns"><button class="btn brand" id="again">Elegir otra simulación</button><a class="btn" href="../">Volver a Tesai</a></div>
   </div>
 </div>
 
 <script>
 (() => {
   const D = {
-    'Higía — Simulaciones': 'Higía — Simulations',
-    'Higía · NASA Space Apps 2026': 'Higía · NASA Space Apps 2026',
+    'Simulación · Tesai': 'Simulation · Tesai',
+    'Tesai · NASA Space Apps 2026': 'Tesai · NASA Space Apps 2026',
     'Un segundo médico dentro de tu visor.': 'A second doctor inside your visor.',
-    'Higía lee los signos vitales de toda la tripulación, te guía paso a paso en una emergencia y envía todo a la Tierra automáticamente, porque desde Marte la Tierra tarda hasta 20 minutos en enterarse.': 'Higía reads the whole crew’s vital signs, guides you step by step through an emergency and sends everything to Earth automatically, because from Mars it takes Earth up to 20 minutes to find out.',
+    'Tesai lee los signos vitales de toda la tripulación, te guía paso a paso en una emergencia y envía todo a la Tierra automáticamente, porque desde Marte la Tierra tarda hasta 20 minutos en enterarse.': 'Tesai reads the whole crew’s vital signs, guides you step by step through an emergency and sends everything to Earth automatically, because from Mars it takes Earth up to 20 minutes to find out.',
     'Simulación 1': 'Simulation 1', 'Simulación 2': 'Simulation 2', 'Simulación 3': 'Simulation 3',
     'EVA en Marte': 'EVA on Mars', 'Rover presurizado': 'Pressurized rover', 'Nave en tránsito': 'Ship in transit',
     'Ana colapsa en plena caminata. Con el traje puesto no hay RCP posible: el DEA del rover es la clave. Y el regolito no deja ver.': 'Ana collapses mid-walk. With the suit on, CPR is impossible: the rover’s AED is the key. And regolith blocks your view.',
-    'Luis se desploma al volante. Higía detiene el rover, avisa a todos y te guía con el DEA y la RCP dentro de la cabina.': 'Luis collapses at the wheel. Higía stops the rover, alerts everyone and guides you through the AED and CPR inside the cabin.',
+    'Luis se desploma al volante. Tesai detiene el rover, avisa a todos y te guía con el DEA y la RCP dentro de la cabina.': 'Luis collapses at the wheel. Tesai stops the rover, alerts everyone and guides you through the AED and CPR inside the cabin.',
     'Día 96 rumbo a Marte. Mei pierde el conocimiento en microgravedad: hay que fijarla a la camilla antes de reanimarla.': 'Day 96 en route to Mars. Mei loses consciousness in microgravity: you must strap her to the stretcher before resuscitating her.',
     'Retardo 20 min': '20 min delay', 'Retardo 12 min': '12 min delay', 'Regolito': 'Regolith', 'DEA': 'AED',
     'RCP guiada': 'Guided CPR', 'Microgravedad': 'Microgravity',
@@ -396,8 +393,8 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
     'Resumen de la simulación': 'Simulation summary', 'Alerta → pulso recuperado': 'Alert → pulse restored',
     'Primera respuesta posible de la Tierra': 'Earliest possible reply from Earth', 'Paquetes enviados solos a la Tierra': 'Packets sent to Earth automatically',
     'Calidad de la RCP (100–120 cpm)': 'CPR quality (100–120 cpm)', 'Dispositivos alertados': 'Devices alerted', 'Elegir otra simulación': 'Choose another simulation',
-    'Volver a Higía': 'Back to Higía', 'Iniciar simulación': 'Start the simulation', 'Menú': 'Menu', 'Pausa': 'Paused', 'Simulación en pausa': 'Simulation paused', 'Continuar': 'Resume',
-    'El reloj y la guía están detenidos. Tu progreso en esta simulación se pierde si cambias de simulación o vuelves a Higía.': 'The clock and the guidance are stopped. Your progress in this simulation is lost if you switch simulation or go back to Higía.',
+    'Volver a Tesai': 'Back to Tesai', 'Iniciar simulación': 'Start the simulation', 'Menú': 'Menu', 'Pausa': 'Paused', 'Simulación en pausa': 'Simulation paused', 'Continuar': 'Resume',
+    'El reloj y la guía están detenidos. Tu progreso en esta simulación se pierde si cambias de simulación o vuelves a Tesai.': 'The clock and the guidance are stopped. Your progress in this simulation is lost if you switch simulation or go back to Tesai.',
     'Vista en primera persona de la simulación': 'First-person view of the simulation',
     'Astronauta caminando sobre la superficie rojiza de Marte con un rover al fondo': 'Astronaut walking on the reddish surface of Mars with a rover in the background',
     'Interior de un rover presurizado con vista al desierto marciano': 'Interior of a pressurized rover overlooking the Martian desert',
@@ -405,7 +402,7 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
     'Rumbo': 'Heading', 'Tu traje · Tomás': 'Your suit · Tomás', 'Tu visor AR · Tomás': 'Your AR visor · Tomás', 'Tu pulso': 'Your pulse',
     'traje': 'suit', 'cabina': 'cabin', 'Presión': 'Pressure', 'Temp.': 'Temp.', 'Batería': 'Battery', 'Radiación': 'Radiation',
     'Polvo visor': 'Visor dust', 'Filtro regolito': 'Regolith filter', 'Gravedad': 'Gravity',
-    'Higía · segundo médico': 'Higía · second doctor', 'Voz · M': 'Voice · M', 'Silencio · M': 'Muted · M', 'Listo.': 'Ready.',
+    'Tesai · segundo médico': 'Tesai · second doctor', 'Voz · M': 'Voice · M', 'Silencio · M': 'Muted · M', 'Listo.': 'Ready.',
     'Ritmo sinusal': 'Sinus rhythm', 'Presión art.': 'Blood pressure', 'Respiración': 'Breathing', 'Confianza': 'Confidence',
     'Tierra · envío automático': 'Earth · auto uplink', 'Retardo una vía': 'One-way delay', 'Respuesta médica': 'Medical reply',
     'sin pedidos': 'none requested', 'recibido': 'received', 'recibida': 'received',
@@ -461,7 +458,7 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
     'Kestrel · ruta 14': 'Kestrel · route 14', 'La Tierra ya respondió · cerrando la simulación': 'Earth has replied · closing the simulation',
     'La llevas contigo. Ve a la camilla médica, al fondo del módulo.': 'You’re carrying her. Go to the medical stretcher at the end of the module.',
     'Laboratorio · cultivo 7': 'Lab · culture 7', 'Laboratorio': 'Lab', 'Llegó la respuesta de la Tierra': 'Earth’s reply arrived', 'Llévala a la camilla médica': 'Take her to the medical stretcher',
-    'Luis maneja. Higía monitorea a los dos y muestra todo en tu visor, tu reloj y las pantallas del rover.': 'Luis is driving. Higía monitors you both and shows everything on your visor, your watch and the rover screens.',
+    'Luis maneja. Tesai monitorea a los dos y muestra todo en tu visor, tu reloj y las pantallas del rover.': 'Luis is driving. Tesai monitors you both and shows everything on your visor, your watch and the rover screens.',
     'Luis se desplomó. Detuve el rover y avisé a la Tierra. Ve con él.': 'Luis collapsed. I stopped the rover and alerted Earth. Go to him.',
     'Luis se desplomó. Ve con él': 'Luis collapsed. Go to him',
     'Luis tiene pulso. Lo sigo monitoreando y la Tierra ya tiene todo el registro.': 'Luis has a pulse. I keep monitoring him and Earth already has the full record.',
@@ -471,7 +468,7 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
     'Mei perdió el conocimiento. Ve con ella': 'Mei lost consciousness. Go to her', 'Mei tiene pulso. Mantenla monitoreada': 'Mei has a pulse. Keep her monitored',
     'Mei tiene pulso. Todo queda registrado y enviado a la Tierra.': 'Mei has a pulse. Everything is logged and sent to Earth.',
     'Mei · estable': 'Mei · stable', 'Mei · pulso recuperado': 'Mei · pulse restored', 'Mei: paro cardíaco detectado': 'Mei: cardiac arrest detected',
-    'Microgravedad. Higía monitorea a Mei y a ti y envía todo a la Tierra, a 12 minutos y medio de distancia.': 'Microgravity. Higía monitors Mei and you and sends everything to Earth, twelve and a half minutes away.',
+    'Microgravedad. Tesai monitorea a Mei y a ti y envía todo a la Tierra, a 12 minutos y medio de distancia.': 'Microgravity. Tesai monitors Mei and you and sends everything to Earth, twelve and a half minutes away.',
     'Monitoreo continuo': 'Continuous monitoring', 'Monitoreo': 'Monitoring', 'Muestra lista para registrar': 'Sample ready to log',
     'Nadie toca a Mei: analizando.': 'Nobody touch Mei: analyzing.', 'No aplica (traje)': 'N/A (suit)', 'No pares: cada segundo sin compresiones cuenta.': 'Don’t stop: every second without compressions counts.',
     'No responde y no respira normal: es un paro cardíaco. Trae el DEA de la pared izquierda.': 'Unresponsive and not breathing normally: it’s cardiac arrest. Bring the AED from the left wall.',
@@ -479,9 +476,9 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
     'Parches colocados. Nadie toca a Luis: analizando.': 'Pads placed. Nobody touch Luis: analyzing.', 'Paro cardíaco detectado': 'Cardiac arrest detected',
     'Paro cardíaco. Con el traje puesto no se puede hacer RCP: el DEA es lo primero. Está en el rover.': 'Cardiac arrest. With the suit on, CPR isn’t possible: the AED comes first. It’s in the rover.',
     'Paro cardíaco. Trae el DEA del rack verde, en la pared derecha.': 'Cardiac arrest. Bring the AED from the green rack on the right wall.',
-    'Higía detectó el paro, alertó a cada dispositivo, te guió como un segundo médico y mandó todo a la Tierra sin que tocaras nada. La simulación acelera el retardo 60 veces.': 'Higía detected the arrest, alerted every device, guided you like a second doctor and sent everything to Earth without you touching a thing. The simulation speeds up the delay 60×.',
-    'Higía detuvo el rover, avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.': 'Higía stopped the rover and alerted every device and Earth, which will see it in 20 minutes.',
-    'Pulso presente': 'Pulse present', 'Pulso recuperado · signos vitales': 'Pulse restored · vital signs', 'Higía sigue vigilando': 'Higía keeps watching', 'Pulso': 'Pulse', 'Higía: monitoreando': 'Higía: monitoring',
+    'Tesai detectó el paro, alertó a cada dispositivo, te guió como un segundo médico y mandó todo a la Tierra sin que tocaras nada. La simulación acelera el retardo 60 veces.': 'Tesai detected the arrest, alerted every device, guided you like a second doctor and sent everything to Earth without you touching a thing. The simulation speeds up the delay 60×.',
+    'Tesai detuvo el rover, avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.': 'Tesai stopped the rover and alerted every device and Earth, which will see it in 20 minutes.',
+    'Pulso presente': 'Pulse present', 'Pulso recuperado · signos vitales': 'Pulse restored · vital signs', 'Tesai sigue vigilando': 'Tesai keeps watching', 'Pulso': 'Pulse', 'Tesai: monitoreando': 'Tesai: monitoring',
     'RCP en curso': 'CPR in progress', 'RCP en microgravedad: 30 y 2, dos veces': 'CPR in microgravity: 30 and 2, twice',
     'RCP ya. En microgravedad ánclate con los pies para empujar.': 'CPR now. In microgravity, anchor yourself with your feet to push.', 'RCP · 2 ciclos': 'CPR · 2 cycles',
     'RCP: 30 compresiones y 2 ventilaciones, dos veces': 'CPR: 30 compressions and 2 breaths, twice', 'Recomendada · mantén E': 'Advised · hold E', 'Reevaluar ritmo': 'Re-check rhythm',
@@ -489,10 +486,10 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
     'Respondiendo a datos de hace 12 min: «Vemos a Mei en paro. Fíjenla a la camilla, usen el DEA y hagan RCP.»': 'Replying to data from 12 min ago: “We see Mei in arrest. Strap her to the stretcher, use the AED and do CPR.”',
     'Respondiendo a datos de hace 20 min: «Vemos FV en Ana. Usen el DEA y vuelvan al hábitat.»': 'Replying to data from 20 min ago: “We see VF on Ana. Use the AED and return to the habitat.”',
     'Respondiendo a datos de hace 20 min: «Vemos que Luis colapsó. Detengan el rover, usen el DEA e inicien RCP.»': 'Replying to data from 20 min ago: “We see Luis collapsed. Stop the rover, use the AED and start CPR.”',
-    'Ritmo organizado detectado': 'Organized rhythm detected', 'Ritmo recuperándose': 'Rhythm recovering', 'Rover detenido por Higía': 'Rover stopped by Higía',
+    'Ritmo organizado detectado': 'Organized rhythm detected', 'Ritmo recuperándose': 'Rhythm recovering', 'Rover detenido por Tesai': 'Rover stopped by Tesai',
     'Sigue las indicaciones del DEA': 'Follow the AED prompts', 'Sin pulso · FV': 'No pulse · VF', 'Stream ECG + signos vitales': 'ECG + vitals stream',
-    'Su biomonitor detectó fibrilación ventricular (simulada). Higía avisó a la nave y a la Tierra, que lo verá en 12 min 30 s.': 'Her biomonitor detected ventricular fibrillation (simulated). Higía alerted the ship and Earth, which will see it in 12 min 30 s.',
-    'Su biomonitor detectó fibrilación ventricular (simulada). Higía avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.': 'The biomonitor detected ventricular fibrillation (simulated). Higía alerted every device and Earth, which will see it in 20 minutes.',
+    'Su biomonitor detectó fibrilación ventricular (simulada). Tesai avisó a la nave y a la Tierra, que lo verá en 12 min 30 s.': 'Her biomonitor detected ventricular fibrillation (simulated). Tesai alerted the ship and Earth, which will see it in 12 min 30 s.',
+    'Su biomonitor detectó fibrilación ventricular (simulada). Tesai avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.': 'The biomonitor detected ventricular fibrillation (simulated). Tesai alerted every device and Earth, which will see it in 20 minutes.',
     'Sujeta a Mei': 'Grab Mei', 'Sujetar a Mei': 'Grab Mei', 'Talón de la mano en el centro del pecho, brazos rectos, unos 5 cm de profundidad.': 'Heel of the hand on the center of the chest, arms straight, about 5 cm deep.',
     'Telemetría de rutina': 'Routine telemetry', 'Tienes el DEA. Su traje tiene un puerto de electrodos en el pecho. Ve con ella.': 'You have the AED. Her suit has an electrode port on the chest. Go to her.',
     'Todos alejados del paciente.': 'Everyone clear of the patient.', 'Toma el DEA de la pared izquierda': 'Take the AED from the left wall', 'Toma el DEA del rack verde': 'Take the AED from the green rack',
@@ -516,7 +513,7 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
     [/^No toques a (\S+)$/, (m) => `Don’t touch ${m[1]}`],
     [/^Paro · a ([\d.]+) m$/, (m) => `Arrest · ${m[1]} m away`],
     [/^Paso (\d+) de (\d+)$/, (m) => `Step ${m[1]} of ${m[2]}`],
-    [/^Higía lo registró y lo envió solo a la Tierra\. Llegará en (\S+)\.$/, (m) => `Higía logged it and sent it to Earth on its own. It will arrive in ${m[1]}.`],
+    [/^Tesai lo registró y lo envió solo a la Tierra\. Llegará en (\S+)\.$/, (m) => `Tesai logged it and sent it to Earth on its own. It will arrive in ${m[1]}.`],
     [/^RCP ciclo (\d+) · 30:2 · calidad (\d+)%$/, (m) => `CPR cycle ${m[1]} · 30:2 · quality ${m[2]}%`],
     [/^RCP guiada · ciclo (\d+) de (\d+)$/, (m) => `Guided CPR · cycle ${m[1]} of ${m[2]}`],
     [/^Ritmo organizado y pulso presente\. Recuperamos a (\S+)\.$/, (m) => `Organized rhythm and pulse present. We got ${m[1]} back.`],
@@ -574,21 +571,18 @@ body.ar #tint{background:linear-gradient(180deg,rgba(120,170,255,.03),rgba(0,0,0
   function setLang(l) {
     I.lang = l;
     document.documentElement.lang = l;
-    document.title = l === 'en' ? D['Higía — Simulaciones'] : 'Higía — Simulaciones';
+    document.title = l === 'en' ? D['Simulación · Tesai'] : 'Simulación · Tesai';
     if (l === 'en') walk(document.body, apply);
     else walk(document.body, (n) => { if (orig.has(n)) { n.nodeValue = orig.get(n); orig.delete(n); } });
     mo.takeRecords();
     attrs(); kbdEn(l === 'en');
     document.querySelectorAll('.langSwitch button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === l)));
-    try { localStorage.setItem('higia.lang', l); localStorage.setItem('pulso-lang', l); } catch (e) {}
+    try { localStorage.setItem('tesai.lang', l); } catch (e) {}
   }
   I.set = setLang;
   mo.observe(document.body, { childList: true, subtree: true, characterData: true });
   document.querySelectorAll('.langSwitch button').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
-  let saved = null;
-  try { const q = new URLSearchParams(location.search).get('lang'); if (q === 'es' || q === 'en') saved = q; } catch (e) {}
-  try { saved = saved || localStorage.getItem('higia.lang') || localStorage.getItem('pulso-lang'); } catch (e) {}
-  setLang(saved || ((navigator.language || 'es').toLowerCase().startsWith('es') ? 'es' : 'en'));
+  TesaiLang.on(setLang);   /* the switch lives in the site bar (shared/site-bar.js); English by default */
 })();
 </script>
 
@@ -878,7 +872,7 @@ function buildRover(scene) {
 
   let speed = 6, target = 6, fall = 0, filter = 31;
   dash.draw('Kestrel · ruta 14', ['Velocidad 22 km/h', 'Destino: base Jezero · 38 km', 'Luis: signos normales']);
-  side.draw('Tripulación', ['Luis · 74 lpm · 98%', 'Tomás · 88 lpm', 'Higía: monitoreando']);
+  side.draw('Tripulación', ['Luis · 74 lpm · 98%', 'Tomás · 88 lpm', 'Tesai: monitoreando']);
   filt.draw('Filtro de regolito', ['Vida útil 31%', 'Cambiar ahora'], true);
   const cp = new V3(), fp = new V3();
   const L = {
@@ -899,12 +893,12 @@ function buildRover(scene) {
     takeAed() { aed.visible = false; },
     onCollapse() {
       target = 0;
-      dash.draw('ALERTA · LUIS', ['Paro cardíaco detectado', 'Rover detenido por Higía', 'Tierra avisada (+20 min)'], true);
+      dash.draw('ALERTA · LUIS', ['Paro cardíaco detectado', 'Rover detenido por Tesai', 'Tierra avisada (+20 min)'], true);
       side.draw('ALERTA · LUIS', ['Sin pulso · FV', 'DEA: pared izquierda'], true);
     },
     onRosc() {
       dash.draw('Luis · pulso recuperado', ['Monitoreo continuo', 'Registro enviado a la Tierra']);
-      side.draw('Luis · estable', ['Pulso presente', 'Higía sigue vigilando']);
+      side.draw('Luis · estable', ['Pulso presente', 'Tesai sigue vigilando']);
     },
     update(dt) {
       speed += (target - speed) * dt * (target ? 0.5 : 1.3);
@@ -1050,7 +1044,7 @@ const LEVELS = {
     devices: ['Visor', 'Reloj', 'Rover', 'Hábitat', 'Tierra (+20 min)'],
     suit: { label: 'Tu traje · Tomás', o2: 'O<sub>2</sub> traje', pres: '4.3 psi', rad: 0.64, x: 'Polvo visor' },
     startTitle: 'Comienza la caminata · Sol 214', startBody: 'Ana va adelante, junto a la baliza. Tu visor, tu reloj y el rover comparten sus signos vitales.',
-    alertTitle: 'Ana: paro cardíaco detectado', alertBody: 'Su biomonitor detectó fibrilación ventricular (simulada). Higía avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.',
+    alertTitle: 'Ana: paro cardíaco detectado', alertBody: 'Su biomonitor detectó fibrilación ventricular (simulada). Tesai avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.',
     reply: 'Respondiendo a datos de hace 20 min: «Vemos FV en Ana. Usen el DEA y vuelvan al hábitat.»',
     flow: () => [
       { obj: 'Camina hasta la baliza de muestras', target: () => L.pts.beacon, name: 'Baliza', near: 4, reach: true, timeout: 40, idle: 'Usa <kbd>W A S D</kbd> y el mouse. La baliza está junto a Ana.', enter: 'Hola, Tomás. Monitoreo a Ana y a ti en tiempo real. Todo normal por ahora.', done: collapse },
@@ -1066,8 +1060,8 @@ const LEVELS = {
     crew: 'Luis', delay: 1200, hasCpr: true, tag: 'Sol 214 · Kestrel', build: buildRover,
     devices: ['Visor', 'Reloj', 'Pantallas rover', 'Hábitat', 'Tierra (+20 min)'],
     suit: { label: 'Tu visor AR · Tomás', o2: 'O<sub>2</sub> cabina', pres: '14.7 psi', rad: 0.31, x: 'Filtro regolito' },
-    startTitle: 'En ruta a la base Jezero', startBody: 'Luis maneja. Higía monitorea a los dos y muestra todo en tu visor, tu reloj y las pantallas del rover.',
-    alertTitle: 'Luis: paro cardíaco detectado', alertBody: 'Higía detuvo el rover, avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.',
+    startTitle: 'En ruta a la base Jezero', startBody: 'Luis maneja. Tesai monitorea a los dos y muestra todo en tu visor, tu reloj y las pantallas del rover.',
+    alertTitle: 'Luis: paro cardíaco detectado', alertBody: 'Tesai detuvo el rover, avisó a todos los dispositivos y a la Tierra, que lo verá en 20 minutos.',
     reply: 'Respondiendo a datos de hace 20 min: «Vemos que Luis colapsó. Detengan el rover, usen el DEA e inicien RCP.»',
     flow: () => [
       { obj: 'Cambia el filtro de regolito (pared trasera)', target: () => L.pts.filter, name: 'Filtro', near: 1.5, hold: 1.2, act: 'cambiar el filtro', timeout: 45, idle: 'El polvo que entra con los trajes satura el filtro. Date vuelta: está atrás.', enter: 'Hola, Tomás. Luis maneja y yo monitoreo a los dos. El filtro de regolito está casi saturado.', done: () => L.changeFilter() },
@@ -1085,8 +1079,8 @@ const LEVELS = {
     crew: 'Mei', delay: 750, hasCpr: true, tag: 'Nave Hermes', build: buildShip,
     devices: ['Visor', 'Reloj', 'Pantallas nave', 'Tripulación', 'Tierra (+12 min)'],
     suit: { label: 'Tu visor AR · Tomás', o2: 'O<sub>2</sub> cabina', pres: '14.7 psi', rad: 1.82, x: 'Gravedad' },
-    startTitle: 'Día 96 rumbo a Marte', startBody: 'Microgravedad. Higía monitorea a Mei y a ti y envía todo a la Tierra, a 12 minutos y medio de distancia.',
-    alertTitle: 'Mei: paro cardíaco detectado', alertBody: 'Su biomonitor detectó fibrilación ventricular (simulada). Higía avisó a la nave y a la Tierra, que lo verá en 12 min 30 s.',
+    startTitle: 'Día 96 rumbo a Marte', startBody: 'Microgravedad. Tesai monitorea a Mei y a ti y envía todo a la Tierra, a 12 minutos y medio de distancia.',
+    alertTitle: 'Mei: paro cardíaco detectado', alertBody: 'Su biomonitor detectó fibrilación ventricular (simulada). Tesai avisó a la nave y a la Tierra, que lo verá en 12 min 30 s.',
     reply: 'Respondiendo a datos de hace 12 min: «Vemos a Mei en paro. Fíjenla a la camilla, usen el DEA y hagan RCP.»',
     flow: () => [
       { obj: 'Flota hasta el panel del laboratorio', target: () => L.pts.lab, name: 'Laboratorio', near: 1.7, hold: 1.2, act: 'registrar el experimento', timeout: 45, idle: '<kbd>W A S D</kbd> + mirar · <kbd>Espacio</kbd> sube · <kbd>C</kbd> baja', enter: 'Hola, Tomás. Día 96 de tránsito. Monitoreo a Mei y a ti; la Tierra está a 12 minutos y medio.' },
@@ -1189,7 +1183,7 @@ function rosc() {
   L.onRosc(); setBadge(L.crew, false);
   $('alertGlow').classList.remove('on'); $('crew').classList.remove('crit'); $('watch').classList.remove('crit');
   sendPacket('Pulso recuperado · signos vitales');
-  showBanner(`${level.crew} recuperó el pulso`, `Higía lo registró y lo envió solo a la Tierra. Llegará en ${fmt(level.delay)}.`, [0, 1, 2, 4], true, 6000);
+  showBanner(`${level.crew} recuperó el pulso`, `Tesai lo registró y lo envió solo a la Tierra. Llegará en ${fmt(level.delay)}.`, [0, 1, 2, 4], true, 6000);
   beep(660, 0.12, 0.05); setTimeout(() => beep(990, 0.18, 0.05), 140);
 }
 
@@ -1364,7 +1358,7 @@ function endGame() {
   $('sPk').textContent = `${stats.packets} · ${stats.mb.toFixed(1)} MB`;
   $('sCpr').textContent = level.hasCpr ? `${quality()}%` : 'No aplica (traje)';
   $('sDev').textContent = level.devices.length;
-  $('endBody').textContent = 'Higía detectó el paro, alertó a cada dispositivo, te guió como un segundo médico y mandó todo a la Tierra sin que tocaras nada. La simulación acelera el retardo 60 veces.';
+  $('endBody').textContent = 'Tesai detectó el paro, alertó a cada dispositivo, te guió como un segundo médico y mandó todo a la Tierra sin que tocaras nada. La simulación acelera el retardo 60 veces.';
   $('hud').classList.remove('on'); $('watch').classList.remove('on'); $('lookHint').classList.remove('on');
   $('end').classList.remove('hide');
 }

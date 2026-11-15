@@ -36,12 +36,14 @@ export const State = {
         gam: this.gam, sound: this.sound, demo: this.demo, motion: this.motion,
         seed: CONFIG.seed, tickMs: CONFIG.tickMs, dataSource: CONFIG.dataSource, lang: this.lang
       }));
+      localStorage.setItem('tesai.lang', this.lang);
     } catch (e) { /* storage unavailable */ }
   },
 
   load() {
+    const shared = () => { try { const l = localStorage.getItem('tesai.lang'); if (l === 'es' || l === 'en') this.lang = l; } catch (e) { /* the site shares one language */ } };
     try {
-      const s = JSON.parse(localStorage.getItem(CONFIG.storageKey) || 'null'); if (!s) return;
+      const s = JSON.parse(localStorage.getItem(CONFIG.storageKey) || 'null'); if (!s) { shared(); return; }
       if (s.gam) this.gam = { ...defaultGam(), ...s.gam };
       this.sound = s.sound === undefined ? true : !!s.sound;
       if (s.demo === false) this.demo = false;
@@ -51,6 +53,7 @@ export const State = {
       if (s.dataSource && s.dataSource !== 'file') CONFIG.dataSource = s.dataSource;
       if (s.lang === 'es' || s.lang === 'en') this.lang = s.lang;
     } catch (e) { /* corrupt storage */ }
+    shared();
   }
 };
 

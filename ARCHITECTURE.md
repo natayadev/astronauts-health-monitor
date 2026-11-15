@@ -54,13 +54,8 @@ astronauts-health-monitor/
     └── tesai/                      La app Tesai (las rutas src/... del resto del documento son relativas a esta carpeta)
         ├── index.html                  HTML puro de Tesai (~580 líneas)
         ├── assets/
-        │   ├── fonts/                  Plus Jakarta Sans + JetBrains Mono (SIL OFL)
-        │   │   ├── jetbrains-mono-*.woff2
-        │   │   └── plus-jakarta-sans-*.woff2
-        │   ├── human.png               Astronauta PNG anterior (ya no lo usa la UI; se conserva)
         │   └── visor/                  Fondos del Visor (ship.webp, rover.webp)
         ├── styles/
-        │   ├── tokens.css              Variables CSS (paleta, tipografía, radios)
         │   ├── base.css                Reset, @font-face, body, utilidades
         │   ├── layout.css              Views, grids, stage, twin, responsive
         │   └── components/
@@ -118,14 +113,14 @@ astronauts-health-monitor/
 ### Orden de carga
 
 ```html
-tokens.css   →  base.css   →  layout.css   →  components/*.css
+shared/tokens.css   →  base.css   →  layout.css   →  components/*.css
 ```
 
-Cada capa solo lee variables de las capas anteriores; nunca define colores literales fuera de `tokens.css`.
+Cada capa solo lee variables de las capas anteriores; nunca define colores literales fuera de `shared/tokens.css`.
 
 ### Tokens (variables CSS)
 
-Todas las variables viven en `:root` dentro de `tokens.css`. Cambiar el tema = editar solo ese archivo.
+Todas las variables viven en `:root` dentro de `src/shared/tokens.css`, que usan la landing, el simulador y el panel. Cambiar el tema = editar solo ese archivo.
 
 | Grupo | Variables |
 |---|---|
@@ -368,7 +363,7 @@ npx serve src -p 5173
 
 - Variables sin prefijo `--color-` están reservadas para valores derivados (`--glass`, `--line`, `--grad-*`, `--shadow-*`, `--band-*`).
 - Variables de color base siempre tienen prefijo `--color-`.
-- Sin colores literales fuera de `tokens.css`.
+- Sin colores literales fuera de `shared/tokens.css`.
 - El estado de salud siempre incluye un elemento textual además del color (`.lvdot` + texto del nivel).
 
 ### JS

@@ -11,13 +11,16 @@
 /* eslint-disable key-spacing */
 /*I18N-DATA-START*/
 const ES_DICT = {
+"Dashboard · Tesai": "Panel · Tesai",
+"Sleep and activity goals": "Metas de sueño y actividad",
+"The goals in this panel are team design values: 7 hours of sleep, 60 minutes of exercise and 30 minutes of free time. For reference, NASA schedules a sleep period of 8.5 hours and ISS astronauts slept about 6 hours per night (Barger et al., 2014). ISS crews exercise about 1.5 hours per day, so our 60 minutes is lighter. NASA lists a personal journal, gardening, windows and more privacy as countermeasures for isolation, but gives no number of minutes.": "Las metas de este panel son valores de diseño del equipo: 7 horas de sueño, 60 minutos de ejercicio y 30 minutos de tiempo libre. Como referencia, la NASA programa un período de sueño de 8,5 horas y los astronautas de la ISS dormían unas 6 horas por noche (Barger et al., 2014). Las tripulaciones de la ISS hacen ejercicio cerca de 1,5 horas por día, así que nuestros 60 minutos son más livianos. La NASA menciona un diario personal, la jardinería, las ventanas y más privacidad como medidas contra el aislamiento, pero no da un número de minutos.",
 "Built-in audio": "Audio incorporado",
-"Tesai warns by tone and voice, like the Higía simulation. Turn it on to hear it.": "Tesai avisa con un tono y por voz, como la simulación Higía. Activalo para escucharlo.",
+"Tesai warns by tone and voice, like the Tesai simulation. Turn it on to hear it.": "Tesai avisa con un tono y por voz, como la simulación Tesai. Activalo para escucharlo.",
 "Turn on audio": "Activar audio",
 "Second doctor": "Segundo doctor",
-"Tesai has audio built in, like the Higía simulation. When an alert opens it plays a tone, and for critical alerts a voice reads the situation aloud in English or Spanish.": "Tesai tiene audio incorporado, como la simulación Higía. Cuando se abre un aviso suena un tono y, en los avisos críticos, una voz lee la situación en español o en inglés.",
+"Tesai has audio built in, like the Tesai simulation. When an alert opens it plays a tone, and for critical alerts a voice reads the situation aloud in English or Spanish.": "Tesai tiene audio incorporado, como la simulación Tesai. Cuando se abre un aviso suena un tono y, en los avisos críticos, una voz lee la situación en español o en inglés.",
 "The second doctor on the Visor can read each step aloud. Sound needs one click or key press to start, and you can turn it off with the speaker button in the top bar.": "El segundo doctor del Visor puede leer cada paso en voz alta. El sonido necesita un clic o una tecla para empezar y se apaga con el botón del parlante en la barra superior.",
-"Open the Higía simulation": "Abrir la simulación Higía",
+"Open the Tesai simulation": "Abrir la simulación Tesai",
 "Check-in": "Chequeo",
 "Daily check-in": "Chequeo diario",
 "A short, private check-in about how you are today. It is not a clinical questionnaire and it does not diagnose anything. It never raises alerts and never earns points.": "Un chequeo breve y privado sobre cómo estás hoy. No es un cuestionario clínico y no diagnostica nada. Nunca genera avisos ni da puntos.",
