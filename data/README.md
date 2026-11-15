@@ -29,7 +29,8 @@ Listed in the app's About page: NASA OSDR (Inspiration4 datasets, environmental 
 ## Third-party assets
 
 - Fonts: Plus Jakarta Sans and JetBrains Mono, SIL Open Font License 1.1, served locally from `src/assets/fonts/`.
-- No NASA logos, flags or mission identifiers are used.
+- three.js 0.170.0, MIT license (`src/simulacion/vendor/three-LICENSE`), served locally so the simulation works offline.
+- No NASA logos or mission identifiers are used.
 
 ## Rules
 

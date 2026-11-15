@@ -21,7 +21,7 @@ The team used several Claude models (Fable, Opus and Sonnet), several ChatGPT mo
 
 ## How the AI output was checked
 
-- Every limit in `src/tesai/js/evidence.js` carries its source and a label saying whether it is taken from a source, adapted, or a team design value. Numbers the team could not confirm against the original are marked as unverified (†).
+- Every limit in `src/tesai/js/evidence.js` carries its source and a label saying whether it is taken from a source, adapted, or a team design value. Bibliographic details the team could not confirm against the original are flagged in the code (`unverified: true`) for review.
 - Unit conversions (ppm to mmHg, mSv/day to µSv/h) were recomputed in code.
 - The interface was run and checked in a browser after each change.
 
@@ -29,4 +29,4 @@ The team used several Claude models (Fable, Opus and Sonnet), several ChatGPT mo
 
 - **No AI in the science or the alerts.** The rules engine (`src/tesai/js/rules.js`) and the check-in comparison (`src/tesai/js/checkin.js`) are plain, readable code.
 - **No invented data presented as real.** All readings and the check-in history before today are synthetic and labeled.
-- **No invented sources.** References were looked up; the ones that could not be opened are marked.
+- **No invented sources.** References were looked up; the ones whose details could not be confirmed are flagged in the code for review.

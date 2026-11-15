@@ -4,7 +4,7 @@
 
 > **Nota de estructura:** Tesai vive ahora en `src/tesai/`. Las rutas cortas de módulos (`js/...`, `styles/...`) de este documento son relativas a esa carpeta. El sitio completo (web central + simulación + Tesai) está descrito en `src/README.md`.
 >
-> Sin bundler, sin framework. Solo HTML, CSS y ES modules nativos del browser. Desplegable en Vercel con un solo `vercel.json`.
+> Sin bundler, sin framework. Solo HTML, CSS y ES modules nativos del browser. Desplegable en Vercel con un solo `vercel.json` (o en cualquier hosting estático).
 
 ---
 
@@ -17,7 +17,7 @@
 5. [Flujo de datos](#5-flujo-de-datos)
 6. [Sistema de alertas](#6-sistema-de-alertas)
 7. [Cómo agregar una fuente de datos real](#7-cómo-agregar-una-fuente-de-datos-real)
-8. [Despliegue en Vercel](#8-despliegue-en-vercel)
+8. [Despliegue y seguridad](#8-despliegue-y-seguridad)
 9. [Convenciones](#9-convenciones)
 
 ---
@@ -32,7 +32,7 @@ Browser
               └── importa todo el grafo de módulos
 ```
 
-El HTML es solo estructura semántica. No contiene `<style>` ni `<script>` inline.
+El HTML es solo estructura semántica. Ninguna página del sitio tiene `<script>` inline, lo que permite una CSP con `script-src 'self'`.
 El CSS está organizado en capas (`tokens → base → layout → components`).
 El JS usa ES modules estáticos; el browser los resuelve sin bundler.
 
@@ -42,25 +42,42 @@ El JS usa ES modules estáticos; el browser los resuelve sin bundler.
 
 ```
 astronauts-health-monitor/
-├── vercel.json                     Caché de assets, headers de seguridad
+├── vercel.json                     Publica src/, caché de assets y cabeceras de seguridad (CSP incluida)
 ├── tools/twin/                     Geometría de la figura (no se despliega): build.mjs, scene.mjs, stand.mjs, suit.mjs, overlays/, kit/
 ├── react/astronaut/                El astronauta como componentes React/Next.js (no se despliega ni lo usa el dashboard); ver su README
 └── src/
-    ├── index.html                  Web central de Tesai: portada, guía de sensores, accesos
-    ├── main.js                     Idioma de la portada y enlaces a la simulación
+    ├── index.html                  Web central: portada, el problema, la app, cómo funciona, sensores, accesos, equipo
+    ├── main.js                     Textos ES/EN de la portada, guía de sensores y video del Visor
     ├── styles.css                  Estilos de la portada
-    ├── assets/                     hero.webp, astronaut.webp
-    ├── simulacion/                 Simulación inmersiva: index.html + img/ (eva, rover, ship)
+    ├── shared/                     Lo común a las tres páginas
+    │   ├── tokens.css              Colores, superficies, tipografía y sombras (única fuente de color)
+    │   ├── fonts.css · buttons.css Tipografías locales y botones
+    │   ├── lang.js                 Un solo idioma para todo el sitio (TesaiLang, guardado en tesai.lang)
+    │   └── site-bar.js · .css      Barra superior: <tesai-brand> y <tesai-lang>
+    ├── assets/
+    │   ├── fonts/                  Plus Jakarta Sans y JetBrains Mono (woff2, servidas localmente)
+    │   ├── logo/                   Logo, favicon y variantes
+    │   ├── tesai/                  Capturas y video del Visor usados en la portada (ES y EN)
+    │   └── hero.webp, astronaut.webp
+    ├── simulacion/                 Simulación inmersiva en primera persona (3 escenarios, con voz)
+    │   ├── index.html              Solo estructura
+    │   ├── styles.css              Estilos de la escena, el HUD y los menús
+    │   ├── js/i18n.js              Textos ES/EN (script clásico)
+    │   ├── js/scene.js             Escena 3D con three.js: Marte, el rover y la nave
+    │   ├── js/sim.js               Bucle, escenarios, guía de Tesai y HUD
+    │   ├── vendor/                 three.js 0.170.0 (MIT), incluido para funcionar sin conexión
+    │   └── img/                    eva.webp, rover.webp, ship.webp
     └── tesai/                      La app Tesai (las rutas src/... del resto del documento son relativas a esta carpeta)
         ├── index.html                  HTML puro de Tesai (~580 líneas)
         ├── assets/
         │   ├── human.png               Astronauta original (traje crema, visor verde): la figura del Overview
-        │   └── visor/                  Fondos del Visor (ship.webp, rover.webp)
+        │   ├── visor/                  Fondos del Visor (ship.webp, rover.webp)
+        │   └── wearables/              Dibujos isométricos de los dispositivos (Biometría)
         ├── styles/
-        │   ├── base.css                Reset, @font-face, body, utilidades
-        │   ├── layout.css              Views, grids, stage, twin, responsive
+        │   ├── base.css                Reset, body, utilidades
+        │   ├── layout.css              Views, grids, stage, twin
+        │   ├── responsive.css          Todos los @media del panel, cargado al final
         │   └── components/
-        │       ├── buttons.css
         │       ├── nav.css
         │       ├── cards.css
         │       ├── badges.css
@@ -70,7 +87,8 @@ astronauts-health-monitor/
         │       ├── charts.css
         │       ├── forms.css
         │       ├── evidence.css
-        │       ├── visor.css               Visor en primera persona y segundo doctor
+        │       ├── visor.css               Visor: HUD de vidrio en primera persona (mismo lenguaje que la simulación)
+        │       ├── wearables.css           Dispositivos de Biometría
         │       ├── checkin.css             Chequeo diario (escalas 0–10, tira de 14 días)
         │       └── twin.css                Astronauta: placa, figura, vista 360°, barrido y overlays de métricas
         └── js/
@@ -105,6 +123,7 @@ astronauts-health-monitor/
                 ├── toasts.js           showToast, dismissToast, closeToastFor
                 ├── checkin.js          Vista del chequeo diario (formulario, tendencia, CO₂)
                 ├── visor.js            Vista Visor: HUD en primera persona, aviso de situación, segundo doctor
+                ├── wearables.js        Dispositivos que se separan en piezas (Biometría)
                 └── ui.js               Objeto UI: todas las funciones de render y navegación
 ```
 
@@ -206,7 +225,7 @@ La única referencia circular es `ui.js → app.js` y `app.js → ui.js`. ES mod
 | `providers/file.js` | Reproduce en tiempo real un CSV o JSON importado por el usuario. |
 | `providers/adapters.js` | `Normalizer` valida y limpia cualquier dato antes de que llegue al motor de reglas. `Adapters` mapea formatos externos al `SCHEMA`. |
 | `ui/icons.js` | 27 íconos SVG exportados como strings. Trazo de 2 px, estilo Lucide. Sin emojis. |
-| `ui/helpers.js` | Helpers de DOM (`$`, `$$`, `setHtml`, `setText`) y de rendering (`pillHtml`, `chartInner`, `fmtVal`, `download`, `beep`). |
+| `ui/helpers.js` | Helpers de DOM (`$`, `$$`, `setHtml`, `setText`) y de rendering (`pillHtml`, `chartInner`, `fmtVal`, `download`). |
 | `ui/toasts.js` | Toast system: cola de máximo 4, auto-dismiss, toasts persistentes para alertas críticas. |
 | `checkin.js` | Chequeo diario: ítems (escalas 0–10 en la misma dirección, con período), guardado en `localStorage` con clave propia (`tesai.checkin.v1`), historial simulado rotulado para la demo y regla de comparación con la propia historia. **No** alimenta al `RulesEngine`, no abre alertas y no da puntos. |
 | `ui/checkin.js` | `CheckinUI`: formulario, panel "Quién ve esto", tira de 14 días por ítem y cruce de síntomas con el CO₂ de cabina (promedio de 30 min convertido a mmHg con la presión de cabina). |
@@ -320,42 +339,42 @@ async getCrew() {
 
 `Normalizer.*` valida tipos, rangos y deja `null` todo lo que no cumple. Marcar `source: 'real'` en las lecturas activa el badge **UNVERIFIED** en la barra superior.
 
-**CORS:** la mayoría de las APIs no permiten llamadas directas desde el browser. Usar un proxy serverless (Vercel Functions, por ejemplo) que también guarde la API key y cachée las respuestas.
+**CORS y claves:** la mayoría de las APIs no permiten llamadas directas desde el browser. Usar un proxy serverless (Vercel Functions, por ejemplo) que guarde la API key y cachée las respuestas. El browser solo conoce la dirección del proxy (`CONFIG.api.baseUrl`): ninguna clave vive en el código del cliente. Si el proxy está en otro dominio, hay que sumarlo a `connect-src` en la CSP de `vercel.json`.
+
+**Archivos importados:** el CSV o JSON que carga la persona se trata como no confiable. `Normalizer` deja en los ids solo caracteres seguros, corta los textos y descarta métricas desconocidas, porque los ids terminan en atributos HTML.
 
 ---
 
-## 8. Despliegue en Vercel
+## 8. Despliegue y seguridad
 
-El proyecto es completamente estático. Vercel lo despliega sin configuración extra más allá de `vercel.json`.
+El proyecto es completamente estático. `vercel.json`, en la raíz del repo, publica solo `src/` (`outputDirectory`), así que `docs/`, `tools/` y `react/` no se suben al sitio.
 
-```json
-// vercel.json
-{
-  "cleanUrls": true,
-  "headers": [
-    { "source": "/assets/fonts/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] },
-    { "source": "/styles/(.*)\\.css",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }] },
-    { "source": "/js/(.*)\\.js",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }] }
-  ]
-}
-```
+**Cabeceras de seguridad** (todas las rutas):
 
-**Estrategia de caché:**
+| Cabecera | Valor | Para qué |
+|---|---|---|
+| `Content-Security-Policy` | `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'` | Solo se ejecuta código del propio sitio. `'unsafe-inline'` queda solo para estilos, porque el panel usa atributos `style` |
+| `X-Content-Type-Options` | `nosniff` | El browser no adivina tipos de archivo |
+| `X-Frame-Options` | `DENY` | No se puede incrustar en otro sitio |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | No filtra rutas a otros dominios |
+| `Permissions-Policy` | sin cámara, micrófono, ubicación, pagos ni USB | Ninguna se usa |
+| `Strict-Transport-Security` | 2 años | Siempre HTTPS |
+
+**Caché:**
 
 | Asset | TTL | Razón |
 |---|---|---|
 | Fuentes `.woff2` | 1 año (`immutable`) | No cambian entre deploys |
-| `.css` y `.js` | 1 día + 7 días stale | Cambios frecuentes; Vercel sirve el hash correcto en cada deploy |
+| Imágenes, video y three.js | 30 días + 7 stale | Cambian poco |
+| `.css` y `.js` | 1 hora + 1 día stale | Se ven los cambios de un deploy enseguida |
 
-**Para desplegar localmente:**
+**Para probar localmente:**
 
 ```bash
-npx serve src -p 5173
-# → http://localhost:5173        (web central)
-# → http://localhost:5173/tesai/ (Tesai)
+cd src && python3 -m http.server 8765
+# → http://localhost:8765/            (web central)
+# → http://localhost:8765/simulacion/ (simulación)
+# → http://localhost:8765/tesai/      (Tesai)
 ```
 
 ---

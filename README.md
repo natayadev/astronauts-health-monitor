@@ -20,19 +20,20 @@ Equipo Higía · Buenos Aires, Argentina
 
 </div>
 
-![Vista general de Tesai: un gemelo del cuerpo con seis signos vitales, la franja de estado y la cabina, con datos simulados](docs/screenshots/overview.jpg)
+![Simulación de Tesai: caminata en Marte en primera persona, con los signos vitales de la tripulación en el visor del casco](docs/screenshots/simulation.jpg)
 
 ## Contenido
 
 1. [El problema](#el-problema)
 2. [Nuestra solución](#nuestra-solución)
-3. [Cómo se arma](#cómo-se-arma)
-4. [La app, pantalla por pantalla](#la-app-pantalla-por-pantalla)
-5. [Cada número muestra su base](#cada-número-muestra-su-base)
-6. [Factores humanos y privacidad](#factores-humanos-y-privacidad)
-7. [Cómo correrla](#cómo-correrla) · [Probala](#probala)
-8. [Tecnología](#tecnología) · [Estructura del proyecto](#estructura-del-proyecto)
-9. [Uso de IA](#uso-de-ia) · [Datos de la NASA](#datos-de-la-nasa) · [Límites](#límites) · [Equipo](#equipo) · [Aviso](#aviso)
+3. [La simulación](#la-simulación)
+4. [El Visor y el segundo doctor](#el-visor-y-el-segundo-doctor)
+5. [Cómo se arma](#cómo-se-arma)
+6. [La app, pantalla por pantalla](#la-app-pantalla-por-pantalla)
+7. [Cada número muestra su base](#cada-número-muestra-su-base)
+8. [Cómo correrla](#cómo-correrla) · [Probala](#probala) · [Publicarla](#publicarla)
+9. [Seguridad y privacidad](#seguridad-y-privacidad) · [Tecnología](#tecnología) · [Estructura del proyecto](#estructura-del-proyecto)
+10. [Uso de IA](#uso-de-ia) · [Datos de la NASA](#datos-de-la-nasa) · [Límites](#límites) · [Equipo](#equipo) · [Aviso](#aviso)
 
 ## El problema
 
@@ -45,10 +46,11 @@ Camino a Marte, un mensaje a la Tierra puede tardar hasta unos 20 minutos por tr
 
 ## Nuestra solución
 
-Tesai muestra en pocas pantallas los signos vitales, el sueño, la actividad y el ambiente de cabina de cada tripulante, más un chequeo diario privado, y es honesto con cada número.
+Tesai es un segundo médico dentro del visor. Muestra los signos vitales de toda la tripulación, el sueño, la actividad y el ambiente de cabina, guía paso a paso cuando algo cambia y es honesto con cada número. Se puede vivir en una simulación en primera persona y explorar en un prototipo completo.
 
 | | |
 |---|---|
+| 🎮 **Simulación inmersiva** | Tres emergencias en primera persona (caminata en Marte, rover presurizado y nave en tránsito) en las que sos el primer médico y Tesai te guía por voz |
 | 🧍 **Gemelo de salud** | Una figura del cuerpo con seis signos vitales, cada uno comparado con la línea base de la propia persona y con un rango de referencia |
 | 🌬️ **Ambiente de cabina** | CO₂, oxígeno, presión, temperatura, humedad y radiación, con rangos de NASA-STD-3001 |
 | 📝 **Chequeo diario privado** | Cinco escalas de 0 a 10 (calidad del sueño, ánimo, calma, lucidez mental y conexión con la tripulación). Queda en el dispositivo, nunca genera avisos, nunca da puntos y se compara solo con la propia historia |
@@ -59,6 +61,31 @@ Tesai muestra en pocas pantallas los signos vitales, el sueño, la actividad y e
 | 📡 **Enlace con Tierra tolerante a demoras** | Los avisos críticos que nadie reconoce se escalan por un enlace simulado con la Tierra |
 
 > **Estado (15 de noviembre de 2026):** todas las pantallas funcionan en el navegador con datos simulados. Tesai es un prototipo de hackathon, **no un dispositivo médico**. Los umbrales son ilustrativos. El escenario de la demo es similar al de la ISS.
+
+## La simulación
+
+Es la puerta de entrada: corre en el navegador, sin instalar nada. Elegís un escenario y un compañero colapsa. Vos sos el primer médico, porque la Tierra tarda hasta 20 minutos en enterarse.
+
+| Escenario | Qué pasa | Qué tenés que hacer |
+|---|---|---|
+| **EVA en Marte** | Ana colapsa en plena caminata y el regolito tapa el visor | Llegar al DEA del rover; con el traje puesto no hay RCP posible |
+| **Rover presurizado** | Luis se desploma al volante | Tesai detiene el rover y avisa a todos; DEA y RCP guiada dentro de la cabina |
+| **Nave en tránsito** | Día 96 rumbo a Marte, Mei pierde el conocimiento en microgravedad | Fijarla a la camilla antes de reanimarla |
+
+En el visor del casco ves tus propios datos y el biomonitor de la persona afectada. El segundo doctor te dice qué hacer y te marca el ritmo de la RCP por voz, mientras el aviso a la Tierra sale solo, con su demora. Al final, un resumen muestra cuánto tardaste, la calidad de la RCP y qué dispositivos se alertaron. Se juega con WASD, el mouse y la tecla E.
+
+## El Visor y el segundo doctor
+
+El Visor lleva lo mismo que se ve en la simulación al prototipo: la vista a través del casco, con los signos vitales de toda la tripulación proyectados en el vidrio.
+
+![Visor de Tesai: la frecuencia cardíaca de Amara sube, aparece el aviso y el segundo doctor marca los pasos](docs/screenshots/visor.jpg)
+
+- **Tu visor:** tu pulso, SpO₂, presión, respiración y temperatura, más el CO₂, el oxígeno y la presión de la cabina.
+- **Biomonitores:** el resto de la tripulación, cada uno con su ECG y su estado. El estado siempre va con palabra además de color.
+- **Aviso de situación:** cuando algo cambia, aparece en el centro con quién y qué, y suena un tono. En los críticos, una voz lee la situación.
+- **Segundo doctor:** una guía paso a paso para ese aviso. Se puede leer en voz alta, avanzar, avisar a la Tierra y reconocer.
+- **Enlace con la Tierra:** la demora de ida y si ya salió el aviso. Es simulado: no se transmite nada.
+- **Probá una situación:** debajo del visor, un panel dispara un evento simulado (taquicardia, oxígeno bajo, fiebre, presión alta o CO₂ alto) para cualquier tripulante.
 
 ## Cómo se arma
 
@@ -94,13 +121,15 @@ El motor de reglas no sabe de dónde vienen los datos, y el chequeo diario nunca
 
 ## La app, pantalla por pantalla
 
-La interfaz tiene un botón **EN | ES** para cambiar de idioma.
+La interfaz tiene un botón **EN | ES** para cambiar de idioma, el mismo en la web, la simulación y el prototipo.
 
 ### Overview (vista general)
 El gemelo de salud con seis signos vitales, el estado general y un próximo paso sugerido, las misiones diarias y una vista compacta de la cabina. Al tocar un signo vital se abre su historial reciente al lado del cuerpo.
 
+![Vista general de Tesai: el astronauta con seis signos vitales conectados al cuerpo, con datos simulados](docs/screenshots/overview.jpg)
+
 ### Biometrics (biometría)
-Una tarjeta por signo vital con su tendencia y la calidad de la lectura, seis métricas de cabina con sus rangos de referencia, y sueño y actividad. Cada tarjeta tiene su botón "!".
+Una tarjeta por signo vital con su tendencia y la calidad de la lectura, seis métricas de cabina con sus rangos de referencia, sueño y actividad, y los dispositivos que toman las lecturas, que se pueden separar en piezas. Cada tarjeta tiene su botón "!".
 
 ![Biometría: tarjetas de signos vitales con tendencias y calidad de lectura, y el ambiente de cabina](docs/screenshots/biometrics.jpg)
 
@@ -110,7 +139,7 @@ Un chequeo breve sobre cómo estás hoy. Todas las escalas van de 0 (peor) a 10 
 ![Chequeo diario: escalas de 0 a 10, quién ve esto y la comparación con la propia historia](docs/screenshots/checkin.jpg)
 
 ### Alertas, History y About
-Los avisos se abren desde la campana, con ciclo de vida (activo, reconocido, pospuesto, resuelto), prioridades y el enlace simulado con la Tierra. History muestra cada signo vital con sus bandas de estado y su línea base, la calidad de la señal, las misiones y la racha. About lista la evidencia por dato, la procedencia de los datos y todas las referencias.
+Los avisos se abren desde la campana, con ciclo de vida (activo, reconocido, pospuesto, resuelto), prioridades y el enlace simulado con la Tierra. History muestra cada signo vital con sus bandas de estado y su línea base, la calidad de la señal, las misiones y la racha. About lista la evidencia por dato, cada una con sus referencias, y la procedencia de los datos.
 
 ## Cada número muestra su base
 
@@ -131,8 +160,10 @@ Es un sitio estático, sin compilación. Los ES modules necesitan HTTP:
 
 ```bash
 cd src
-python -m http.server 8765
+python3 -m http.server 8765
 ```
+
+No hace falta internet: las tipografías y three.js están incluidos en el repo.
 
 - `http://localhost:8765/`: la web central de Tesai.
 - `http://localhost:8765/simulacion/`: la simulación inmersiva (tres escenarios en primera persona).
@@ -140,37 +171,56 @@ python -m http.server 8765
 
 ## Probala
 
-1. Todos los datos son simulados (semilla 2026).
-2. **Overview:** tocá un signo vital del gemelo para ver su historial.
-3. **Biometrics:** apretá cualquier "!" para ver de dónde sale un límite.
-4. **Check-in:** respondé las cinco escalas y guardá. Después mirá "Compared with your usual". La historia simulada de Valentina Ruiz muestra una caída de la calidad del sueño en los últimos días.
-5. **Inyectá un evento:** abrí `#/advanced`, activá el modo demo e inyectá `co2` o `tachycardia`. El aviso se abre después de varias lecturas, y uno crítico se escala al enlace simulado con la Tierra.
+Todos los datos son simulados (semilla 2026).
+
+1. **Simulación:** en la web, apretá **Iniciar simulación** y elegí un escenario.
+2. **Visor:** abrí el dashboard, entrá a **Visor** y, en **Probá una situación**, elegí un tripulante y disparale una taquicardia. Seguí los pasos del segundo doctor y avisá a la Tierra.
+3. **Overview:** tocá un signo vital del gemelo para ver su historial.
+4. **Biometría:** apretá cualquier "!" para ver de dónde sale un límite.
+5. **Chequeo:** respondé las cinco escalas y guardá. Después mirá la comparación con lo habitual. La historia simulada de Valentina Ruiz muestra una caída de la calidad del sueño en los últimos días.
 6. Cambiá **EN | ES** en la barra superior.
+
+## Publicarla
+
+El sitio es estático: se publica la carpeta `src/` tal cual, sin paso de build.
+
+- **Vercel:** importá el repo como proyecto nuevo, sin elegir framework. `vercel.json` ya indica que se publica `src/` y agrega las cabeceras de seguridad.
+- **Cloudflare Pages:** conectá el repo, dejá vacío el comando de build y poné `src` como directorio de salida.
+
+## Seguridad y privacidad
+
+- **Nada sale del navegador.** No hay servidor, cuentas ni base de datos. El enlace con la Tierra y la opción de compartir el chequeo son simulaciones.
+- **El chequeo diario queda en el dispositivo** (`localStorage`), sin promedios grupales ni avisos.
+- **Sin código inline:** ninguna página tiene `<script>` inline, así que `vercel.json` aplica una Content Security Policy con `script-src 'self'`, más `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` y HSTS.
+- **Archivos importados como no confiables:** el CSV o JSON que se carga en `#/advanced` pasa por un normalizador que limpia los ids, acota los textos y descarta métricas desconocidas antes de mostrarse.
+- **Sin claves en el cliente:** una fuente de datos real iría detrás de un proxy del lado del servidor que guarde las claves; el navegador solo conoce su dirección.
 
 ## Tecnología
 
-HTML, CSS (tokens de diseño, `color-mix`), JavaScript con ES modules y gráficos SVG. Sin framework, sin bundler y sin dependencias. Tipografías Plus Jakarta Sans y JetBrains Mono (SIL OFL).
+HTML, CSS (tokens de diseño, `color-mix`), JavaScript con ES modules y gráficos SVG. Sin framework, sin bundler y sin npm. La simulación usa three.js 0.170.0 (MIT), incluido en el repo. Voz con la Web Speech API y tonos con Web Audio. Tipografías Plus Jakarta Sans y JetBrains Mono (SIL OFL), servidas localmente.
 
 ## Estructura del proyecto
 
 ```text
 .
-├── src/                 El sitio de Tesai (ver src/README.md)
-│   ├── index.html       Web central: portada, guía de sensores, accesos
-│   ├── simulacion/      Simulación inmersiva en primera persona
+├── src/                 El sitio de Tesai, lo único que se publica (ver src/README.md)
+│   ├── index.html       Web central: el problema, la app, cómo funciona, sensores, accesos y equipo
+│   ├── shared/          Colores, tipografías, botones, idioma y barra superior comunes a las tres páginas
+│   ├── assets/          Imágenes, logo, tipografías y las capturas y el video del Visor
+│   ├── simulacion/      Simulación inmersiva: index.html, styles.css, js/ (textos, escena 3D, bucle) y vendor/three.js
 │   └── tesai/           La app Tesai (ver src/tesai/README.md y ARCHITECTURE.md)
 │       ├── index.html
-│       ├── styles/      tokens → base → layout → components
+│       ├── styles/      base → layout → components → responsive
 │       └── js/          config, reglas, estado, chequeo, gemelo, Visor, audio, evidencia, i18n, proveedores, ui
 ├── tools/twin/          Generador del dibujo del gemelo (escribe src/tesai/js/twin/art.js)
 ├── react/astronaut/     El gemelo como componentes React, en paralelo a la versión del sitio
-├── docs/                Resumen de la investigación, fundamento de factores humanos, uso de IA
+├── docs/                Resumen de la investigación, fundamento de factores humanos, uso de IA y capturas
 ├── data/                Datos y fuentes
-├── assets/              Banner e insignias
-└── ARCHITECTURE.md      Mapa de módulos, flujo de datos y sistema de avisos
+├── assets/              Banner e insignias del README
+├── vercel.json          Publicación de src/, caché y cabeceras de seguridad
+└── ARCHITECTURE.md      Mapa de módulos, flujo de datos, sistema de avisos y despliegue
 ```
 
-La carpeta `src/` es el sitio completo de Tesai (estático, sin build): la web central en la raíz, la simulación inmersiva en `src/simulacion/` y el prototipo Tesai en `src/tesai/`. Ver [`src/README.md`](src/README.md).
 
 ## Uso de IA
 
@@ -208,7 +258,7 @@ Código bajo licencia [MIT](LICENSE).
 
 ## Aviso
 
-Proyecto independiente realizado en el marco del NASA Space Apps Challenge. No está afiliado a la NASA ni cuenta con su aval. La NASA no respalda a entidades que no pertenezcan al gobierno de EE. UU. Este repositorio no usa logos, banderas ni identificadores de misión de la NASA.
+Proyecto independiente realizado en el marco del NASA Space Apps Challenge. No está afiliado a la NASA ni cuenta con su aval. La NASA no respalda a entidades que no pertenezcan al gobierno de EE. UU. Este repositorio no usa logos ni identificadores de misión de la NASA.
 
 ---
 
@@ -231,15 +281,16 @@ On the way to Mars, a message to Earth can take up to about 20 minutes each way.
 
 ## Our solution
 
-Tesai shows one crew member's vital signs, sleep, activity, cabin environment and a private daily check-in on a few screens, and is honest about every number.
+Tesai is a second doctor inside the visor. It shows the whole crew's vital signs, sleep, activity and cabin environment, guides you step by step when something changes, and is honest about every number. You can live it in a first-person simulation and explore it in a full prototype.
 
+- **Immersive simulation:** three first-person emergencies (Mars EVA, pressurized rover, ship in transit) where you are the first doctor and Tesai guides you by voice. It runs in the browser; move with WASD, look with the mouse, act with E.
 - **Health twin:** a body figure with six vital signs, each compared with the person's own baseline as well as a reference range.
 - **Cabin environment:** CO₂, oxygen, pressure, temperature, humidity and radiation, with ranges from NASA-STD-3001.
 - **Private daily check-in:** five 0–10 scales (sleep quality, mood, calm, mental sharpness, connection with the crew). It stays on the device, never raises alerts, never earns points, and is compared only with the person's own history.
 - **Alerts that do not cry wolf:** one alert per condition, persistence before raising, noisy readings ignored, sensor problems kept apart, "Partial data" instead of "Normal".
 - **Evidence on every number:** a "!" button next to every limit, goal and rule (based on a source, adapted, or a team design value), with APA references.
 - **Delay-tolerant ground link:** critical alerts that nobody acknowledges are escalated through a simulated link to Earth.
-- **Visor and second doctor:** a first-person view through the helmet visor, with the crew's vitals projected on the glass and a step-by-step guide for each alert.
+- **Visor and second doctor:** the simulation's view brought into the prototype. Your own vitals and the cabin, every crew member's biomonitor with ECG, a situation notice, a step-by-step guide for each alert, and the delay to Earth. A "Try a situation" panel triggers simulated events.
 - **Built-in audio:** a tone when an alert opens and, for critical alerts, a voice that reads the situation aloud in English or Spanish.
 
 > **Status (15 Nov 2026):** all screens work in the browser with simulated data. Tesai is a hackathon prototype, **not a medical device**. Thresholds are illustrative. The demo scenario is ISS-like.
@@ -257,9 +308,17 @@ Research summary: [`docs/research-summary.md`](docs/research-summary.md).
 
 ## Tech stack
 
-HTML, CSS (design tokens, `color-mix`), JavaScript ES modules, SVG charts. No framework, no bundler, no dependencies. Plus Jakarta Sans and JetBrains Mono (SIL OFL).
+HTML, CSS (design tokens, `color-mix`), JavaScript ES modules, SVG charts. No framework and no bundler. Plus Jakarta Sans and JetBrains Mono (SIL OFL), served locally.
 
-The `src/` folder is the whole Tesai site (static, no build): the main web page at the root, the immersive simulation in `src/simulacion/` and the Tesai prototype in `src/tesai/`. See [`src/README.md`](src/README.md). To run it: `cd src && python -m http.server 8765`, then open `/`, `/simulacion/` or `/tesai/`.
+The simulation uses three.js 0.170.0 (MIT), included in the repo, plus the Web Speech API for the voice and Web Audio for the tones. No npm and no build step.
+
+## Run and deploy
+
+`cd src && python3 -m http.server 8765`, then open `/`, `/simulacion/` or `/tesai/`. It works offline. To publish, serve `src/` as is: on Vercel, `vercel.json` already points to `src/`; on Cloudflare Pages, leave the build command empty and set the output directory to `src`. See [`src/README.md`](src/README.md).
+
+## Security and privacy
+
+Nothing leaves the browser: no server, accounts or database, and the Earth link is simulated. The check-in stays in `localStorage`. No page has inline scripts, so `vercel.json` sets a Content Security Policy with `script-src 'self'` plus `nosniff`, frame, referrer, permissions and HSTS headers. Imported CSV or JSON files are treated as untrusted and normalized before display, and no API key lives in the client.
 
 ## Use of AI
 
@@ -289,4 +348,4 @@ The code is released under the [MIT license](LICENSE).
 
 ## Disclaimer
 
-An independent project made for the NASA Space Apps Challenge. It is not affiliated with or endorsed by NASA. NASA does not endorse non-U.S. Government entities. This repository does not use NASA logos, flags or mission identifiers.
+An independent project made for the NASA Space Apps Challenge. It is not affiliated with or endorsed by NASA. NASA does not endorse non-U.S. Government entities. This repository does not use NASA logos or mission identifiers.
