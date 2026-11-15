@@ -2,6 +2,8 @@
 
 **Tesai** es el prototipo de *health twin* para astronautas de Team Higía (NASA Space Apps Challenge 2026). Este documento describe la arquitectura del frontend modular que reemplazó el monolito original de ~3700 líneas.
 
+> **Nota de estructura:** Tesai vive ahora en `src/tesai/`. Las rutas `src/...` de este documento son relativas a esa carpeta. El sitio completo (web central + simulación + Tesai) está descrito en `src/README.md`.
+>
 > Sin bundler, sin framework. Solo HTML, CSS y ES modules nativos del browser. Desplegable en Vercel con un solo `vercel.json`.
 
 ---
@@ -312,7 +314,8 @@ El proyecto es completamente estático. Vercel lo despliega sin configuración e
 
 ```bash
 npx serve src -p 5173
-# → http://localhost:5173
+# → http://localhost:5173        (web central)
+# → http://localhost:5173/tesai/ (Tesai)
 ```
 
 ---

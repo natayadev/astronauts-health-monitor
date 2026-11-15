@@ -12,8 +12,11 @@ import { RulesEngine, GROUPS } from '../rules.js';
 import { I18N } from '../i18n.js';
 import { EVIDENCE, SOURCES, REAL_SOURCES, BASIS_LABEL, BASIS_LEVEL, EVIDENCE_LEGEND, citeText, apaItems, hasUnverified, evBtn, evidenceBody, evCell, basisPill } from '../evidence.js';
 import { refreshSecondary, startProvider, runAlertAction } from '../app.js';
+import { Visor } from './visor.js';
+import { Sound } from '../audio.js';
+import { t } from '../guidance.js';
 
-const VIEWS = ['overview', 'biometrics', 'alerts', 'history', 'about', 'advanced'];
+const VIEWS = ['overview', 'visor', 'biometrics', 'alerts', 'history', 'about', 'advanced'];
 
 /* ===== Twin geometry ===== */
 /* Astronaut suit silhouette — used only for the scan-line mask.
@@ -115,6 +118,11 @@ export const UI = {
     $('#btn-scan').onclick = () => this.runScan();
     $('#btn-export').onclick = () => this.exportReport();
 
+    // Built-in audio: top-bar speaker button + Visor / second doctor
+    $('#btn-audio').onclick = () => this.toggleAudio();
+    Visor.init({ onChange: () => { this.syncAudioBtn(); this.renderLive(); } });
+    this.syncAudioBtn();
+
     // Language
     $$('#lang button').forEach(b => b.onclick = () => { State.lang = b.dataset.lang; State.save(); this.syncLang(); });
 
@@ -163,7 +171,19 @@ export const UI = {
   },
 
   /* ===== Navigation ===== */
-  syncLang() { I18N.setLang(State.lang); $$('#lang button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.lang === State.lang))); },
+  syncLang() { I18N.setLang(State.lang); $$('#lang button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.lang === State.lang))); this.syncAudioBtn(); Visor.render(); },
+  /* ===== Built-in audio ===== */
+  syncAudioBtn() {
+    const b = $('#btn-audio'); if (!b) return;
+    const on = Sound.enabled, label = on ? t('Audio on', 'Audio activado') : t('Audio off', 'Audio apagado');
+    b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', label); b.title = label;
+    const cb = $('#set-sound'); if (cb) cb.checked = on;
+  },
+  toggleAudio() {
+    Sound.unlock(); const on = !Sound.enabled; Sound.setEnabled(on);
+    if (on) { Sound.tone('ok'); Sound.speak(t('Audio on. Tesai will warn you by tone and voice.', 'Audio activado. Tesai te avisa con un tono y por voz.')); }
+    this.syncAudioBtn(); if (State.view === 'visor') Visor.render();
+  },
   go(view, fromHash) {
     if (!VIEWS.includes(view)) view = 'overview';
     State.view = view; $('#bell').classList.toggle('on', view === 'alerts');
@@ -176,6 +196,7 @@ export const UI = {
     if (view === 'history')  this.renderHistory();
     if (view === 'advanced') this.renderSystem();
     if (view === 'about')    this.renderAbout();
+    if (view === 'visor')    Visor.render();
     this.renderLive(); this.placeToasts();
   },
   bindMenu(btnSel, menuSel, render) {
@@ -219,6 +240,7 @@ export const UI = {
   renderLive() {
     this.renderMet(); this.renderSourceBadge(); this.renderBadges(); this.renderWho();
     if (State.view === 'overview')   { this.renderStrip(); this.renderStage(); this.renderDockbar(); this.renderMissions(true); this.renderScore(); this.renderEnv(); }
+    if (State.view === 'visor')      Visor.render();
     if (State.view === 'biometrics') this.renderBio();
     if (State.view === 'alerts')     this.renderDiag();
     if (State.view === 'history')    { if (!State.histPaused) this.renderHistory(); this.renderMissions(false); this.renderScore(); }
@@ -451,6 +473,10 @@ export const UI = {
           <p>The team used several Claude models (Fable, Opus and Sonnet), not just one.</p>
           <p>Bob, an AI assistant by IBM, was also used on this project.</p></section>
       </div>
+      <section class="panel" aria-labelledby="h-audio"><h3 id="h-audio"><span class="grow">Built-in audio</span></h3>
+        <p>Tesai has audio built in, like the Higía simulation. When an alert opens it plays a tone, and for critical alerts a voice reads the situation aloud in English or Spanish.</p>
+        <p>The second doctor on the Visor can read each step aloud. Sound needs one click or key press to start, and you can turn it off with the speaker button in the top bar.</p>
+        <p><a href="../simulacion/index.html">Open the Higía simulation</a></p></section>
       <section class="panel" aria-labelledby="h-evid"><h3 id="h-evid"><span class="grow">Evidence by data point</span></h3>
         <p class="note">Every number in Tesai is tagged with where it comes from. "Based on a source" means the value follows a published one. "Adapted" means it starts from a source but Tesai changed it, and the note says how. "Team design value" means the team chose it and no published source was found. "No real data source" marks simulated data.</p>
         <p class="note">Open a link to read the original and confirm any number before quoting it.</p>
@@ -480,7 +506,7 @@ export const UI = {
     $('#dl-export').onclick = () => download(`tesai-export-${Date.now()}.json`, JSON.stringify({ crew: State.crew, vitals: Object.values(State.history).flat(), environment: State.env, devices: Object.values(State.devicesBy).flat(), sleepActivity: Object.values(State.sleepBy).filter(Boolean) }, null, 1), 'application/json');
     $('#set-source').onchange = async e => { await startProvider(e.target.value); $('#set-source').value = CONFIG.dataSource; this.renderLive(); this.renderSystem(); };
     $('#apply-sim').onclick = async () => { CONFIG.seed = +$('#set-seed').value || CONFIG.seed; CONFIG.tickMs = clamp(+$('#set-tick').value || CONFIG.tickMs, 250, 60000); await startProvider('simulated'); this.renderSystem(); showToast({ level: 'normal', icon: 'achievement', title: 'Simulation restarted', message: `seed ${CONFIG.seed} · interval ${CONFIG.tickMs} ms` }); };
-    $('#set-sound').onchange = e => { State.sound = e.target.checked; State.save(); };
+    $('#set-sound').onchange = e => { Sound.unlock(); Sound.setEnabled(e.target.checked); this.syncAudioBtn(); };
     $('#set-demo').onchange  = e => { State.demo = e.target.checked; State.save(); this.renderSystemLive(); };
     $('#set-motion').onchange = e => { State.motion = e.target.checked ? 'reduced' : 'full'; State.save(); this.applyMotion(); };
     $('#reset-gam').onclick = () => { if (!confirm(I18N.tx('Reset points, streak and missions?'))) return; State.gam = defaultGam(); State.gam.streak = 0; State.gam.bestStreak = 0; State.gam.demo = false; State.save(); this.renderLive(); };

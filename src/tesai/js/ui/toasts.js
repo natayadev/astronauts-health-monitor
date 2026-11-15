@@ -15,7 +15,7 @@ export function showToast({ alertId = null, level = 'normal', title, message = '
   if (!alertId) el.setAttribute('role', 'status');
   const glyph = TOAST_ICON[icon] || LV_ICON[level] || ICONS.tick;
   el.innerHTML = `${glyph}<div class="tx"><b><i class="lvdot"></i>${esc(title)}</b><span>${esc(message)}</span></div>${action ? `<button class="btn" type="button">${esc(action.label)}</button>` : ''}`;
-  if (action) el.querySelector('button').onclick = () => { action.run(); dismissToast(el); };
+  if (action) el.querySelector('button').onclick = () => { action.run(); if (!action.keep) dismissToast(el); };
   box.appendChild(el);
   if (alertId) State.toastByAlert[alertId] = el;
   el._persistent = persistent;

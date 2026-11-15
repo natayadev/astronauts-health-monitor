@@ -22,7 +22,7 @@ export const State = {
   env: null, envEval: null, envHistory: [],
   devicesBy: {}, sleepBy: {}, sleepHistory: [],
   alerts: [], alertIndex: {}, cond: {}, uplink: [], toastByAlert: {},
-  view: 'overview', alertFilter: 'active', sound: false, demo: true,
+  view: 'overview', alertFilter: 'active', sound: true, demo: true,
   motion: 'auto', histPaused: false, selMetric: null, drawerWin: 30,
   gam: defaultGam(), unsub: [], startedAt: Date.now(), sourceNote: '',
   refreshing: false, lang: 'en',
@@ -43,7 +43,7 @@ export const State = {
     try {
       const s = JSON.parse(localStorage.getItem(CONFIG.storageKey) || 'null'); if (!s) return;
       if (s.gam) this.gam = { ...defaultGam(), ...s.gam };
-      this.sound = !!s.sound;
+      this.sound = s.sound === undefined ? true : !!s.sound;
       if (s.demo === false) this.demo = false;
       if (s.motion) this.motion = s.motion;
       if (s.seed)   CONFIG.seed = s.seed;

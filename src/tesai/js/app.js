@@ -19,6 +19,9 @@ import { RemoteProvider }    from './providers/remote.js';
 import { FileProvider }      from './providers/file.js';
 import { showToast, closeToastFor } from './ui/toasts.js';
 import { UI } from './ui/ui.js';
+import { Visor } from './ui/visor.js';
+import { Sound } from './audio.js';
+import { hasGuide } from './guidance.js';
 
 /* ===== File import state ===== */
 export let fileBundle = null;
@@ -143,7 +146,9 @@ function processVitals(c, rd, ev) {
     const present = g === 'bp' ? (rd.bpSys != null || rd.bpDia != null) : rd[g] != null; if (!present) continue;
     const m = ev.metrics[g];
     trackCondition(`health:${c.id}:${g}`, m.level, () => ({ domain: 'health', title: METRICS[g].label, message: m.reason || METRICS[g].label, astronautId: c.id, metric: g }));
-    const a = openAlertByKey(`health:${c.id}:${g}`); if (a) { announce(a); onAlertOpened(a); }
+    const a = openAlertByKey(`health:${c.id}:${g}`);
+    // announce once per level: this runs on every reading while the alert stays open (it used to repeat toasts and uplink lines)
+    if (a && a._announced !== a.level && visibleAlert(a)) { a._announced = a.level; announce(a); onAlertOpened(a); }
   }
 }
 function processEnvironment() {
@@ -201,15 +206,18 @@ function announce(a) {
   const who = a.astronautId ? ' · ' + personName(a.astronautId) : '';
   const warming = Date.now() - State.startedAt < 6000 && a.level !== 'surgeon';
   say(`New alert: ${LEVELS[a.level]?.label || a.title}. ${a.message}${who}`, a.level === 'surgeon');
+  Visor.onSituation(a); // built-in audio: tone, and voice for critical alerts
   if (!warming && a.priority < 4) {
-    showToast({ alertId: a.id, level: a.level === 'info' ? 'normal' : a.level, title: a.title + who, message: a.message, persistent: a.level === 'surgeon',
-      action: a.level === 'surgeon' ? { label: 'Acknowledge', run: () => { ackAlert(a.id); UI.renderLive(); } } : null, icon: a.domain });
+    const second = hasGuide(a) && (a.level === 'surgeon' || a.level === 'attention'); // second doctor guide available
+    const action = second ? { label: 'Second doctor', keep: a.level === 'surgeon', run: () => { Visor.focus(a.id); UI.go('visor'); } }
+      : a.level === 'surgeon' ? { label: 'Acknowledge', run: () => { ackAlert(a.id); UI.renderLive(); } } : null;
+    showToast({ alertId: a.id, level: a.level === 'info' ? 'normal' : a.level, title: a.title + who, message: a.message, persistent: a.level === 'surgeon', action, icon: a.domain });
   }
 }
 function say(msg, assertive) { const el = document.querySelector(assertive ? '#live-assertive' : '#live-polite'); if (!el) return; el.textContent = ''; setTimeout(() => { el.textContent = msg; }, 30); }
 
 /* ===== main · entry point ===== */
-const VIEWS = ['overview', 'biometrics', 'alerts', 'history', 'about', 'advanced'];
+const VIEWS = ['overview', 'visor', 'biometrics', 'alerts', 'history', 'about', 'advanced'];
 (async function main() {
   const { I18N } = await import('./i18n.js');
   State.load(); UI.init(); I18N.init(State.lang); UI.syncLang();
@@ -218,4 +226,8 @@ const VIEWS = ['overview', 'biometrics', 'alerts', 'history', 'about', 'advanced
   UI.go(State.view, true);
   setInterval(() => UI.renderMet(), 1000);
   if (CONFIG.dataSource === 'simulated') setTimeout(() => showToast({ level: 'attention', icon: 'sensor', title: 'Demo mode', message: `All data is simulated (seed ${CONFIG.seed}). No reading belongs to a real person.` }), 800);
+  // Built-in audio: browsers need one gesture before any sound, so the first click or key press unlocks it.
+  ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { Sound.unlock(); }, { once: true, capture: true }));
+  if (State.sound) setTimeout(() => showToast({ level: 'normal', title: 'Built-in audio', message: 'Tesai warns by tone and voice, like the Higía simulation. Turn it on to hear it.',
+    action: { label: 'Turn on audio', run: () => { Sound.unlock(); Sound.setEnabled(true); Sound.tone('ok'); Sound.speak(State.lang === 'es' ? 'Audio activado. Tesai te avisa con un tono y por voz.' : 'Audio on. Tesai will warn you by tone and voice.'); UI.syncAudioBtn(); } } }), 1600);
 })();

@@ -51,7 +51,7 @@ En misiones largas, como un viaje a Marte, la tripulación está lejos de la Tie
 └── README.md
 ```
 
-La carpeta `src/` se agregará cuando se defina la solución.
+La carpeta `src/` es el sitio completo de Higía (estático, sin build): la web central en la raíz, la simulación inmersiva en `src/simulacion/` y el prototipo Tesai en `src/tesai/`. Ver [`src/README.md`](src/README.md).
 
 ## Datos y fuentes
 
@@ -105,7 +105,7 @@ On long missions, such as a trip to Mars, the crew is far from Earth, with commu
 └── README.md
 ```
 
-The `src/` folder will be added once the solution is defined.
+The `src/` folder is the whole Higía site (static, no build): the main web page at the root, the immersive simulation in `src/simulacion/` and the Tesai prototype in `src/tesai/`. See [`src/README.md`](src/README.md).
 
 ## Data and sources
 
