@@ -114,19 +114,12 @@
             <div class="twin-persp" aria-hidden="true">
               <div class="twin-spin" id="twin-spin">
                 <svg viewBox="0 0 1440 780" width="1440" height="780" style="position:absolute;inset:0;overflow:visible" focusable="false">
-                  <g id="twin-body" opacity=".6" stroke-linecap="round" stroke-linejoin="round"></g>
-                  <rect x="540" y="40" width="360" height="740" fill="url(#tz-tint)" opacity=".18" mask="url(#tz-mask)"/>
-                  <rect x="540" y="40" width="360" height="740" fill="url(#tz-lines)" mask="url(#tz-mask)"/>
-                  <g fill="none" style="stroke:var(--color-teal)" stroke-opacity=".38" stroke-width="1">
-                    <ellipse cx="720" cy="90" rx="25" ry="21" stroke-dasharray="3 3"/>
-                    <path d="M708 82 C716 76 726 78 732 86 M704 96 C714 102 726 100 736 94" stroke-opacity=".3"/>
-                    <ellipse cx="692" cy="268" rx="21" ry="44"/>
-                    <ellipse cx="750" cy="268" rx="20" ry="42"/>
-                    <ellipse cx="714" cy="364" rx="32" ry="19" stroke-dasharray="4 3"/>
-                    <line x1="720" y1="186" x2="720" y2="470" stroke-dasharray="1 4" stroke-width="1.6"/>
-                    <path d="M628 216 L600 330 L582 448 M812 216 L840 330 L858 448 M682 472 L670 610 L664 738 M758 472 L770 610 L776 738" stroke-dasharray="2 5" stroke-opacity=".3"/>
-                  </g>
-                  <circle cx="742" cy="278" r="12" style="fill:var(--tw1)" opacity=".3"/>
+                  <!-- astronaut PNG — natural proportions, centred in stage -->
+                  <image id="twin-body-img" href="assets/human.png"
+                    x="0" y="0" width="1440" height="780"
+                    preserveAspectRatio="xMidYMid meet" opacity=".95"/>
+                  <!-- hidden — not used -->
+                  <g id="twin-body" style="display:none" stroke-linecap="round" stroke-linejoin="round"></g>
                 </svg>
               </div>
             </div>

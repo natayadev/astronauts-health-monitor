@@ -16,23 +16,42 @@ import { refreshSecondary, startProvider, runAlertAction } from '../app.js';
 const VIEWS = ['overview', 'biometrics', 'alerts', 'history', 'about', 'advanced'];
 
 /* ===== Twin geometry ===== */
+/* Astronaut suit silhouette — used only for the scan-line mask.
+   PNG is 491×1080, rendered at x=542 y=0 w=356 h=780 in the 1440×780 viewBox.
+   Scale factors: sx = 356/491 ≈ 0.725, sy = 780/1080 ≈ 0.722, offset x += 542.
+   Suit occupies roughly the central 70% of the PNG width. */
 const TWIN_PARTS = [
-  '<ellipse cx="720" cy="98" rx="36" ry="44" stroke-width="0"/>', '<line x1="720" y1="140" x2="720" y2="186" stroke-width="32"/>', '<line x1="642" y1="208" x2="798" y2="208" stroke-width="40"/>',
-  '<path d="M640 205 C620 210 612 224 615 252 L630 330 C636 362 645 392 648 432 L792 432 C795 392 804 362 810 330 L825 252 C828 224 820 210 800 205 Z" stroke-width="2"/>',
-  '<path d="M648 420 L792 420 L802 482 C782 502 742 508 720 502 C698 508 658 502 638 482 Z" stroke-width="2"/>',
-  '<line x1="628" y1="216" x2="600" y2="330" stroke-width="34"/>', '<line x1="600" y1="330" x2="582" y2="448" stroke-width="27"/>', '<ellipse cx="577" cy="478" rx="14" ry="23" stroke-width="0"/>',
-  '<line x1="812" y1="216" x2="840" y2="330" stroke-width="34"/>', '<line x1="840" y1="330" x2="858" y2="448" stroke-width="27"/>', '<ellipse cx="863" cy="478" rx="14" ry="23" stroke-width="0"/>',
-  '<line x1="682" y1="472" x2="670" y2="610" stroke-width="50"/>', '<line x1="670" y1="610" x2="664" y2="738" stroke-width="35"/>', '<ellipse cx="660" cy="762" rx="20" ry="9" stroke-width="0"/>',
-  '<line x1="758" y1="472" x2="770" y2="610" stroke-width="50"/>', '<line x1="770" y1="610" x2="776" y2="738" stroke-width="35"/>', '<ellipse cx="780" cy="762" rx="20" ry="9" stroke-width="0"/>'
+  // Helmet
+  '<ellipse cx="720" cy="108" rx="62" ry="68" stroke-width="0"/>',
+  // Neck / collar
+  '<ellipse cx="720" cy="178" rx="38" ry="16" stroke-width="0"/>',
+  // Torso
+  '<path d="M638 184 C624 192 616 210 616 230 L616 460 C616 476 626 488 642 494 L720 498 L798 494 C814 488 824 476 824 460 L824 230 C824 210 816 192 802 184 Z" stroke-width="0"/>',
+  // Left upper arm
+  '<path d="M622 190 C606 196 594 210 588 228 L572 334 C568 350 574 364 586 370 L608 376 C620 370 626 356 628 340 L640 234 C642 218 638 204 622 190 Z" stroke-width="0"/>',
+  // Left forearm + glove
+  '<path d="M586 370 C572 378 562 392 560 408 L552 480 C550 496 558 508 570 514 L596 520 C608 514 614 500 614 486 L620 414 C622 398 616 386 602 378 Z" stroke-width="0"/>',
+  '<ellipse cx="582" cy="536" rx="28" ry="22" stroke-width="0"/>',
+  // Right upper arm
+  '<path d="M818 190 C834 196 846 210 852 228 L868 334 C872 350 866 364 854 370 L832 376 C820 370 814 356 812 340 L800 234 C798 218 802 204 818 190 Z" stroke-width="0"/>',
+  // Right forearm + glove
+  '<path d="M854 370 C868 378 878 392 880 408 L888 480 C890 496 882 508 870 514 L844 520 C832 514 826 500 826 486 L820 414 C818 398 824 386 838 378 Z" stroke-width="0"/>',
+  '<ellipse cx="858" cy="536" rx="28" ry="22" stroke-width="0"/>',
+  // Left leg
+  '<path d="M642 494 C628 500 618 512 616 528 L608 616 C606 632 612 644 624 650 L664 656 C676 650 682 638 682 622 L688 534 C690 518 686 506 672 498 Z" stroke-width="0"/>',
+  '<path d="M624 650 C610 658 602 672 602 688 L600 752 C600 762 608 768 620 768 L672 768 C684 768 692 762 692 752 L692 688 C692 672 684 658 668 650 Z" stroke-width="0"/>',
+  // Right leg
+  '<path d="M798 494 C812 500 822 512 824 528 L832 616 C834 632 828 644 816 650 L776 656 C764 650 758 638 758 622 L752 534 C750 518 754 506 768 498 Z" stroke-width="0"/>',
+  '<path d="M816 650 C830 658 838 672 838 688 L840 752 C840 762 832 768 820 768 L768 768 C756 768 748 762 748 752 L748 688 C748 672 756 658 772 650 Z" stroke-width="0"/>'
 ];
 
 const LAYOUT = {
-  hrv:  { side: 'L', top: 60,  node: [720, 94] },
-  resp: { side: 'L', top: 290, node: [720, 205] },
-  spo2: { side: 'L', top: 520, node: [692, 268] },
-  hr:   { side: 'R', top: 60,  node: [742, 262] },
-  bp:   { side: 'R', top: 290, node: [840, 330] },
-  temp: { side: 'R', top: 520, node: [720, 366] }
+  hrv:  { side: 'L', top: 60,  node: [720, 108] },  // helmet (HRV)
+  resp: { side: 'L', top: 290, node: [655, 310] },  // left chest (respiration)
+  spo2: { side: 'L', top: 520, node: [582, 536] },  // left glove (SpO₂)
+  hr:   { side: 'R', top: 60,  node: [762, 310] },  // right chest / heart
+  bp:   { side: 'R', top: 290, node: [858, 536] },  // right glove (BP cuff)
+  temp: { side: 'R', top: 520, node: [720, 420] }   // abdomen / belt (core temp)
 };
 const COL = { L: { x: 96, w: 290 }, R: { x: 1054, w: 290 } };
 
@@ -52,9 +71,8 @@ export const UI = {
   menuOpen: null, drawerTrigger: null, compact: false, scale: 1, evOpen: false, evKey: null, evTrigger: null,
 
   init() {
-    // Twin
-    const setParts = (id, fill) => { const g = $(id); g.setAttribute('fill', fill); g.setAttribute('stroke', fill); g.innerHTML = TWIN_PARTS.join(''); };
-    setParts('#twin-mask-g', 'var(--color-white)'); setParts('#twin-body', 'var(--twin-body)');
+    // Twin — PNG is shown via <image> in HTML; no SVG primitives needed
+    // #twin-body and #twin-mask-g are kept empty (mask not used with the PNG approach)
 
     // Links and cards
     let links = '', cards = '';

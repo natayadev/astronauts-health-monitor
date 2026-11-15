@@ -10,7 +10,7 @@
 :root {
   /* ===== 1. BASE PALETTE ===== */
   --color-white:   #FFFFFF;
-  --color-bg:      #ECF6F7;
+  --color-bg:      #C8E8EB;
   --color-ink:     #0D2B26;
   --color-muted:   #42655F;
   --color-slate:   #4A706A;
@@ -20,8 +20,8 @@
   --color-aqua:    #48C9B0;
   --color-navy:    #1F4E78;
   --color-brand-1: #169873;
-  --color-mint:    #E0F4E2;
-  --color-halo:    #C3E5E6;
+  --color-mint:    #B8E6C4;
+  --color-halo:    #8ECFD4;
   --color-forest:  #0A362C;
   --color-soft:    #A6DCD0;
   --color-toast-text: #CFE8E2;
