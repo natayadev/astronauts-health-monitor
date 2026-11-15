@@ -1,4 +1,4 @@
-/* Tesai · sitio central. Misma identidad que Tesai (menta + verde petróleo, vidrio). */
+/* Tesai · sitio central. Misma identidad que el panel de Tesai (menta + verde petróleo, vidrio). */
 
 :root{   /* aliases of shared/tokens.css, so the landing keeps its short names */
   --white:var(--color-white); --bg:var(--color-bg); --ink:var(--color-ink); --muted:var(--color-muted); --teal:var(--color-teal); --teal-ink:var(--color-teal-ink);

@@ -134,7 +134,7 @@ cd src
 python -m http.server 8765
 ```
 
-- `http://localhost:8765/`: la web central de Higía.
+- `http://localhost:8765/`: la web central de Tesai.
 - `http://localhost:8765/simulacion/`: la simulación inmersiva (tres escenarios en primera persona).
 - `http://localhost:8765/tesai/`: el prototipo Tesai.
 
@@ -155,7 +155,7 @@ HTML, CSS (tokens de diseño, `color-mix`), JavaScript con ES modules y gráfico
 
 ```text
 .
-├── src/                 El sitio de Higía (ver src/README.md)
+├── src/                 El sitio de Tesai (ver src/README.md)
 │   ├── index.html       Web central: portada, guía de sensores, accesos
 │   ├── simulacion/      Simulación inmersiva en primera persona
 │   └── tesai/           La app Tesai (ver src/tesai/README.md y ARCHITECTURE.md)
@@ -170,7 +170,7 @@ HTML, CSS (tokens de diseño, `color-mix`), JavaScript con ES modules y gráfico
 └── ARCHITECTURE.md      Mapa de módulos, flujo de datos y sistema de avisos
 ```
 
-La carpeta `src/` es el sitio completo de Higía (estático, sin build): la web central en la raíz, la simulación inmersiva en `src/simulacion/` y el prototipo Tesai en `src/tesai/`. Ver [`src/README.md`](src/README.md).
+La carpeta `src/` es el sitio completo de Tesai (estático, sin build): la web central en la raíz, la simulación inmersiva en `src/simulacion/` y el prototipo Tesai en `src/tesai/`. Ver [`src/README.md`](src/README.md).
 
 ## Uso de IA
 
@@ -255,7 +255,7 @@ Research summary: [`docs/research-summary.md`](docs/research-summary.md).
 
 HTML, CSS (design tokens, `color-mix`), JavaScript ES modules, SVG charts. No framework, no bundler, no dependencies. Plus Jakarta Sans and JetBrains Mono (SIL OFL).
 
-The `src/` folder is the whole Higía site (static, no build): the main web page at the root, the immersive simulation in `src/simulacion/` and the Tesai prototype in `src/tesai/`. See [`src/README.md`](src/README.md). To run it: `cd src && python -m http.server 8765`, then open `/`, `/simulacion/` or `/tesai/`.
+The `src/` folder is the whole Tesai site (static, no build): the main web page at the root, the immersive simulation in `src/simulacion/` and the Tesai prototype in `src/tesai/`. See [`src/README.md`](src/README.md). To run it: `cd src && python -m http.server 8765`, then open `/`, `/simulacion/` or `/tesai/`.
 
 ## Use of AI
 

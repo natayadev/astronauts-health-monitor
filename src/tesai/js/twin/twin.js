@@ -16,12 +16,15 @@
  *   spin     true while the 360° view turns the figure
  *
  * Inside root, back to front:
- *   plate.js    the frame, its title and the readout line
- *   spin.js     the perspective box that turns for the 360° view
- *   figure.js   the drawing (art.js) and its metric overlays (overlays/)
- *   scan.js     the scan sweep
+ *   plate.js      the frame, its title and the readout line (hidden for the astronaut picture)
+ *   spin.js       the perspective box that turns for the 360° view
+ *   astronaut.js  the original astronaut picture (assets/human.png) and the layers for its overlays
+ *   scan.js       the scan sweep
+ *
+ * The generated isometric drawing (figure.js + art.js + overlays/) is kept, unused. Both modules
+ * export the same mountFigure / anchorOf / FIGURE, so switching back is this one import.
  */
-import { mountFigure, anchorOf, FIGURE } from './figure.js';
+import { mountFigure, anchorOf, FIGURE } from './astronaut.js';
 import { mountPlate } from './plate.js';
 import { mountSpin } from './spin.js';
 import { mountScan } from './scan.js';
@@ -30,6 +33,7 @@ export { anchorOf, FIGURE };
 
 export function createTwin(root) {
   root.classList.add('twin');
+  if (FIGURE.name) root.dataset.figure = FIGURE.name;
   root.innerHTML = `<div class="twin-plate"></div><div></div><svg class="twin-scan" viewBox="0 0 1440 780" width="1440" height="780" focusable="false" hidden></svg>`;
   const [plateEl, spinEl, scanEl] = root.children;
 
@@ -46,7 +50,7 @@ export function createTwin(root) {
     scan: () => sweep.run(),
     destroy() {
       sweep.destroy(); figure.destroy(); spin.destroy(); plate.destroy();
-      root.innerHTML = ''; root.classList.remove('twin'); root.removeAttribute('data-spinning');
+      root.innerHTML = ''; root.classList.remove('twin'); root.removeAttribute('data-spinning'); root.removeAttribute('data-figure');
     }
   };
 }
