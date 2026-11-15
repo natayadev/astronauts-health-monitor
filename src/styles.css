@@ -31,6 +31,9 @@ a{color:inherit}
 .btn.cta{font-size:20px;padding:18px 34px;min-height:0;position:relative;box-shadow:0 12px 34px rgba(8,60,70,.45),0 0 0 1px rgba(255,255,255,.25) inset}
 .btn.cta::after{content:"";position:absolute;inset:-6px;border-radius:inherit;border:2px solid rgba(255,255,255,.55);animation:ring 2.4s ease-out infinite;pointer-events:none}
 @keyframes ring{0%{transform:scale(.96);opacity:.9}100%{transform:scale(1.14);opacity:0}}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px 16px;align-items:center;justify-content:center}
+.hero-alt{min-height:50px;padding:12px 24px;font-size:16px;color:var(--white);background:color-mix(in srgb,var(--white) 14%,transparent);border-color:color-mix(in srgb,var(--white) 40%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.hero-alt:hover{background:color-mix(in srgb,var(--white) 26%,transparent)}
 .cta-note{display:block;margin-top:12px;font-size:13px;color:rgba(255,255,255,.88)}
 .cta-note.dark{color:var(--muted)}
 
