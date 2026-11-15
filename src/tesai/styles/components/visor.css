@@ -126,57 +126,129 @@
 .vz-pov[data-scene="ship"]  .vz-bg[data-scene="ship"],
 .vz-pov[data-scene="rover"] .vz-bg[data-scene="rover"] { opacity: 1; transform: scale(1) }
 
-/* Helmet: dark rim with an elliptical opening, glass glare, and a glow when something needs you */
-.vz-helmet { position: absolute; inset: 0; z-index: 2; pointer-events: none }
-.vz-helmet::before {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 40%, #0d2229 0%, #040c10 100%);
-  -webkit-mask-image: radial-gradient(ellipse 62% 66% at 50% 50%, transparent 60%, #000 97%);
-          mask-image: radial-gradient(ellipse 62% 66% at 50% 50%, transparent 60%, #000 97%);
-}
-.vz-helmet::after {
-  content: ""; position: absolute; inset: 0; border-radius: inherit;
+/* Helmet: same dark rim, glare and alert glow as the immersive simulation */
+.vz-helmet { position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background:
-    linear-gradient(118deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.05) 18%, transparent 34%),
-    linear-gradient(180deg, rgba(210,255,248,.14) 0%, transparent 16%),
-    radial-gradient(ellipse at 50% 120%, rgba(60, 210, 190, .16), transparent 55%);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), inset 0 0 90px rgba(0, 12, 16, .5), inset 0 0 0 0 transparent;
-  transition: box-shadow .4s ease;
+    radial-gradient(ellipse 40% 22% at 30% 16%, rgba(255,255,255,.08), transparent 70%),
+    radial-gradient(ellipse 84% 90% at 50% 50%, transparent 62%, rgba(4,5,7,.75) 80%, #040507 92%);
 }
-.vz-pov[data-alert="attention"] .vz-helmet::after { box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), inset 0 0 110px rgba(0, 0, 0, .35), inset 0 0 70px 6px color-mix(in srgb, var(--color-warn, #e0a62b) 55%, transparent) }
-.vz-pov[data-alert="surgeon"]   .vz-helmet::after { box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), inset 0 0 110px rgba(0, 0, 0, .35), inset 0 0 80px 10px color-mix(in srgb, var(--color-crit, #d64545) 62%, transparent); animation: vz-pulse 1.6s ease-in-out infinite }
-@keyframes vz-pulse { 50% { opacity: .55 } }
+.vz-helmet::after { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .4s }
+.vz-pov[data-alert="attention"] .vz-helmet::after { opacity: 1; box-shadow: inset 0 0 120px rgba(255,214,10,.35) }
+.vz-pov[data-alert="surgeon"]   .vz-helmet::after { opacity: 1; box-shadow: inset 0 0 140px rgba(255,69,58,.55); animation: vz-pulse 1.6s ease-in-out infinite }
+@keyframes vz-pulse { 0%, 100% { opacity: .35 } 50% { opacity: 1 } }
 @media (prefers-reduced-motion: reduce) {
   .vz-pov[data-alert="surgeon"] .vz-helmet::after { animation: none }
   .vz-bg { transition: none }
 }
 
-/* HUD: Tesai glass projected on the visor, kept inside the safe area of the opening */
+/* HUD on the glass · the simulation's visual language:
+   dark glass cards, small uppercase labels, mono numbers, Apple-like status colors */
+.vz-pov {
+  --h-ink: #f5f5f7; --h-dim: rgba(245,245,247,.64); --h-faint: rgba(245,245,247,.42);
+  --h-glass: rgba(22,24,28,.42); --h-line: rgba(255,255,255,.14);
+  --h-blue: #0a84ff; --h-red: #ff453a; --h-green: #30d158; --h-yellow: #ffd60a;
+  min-height: 720px; border-radius: 32px; background: #050608;
+  font-family: "Geist", -apple-system, system-ui, sans-serif; color: var(--h-ink);
+}
+.vz-pov .mono { font-family: "Geist Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums }
 .vz-hud {
   position: relative; z-index: 3; min-height: inherit;
-  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 22px;
-  padding: 64px 8% 64px; align-items: start;
+  display: grid; grid-template-columns: 268px minmax(0, 1fr) 268px; gap: 20px; align-items: start;
+  padding: 96px 6% 56px;
 }
-.vz-pov .vz-sit, .vz-pov .vz-card {
-  background: color-mix(in srgb, var(--color-white) 80%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(1.25); backdrop-filter: blur(16px) saturate(1.25);
-}
-.vz-pov .vz-sit { padding: 18px 20px; border-radius: 26px }
-.vz-pov .vz-sit.calm { padding: 14px 16px; max-width: 440px }
-.vz-pov .vz-sit h3 { font-size: 20px }
-.vz-pov .vz-doc { margin-top: 12px; padding: 12px; background: color-mix(in srgb, var(--tint-soft) 85%, transparent) }
-.vz-pov .vz-steps { margin-top: 10px; gap: 6px }
-.vz-pov .vz-steps button { padding: 8px 10px }
-.vz-pov .vz-actions { margin-top: 12px }
-.vz-pov .vz-card { padding: 12px 14px; border-radius: 20px }
-.vz-pov .vz-card .who span { font-size: var(--fs-xs) }
-.vz-pov .vz-vitals { margin-top: 10px; gap: 6px }
-.vz-pov .vz-v { padding: 6px 4px; border-radius: 12px }
-.vz-pov .vz-v b { font-size: 14px }
-.vz-pov .vz-q { margin-top: 6px }
+.vz-col { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.vz-left  { grid-column: 1; grid-row: 1 }
+.vz-right { grid-column: 3; grid-row: 1 }
+#vz-crew { display: flex; flex-direction: column; gap: 10px }
 
+.hc {
+  background: var(--h-glass); border: 1px solid var(--h-line); border-radius: 18px; padding: 12px 14px;
+  -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
+  color: var(--h-ink);
+}
+.hc .hl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--h-dim) }
+.hc .hv { font-size: 13px }
+.hc .hrow { display: flex; align-items: baseline; justify-content: space-between; gap: 10px }
+.hc .hrow.base { margin-top: 4px }
+.hc .big { font-size: 22px; font-weight: 600; letter-spacing: -.02em }
+.hc .big small, .hc .kv small { font-size: 11px; font-weight: 500; color: var(--h-dim); margin-left: 3px }
+.hc .hgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 14px; margin-top: 8px }
+.hc .kv { display: flex; flex-direction: column; gap: 1px; min-width: 0 }
+.hc .kv .hl { font-size: 10px }
+.hc .kv b { font-size: 14px; font-weight: 500; white-space: nowrap }
+.hc .kv b.big { font-size: 20px; font-weight: 600 }
+.hc .hnote { font-size: 11px; color: var(--h-faint); margin-top: 8px; line-height: 1.4 }
+/* A value out of range keeps its text and adds color: never color alone */
+.hc [data-level="attention"] > b, .hc b[data-level="attention"], .hc .hv[data-level="attention"] { color: var(--h-yellow) }
+.hc [data-level="surgeon"] > b,   .hc b[data-level="surgeon"],   .hc .hv[data-level="surgeon"]   { color: var(--h-red) }
+.hstate { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--h-dim); white-space: nowrap }
+.hstate i { width: 7px; height: 7px; border-radius: 50%; background: var(--h-faint) }
+.hstate[data-level="normal"] i    { background: var(--h-green) }
+.hstate[data-level="attention"]   { color: var(--h-yellow) }
+.hstate[data-level="attention"] i { background: var(--h-yellow) }
+.hstate[data-level="surgeon"]     { color: var(--h-red); font-weight: 600 }
+.hstate[data-level="surgeon"] i   { background: var(--h-red) }
+.vz-mate[data-level="surgeon"], .vz-ai.crit, .vz-banner.crit { border-color: rgba(255,69,58,.6); background: rgba(60,12,12,.45) }
+.vz-mate[data-level="attention"] { border-color: rgba(255,214,10,.45) }
+.ecg { display: block; width: 100%; height: 32px; margin-top: 4px }
+.ecg path { fill: none; stroke: var(--h-ink); stroke-width: 1.4; stroke-linejoin: round; vector-effect: non-scaling-stroke }
+.ecg[data-level="surgeon"] path { stroke: var(--h-red) }
+
+/* Top pill */
+#vz-top { position: absolute; top: 30px; left: 50%; transform: translateX(-50%) }
+.vz-top { display: flex; align-items: center; gap: 10px; padding: 8px 18px; border-radius: 999px; white-space: nowrap }
+.vz-top .sep { width: 1px; height: 16px; background: var(--h-line) }
+.vz-top .hv { font-size: 15px }
+
+/* Second doctor */
+.vz-ai { border-color: rgba(10,132,255,.35) }
+.vz-ai .msg { font-size: 13px; line-height: 1.45; margin-top: 6px; text-wrap: pretty }
+.vz-pov .vz-steps { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px }
+.vz-pov .vz-steps button {
+  display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 4px 6px; margin: 0 -6px;
+  background: none; border: 0; border-radius: 8px; box-shadow: none; text-align: left;
+  font: inherit; font-size: 12px; line-height: 1.4; color: var(--h-faint); cursor: pointer;
+}
+.vz-pov .vz-steps button:hover { background: rgba(255,255,255,.06) }
+.vz-pov .vz-n { width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; border: 1.5px solid currentColor; background: none; flex: none }
+.vz-pov .vz-steps .is-done button { color: var(--h-dim); opacity: 1 }
+.vz-pov .vz-steps .is-done .vz-n { background: var(--h-ink); border-color: var(--h-ink) }
+.vz-pov .vz-steps .is-done .vz-t { text-decoration: none }
+.vz-pov .vz-steps .is-next button { color: var(--h-ink); font-weight: 500; box-shadow: none }
+.vz-pov .vz-steps .is-next .vz-n { border-color: var(--h-blue); background: var(--h-blue); box-shadow: 0 0 0 3px rgba(10,132,255,.28) }
+.vz-pov .vz-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px }
+.hbtn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--h-line); background: rgba(255,255,255,.08); color: var(--h-ink);
+  font: inherit; font-size: 11.5px; cursor: pointer;
+}
+.hbtn .ic { width: 13px; height: 13px }
+.hbtn:hover { background: rgba(255,255,255,.16) }
+.hbtn.primary { background: var(--h-blue); border-color: var(--h-blue) }
+.hbtn:disabled { opacity: .5; cursor: default }
+.vz-pov :focus-visible { outline: 2px solid var(--h-blue); outline-offset: 2px }
+
+/* Situation banner, centered like the simulation's */
+#vz-sit { grid-column: 2; grid-row: 1; justify-self: center; width: min(400px, 100%) }
+.vz-banner { border-color: rgba(10,132,255,.5) }
+.vz-banner h3 { font-size: 16px; font-weight: 600; letter-spacing: -.01em; margin-top: 4px; text-wrap: balance }
+.vz-banner p { font-size: 13px; color: var(--h-dim); line-height: 1.45; margin-top: 4px }
+.vz-banner .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px }
+.vz-banner .chip { font: inherit; font-size: 11px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--h-line); color: var(--h-faint); background: none }
+.vz-banner .chip.lit, .vz-banner button.chip[aria-pressed="true"] { color: var(--h-ink); border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.08) }
+.vz-banner button.chip { cursor: pointer }
+
+@media (max-width: 1180px) {
+  .vz-hud { grid-template-columns: 240px minmax(0, 1fr) 240px; padding-left: 3%; padding-right: 3% }
+}
+.hc .hgrid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px 10px }
+.vz-mate .hnote { margin-top: 6px; color: var(--h-yellow) }
 @media (max-width: 1000px) {
-  .vz-pov { min-height: 0; border-radius: 28px }
-  .vz-hud { grid-template-columns: 1fr; padding: 40px 5% 44px }
-  .vz-helmet::before { -webkit-mask-image: radial-gradient(ellipse 70% 72% at 50% 50%, transparent 74%, #000 100%); mask-image: radial-gradient(ellipse 70% 72% at 50% 50%, transparent 74%, #000 100%) }
+  .vz-pov { min-height: 0; border-radius: 24px }
+  .vz-hud { display: flex; flex-direction: column; gap: 10px; padding: 24px 16px; align-items: stretch }
+  #vz-crew { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) }
+  #vz-top { position: static; transform: none } #vz-sit, .vz-col { width: auto }
+  .vz-top { white-space: normal; flex-wrap: wrap; justify-content: center }
+  .vz-helmet { background: linear-gradient(rgba(4,5,7,.35), rgba(4,5,7,.55)) }
+  #vz-sit { order: 1 } .vz-left { order: 2 } .vz-right { order: 3 }
 }
