@@ -57,7 +57,7 @@ Alert levels also show a colored dot (green, amber, red, slate for sensors/remin
 
 Six cabin metrics are tracked with a trend, a reference range and a status: CO₂ (ppm), oxygen partial pressure (kPa), cabin pressure (kPa), temperature (°C), humidity (%) and radiation (µSv/h). The ranges come from public NASA material (see Evidence below); the red radiation limit is 54 µSv/h, the 1.3 mSv/day free-space galactic cosmic ray dose from NASA-STD-3001 Vol. 1. A real source can be added through `DataProvider.getEnvironment()`; `Adapters.adaptRestJson.issTelemetry` is a starting point for the public ISS Live feed (verify it is still active).
 
-## Evidence and sources (APA 7)
+## Evidence and sources
 
 Every number, goal and alert rule has a basis and sources:
 
@@ -68,9 +68,9 @@ Every number, goal and alert rule has a basis and sources:
 | Team design value | Chosen by the team; no published source was found |
 | No real data source | Simulated data |
 
-- A **"!" button** sits next to each metric in Biometrics (vital cards, cabin cards, goals, and the side panel), and next to the alert, ground link, sensor and baseline panels. It opens the basis, a short note and the APA 7 references.
+- A **"!" button** sits next to each metric in Biometrics (vital cards, cabin cards, goals, and the side panel), and next to the alert, ground link, sensor and baseline panels. It opens the basis, a short note and the references in APA format.
 - The **About** page lists the evidence by data point, the data provenance and the full alphabetical reference list. The Advanced thresholds table has a "Basis and sources" column.
-- Sources live in `SOURCES` (APA 7 HTML) and `EVIDENCE` (basis, note and source ids per data point) in `index.html`. To add or fix a source, edit those two objects.
+- Sources live in `SOURCES` (APA-style HTML) and `EVIDENCE` (basis, note and source ids per data point) in `index.html`. To add or fix a source, edit those two objects.
 - Entries marked † have a title or date that could not be verified because the site blocked automated access. Numbers taken from sources were read with automatic extractors, so open the link and confirm a value before quoting it.
 - Not backed by a published source: HRV limits, core-temperature limits, the outer heart-rate limits, the sleep goal, the hobby goal, battery levels, hydration, the personal-baseline deviation, escalation timing and the ground-link delay profile.
 

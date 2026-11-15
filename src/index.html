@@ -1660,7 +1660,9 @@ const ES_DICT = {
 "All good: no pending steps for now.": "Todo en orden: sin pasos pendientes por ahora.",
 "All in range": "Todo en rango",
 "All of today's goals are complete.": "Todos los objetivos de hoy completados.",
-"All sources are cited in APA 7 format. Open a link to read the original and confirm any number before quoting it.": "Todas las fuentes se citan en formato APA 7. Abrí el enlace para leer el original y confirmá cualquier número antes de citarlo.",
+"Open a link to read the original and confirm any number before quoting it.": "Abrí el enlace para leer el original y confirmá cualquier número antes de citarlo.",
+"Bob, an AI assistant by IBM, was also used on this project.": "En este proyecto también se usó Bob, un asistente de IA de IBM.",
+"AI tools used": "IA utilizada",
 "All vital signs for the selected person, their recent trend and the quality of each reading. Tap a card to open its detail.": "Todos los signos vitales de la persona elegida, su tendencia reciente y la calidad de cada lectura. Tocá una tarjeta para abrir el detalle.",
 "All your devices above 50%": "Todos tus dispositivos arriba del 50%",
 "All your vital signs, their recent trend and the quality of each reading. Tap a card to open its detail.": "Todos tus signos vitales, su tendencia reciente y la calidad de cada lectura. Tocá una tarjeta para abrir el detalle.",
@@ -1927,7 +1929,6 @@ const ES_DICT = {
 "Reduce decorative animations": "Reducir animaciones decorativas",
 "Reference range": "Rango de referencia",
 "References": "Referencias",
-"References (APA 7)": "Referencias (APA 7)",
 "Reminder": "Recordatorio",
 "Reminder resolved:": "Recordatorio resuelto:",
 "Reminders": "Recordatorios",
@@ -1984,7 +1985,6 @@ const ES_DICT = {
 "Source changed": "Fuente cambiada",
 "Source not available": "Fuente no disponible",
 "Sources": "Fuentes",
-"Sources (APA 7)": "Fuentes (APA 7)",
 "Sources for the cabin ranges": "Fuentes de los rangos de cabina",
 "Sources for the limits": "Fuentes de los límites",
 "Sources:": "Fuentes:",
@@ -3109,7 +3109,7 @@ const apaItems = ids => [...new Set(ids)].sort((a, b) => SOURCES[a].sort.localeC
 const hasUnverified = ids => ids.some(id => SOURCES[id].unverified);
 function evidenceBody(key) {
   const e = EVIDENCE[key]; if (!e) return '';
-  return `${basisPill(e.basis)}<p class="evnote">${esc(e.note)}</p><h3>Sources (APA 7)</h3>`
+  return `${basisPill(e.basis)}<p class="evnote">${esc(e.note)}</p><h3>Sources</h3>`
     + (e.refs.length ? `<ul class="apa" data-i18n="off">${apaItems(e.refs)}</ul>` : '<p class="note">No published source found.</p>')
     + (hasUnverified(e.refs) ? `<p class="note">${esc(EVIDENCE_LEGEND)}</p>` : '');
 }
@@ -3564,19 +3564,20 @@ Object.assign(UI, {
       <section class="dark-card on-dark about-hero"><div class="eyebrow">${esc(C.event)}</div><h3>${esc(C.challenge)}</h3><p>${esc(C.app)} brings an astronaut's vital signs, cabin environment, alerts and daily habits into one calm view. It shows what needs attention first, keeps sensor problems apart from health ones, and every alert has a clear lifecycle.</p></section>
       <div class="grid g2">
         <section class="panel" aria-labelledby="h-team"><h3 id="h-team"><span class="grow">Team ${esc(C.team)}</span></h3><div class="alist">${C.members.map(m => `<div class="member"><span class="avatar">${esc(ini(m))}</span><b>${esc(m)}</b></div>`).join('')}</div></section>
-        <section class="panel" aria-labelledby="h-claude"><h3 id="h-claude"><span class="grow">Built with Claude</span></h3>
-          <p>${esc(C.app)} was made with Claude, an AI assistant by Anthropic. The visual design comes from Claude Design, and Claude Code helped write, review and test the code. Team ${esc(C.team)} chose what to build, directed the work and made the product decisions.</p></section>
+        <section class="panel" aria-labelledby="h-claude"><h3 id="h-claude"><span class="grow">AI tools used</span></h3>
+          <p>${esc(C.app)} was made with Claude, an AI assistant by Anthropic. The visual design comes from Claude Design, and Claude Code helped write, review and test the code. Team ${esc(C.team)} chose what to build, directed the work and made the product decisions.</p>
+          <p>Bob, an AI assistant by IBM, was also used on this project.</p></section>
       </div>
       <section class="panel" aria-labelledby="h-evid"><h3 id="h-evid"><span class="grow">Evidence by data point</span></h3>
         <p class="note">Every number in Tesai is tagged with where it comes from. "Based on a source" means the value follows a published one. "Adapted" means it starts from a source but Tesai changed it, and the note says how. "Team design value" means the team chose it and no published source was found. "No real data source" marks simulated data.</p>
-        <p class="note">All sources are cited in APA 7 format. Open a link to read the original and confirm any number before quoting it.</p>
+        <p class="note">Open a link to read the original and confirm any number before quoting it.</p>
         ${groups.map(g => `<div class="group-title">${g}</div><div class="alist">${Object.entries(EVIDENCE).filter(([k, e]) => e.group === g).map(([k, e]) => `<div class="evrow"><div class="top"><b>${esc(e.label)}</b>${basisPill(e.basis)}${evBtn(k)}</div><p>${esc(e.note)}</p><div class="cites">${e.refs.length ? `Sources: <span data-i18n="off">${esc(citeText(k))}</span>` : 'No published source found.'}</div></div>`).join('')}</div>`).join('')}
       </section>
       <section class="panel" aria-labelledby="h-prov"><h3 id="h-prov"><span class="grow">Data provenance</span><span data-evslot-static></span></h3>
         <p>Every reading in the app is simulated. The crew members, their personal baselines and the events are invented. The sources below back the ranges and rules, not the readings. The team's research found no public dataset of daily in-flight vital signs, so a real data source would have to be built from the options below or from a mission partner.</p>
         <div class="group-title">Real data sources to explore (not used yet)</div>
         <ul class="links">${REAL_SOURCES.map(r => `<li><a href="${r.url}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a> <span class="tag">${esc(r.note)}</span></li>`).join('')}</ul></section>
-      <section class="panel" aria-labelledby="h-refs"><h3 id="h-refs"><span class="grow">References (APA 7)</span></h3>
+      <section class="panel" aria-labelledby="h-refs"><h3 id="h-refs"><span class="grow">References</span></h3>
         <ul class="apa" data-i18n="off">${Object.keys(SOURCES).sort((a, b) => SOURCES[a].sort.localeCompare(SOURCES[b].sort)).map(id => `<li>${SOURCES[id].apa}${SOURCES[id].unverified ? ' †' : ''}<div class="cites" style="text-indent:0;margin-top:2px">Used for: ${esc((used[id] || []).join('; '))}</div></li>`).join('')}</ul>
         <p class="note">${esc(EVIDENCE_LEGEND)}</p></section>
       <section class="panel" aria-labelledby="h-notes"><h3 id="h-notes"><span class="grow">Notices</span></h3>
