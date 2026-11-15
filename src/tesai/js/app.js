@@ -225,7 +225,6 @@ const VIEWS = ['overview', 'visor', 'biometrics', 'checkin', 'alerts', 'history'
   await startProvider(CONFIG.dataSource);
   UI.go(State.view, true);
   setInterval(() => UI.renderMet(), 1000);
-  if (CONFIG.dataSource === 'simulated') setTimeout(() => showToast({ level: 'attention', icon: 'sensor', title: 'Demo mode', message: `All data is simulated (seed ${CONFIG.seed}). No reading belongs to a real person.` }), 800);
   // Built-in audio: browsers need one gesture before any sound, so the first click or key press unlocks it.
   ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { Sound.unlock(); }, { once: true, capture: true }));
   if (State.sound) setTimeout(() => showToast({ level: 'normal', title: 'Built-in audio', message: 'Tesai warns by tone and voice, like the simulation. Turn it on to hear it.',

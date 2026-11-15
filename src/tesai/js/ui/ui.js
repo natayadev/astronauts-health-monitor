@@ -11,7 +11,7 @@ import { esc, fmtTime, pad, clamp, round, dayKey } from '../utils.js';
 import { State, activeAlerts, alertById, visibleAlert, ackAlert, ackNonCritical, snoozeAlert, unsnoozeAlert, snoozeNonCritical, resolveAlert, addPoints, checkMissions, missionState, MISSION_DEFS, PRIORITY_LABEL, nextStep, attention, uplinkStatus, personName, defaultGam } from '../state.js';
 import { RulesEngine, GROUPS } from '../rules.js';
 import { I18N } from '../i18n.js';
-import { EVIDENCE, SOURCES, REAL_SOURCES, BASIS_LABEL, BASIS_LEVEL, EVIDENCE_LEGEND, citeText, apaItems, hasUnverified, evBtn, evidenceBody, evCell, basisPill } from '../evidence.js';
+import { EVIDENCE, SOURCES, REAL_SOURCES, BASIS_LABEL, BASIS_LEVEL, citeText, apaItems, hasUnverified, evBtn, evidenceBody, evCell, basisPill } from '../evidence.js';
 import { refreshSecondary, startProvider, runAlertAction } from '../app.js';
 import { Visor } from './visor.js';
 import { Sound } from '../audio.js';
@@ -464,7 +464,6 @@ export const UI = {
   renderAbout() {
     const C = CREDITS, ini = n => n.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(), groups = ['Vital signs', 'Cabin environment', 'Goals and alert rules', 'Data'];
     setText($('#about-tag'), `${C.app} is a health twin for astronauts, built by Team ${C.team} for the ${C.event}.`);
-    const used = {}; Object.entries(EVIDENCE).forEach(([k, e]) => e.refs.forEach(id => (used[id] ||= []).push(e.label)));
     setHtml($('#about-body'), `
       <section class="dark-card on-dark about-hero"><div class="eyebrow">${esc(C.event)}</div><h3>${esc(C.challenge)}</h3><p>${esc(C.app)} brings an astronaut's vital signs, cabin environment, alerts and daily habits into one calm view. It shows what needs attention first, keeps sensor problems apart from health ones, and every alert has a clear lifecycle.</p></section>
       <div class="grid g2">
@@ -472,6 +471,7 @@ export const UI = {
         <section class="panel" aria-labelledby="h-claude"><h3 id="h-claude"><span class="grow">AI tools used</span></h3>
           <p>${esc(C.app)} was made with Claude, an AI assistant by Anthropic. The visual design comes from Claude Design, and Claude Code helped write, review and test the code. Team ${esc(C.team)} chose what to build, directed the work and made the product decisions.</p>
           <p>The team used several Claude models (Fable, Opus and Sonnet), not just one.</p>
+          <p>The team also used ChatGPT (OpenAI) and Gemini (Google), with several of their models.</p>
           <p>Bob, an AI assistant by IBM, was also used on this project.</p></section>
       </div>
       <section class="panel" aria-labelledby="h-audio"><h3 id="h-audio"><span class="grow">Built-in audio</span></h3>
@@ -480,19 +480,16 @@ export const UI = {
         <p><a href="../simulacion/">Open the simulation</a></p></section>
       <section class="panel" aria-labelledby="h-evid"><h3 id="h-evid"><span class="grow">Evidence by data point</span></h3>
         <p class="note">Every number in Tesai is tagged with where it comes from. "Based on a source" means the value follows a published one. "Adapted" means it starts from a source but Tesai changed it, and the note says how. "Team design value" means the team chose it and no published source was found. "No real data source" marks simulated data.</p>
-        <p class="note">Open a link to read the original and confirm any number before quoting it.</p>
-        ${groups.map(g => `<div class="group-title">${g}</div><div class="alist">${Object.entries(EVIDENCE).filter(([k, e]) => e.group === g).map(([k, e]) => `<div class="evrow"><div class="top"><b>${esc(e.label)}</b>${_basisPill(e.basis)}${_evBtn(k)}</div><p>${esc(e.note)}</p><div class="cites">${e.refs.length ? `Sources: <span data-i18n="off">${esc(citeText(k))}</span>` : 'No published source found.'}</div></div>`).join('')}</div>`).join('')}
+        ${groups.map(g => `<div class="group-title">${g}</div><div class="alist">${Object.entries(EVIDENCE).filter(([k, e]) => e.group === g).map(([k, e]) => `<div class="evrow"><div class="top"><b>${esc(e.label)}</b>${_basisPill(e.basis)}${_evBtn(k)}</div><p>${esc(e.note)}</p>${e.refs.length ? `<ul class="apa" data-i18n="off">${apaItems(e.refs)}</ul>` : '<div class="cites">No published source found.</div>'}</div>`).join('')}</div>`).join('')}
       </section>
       <section class="panel" aria-labelledby="h-prov"><h3 id="h-prov"><span class="grow">Data provenance</span></h3>
-        <p>Every reading in the app is simulated. The crew members, their personal baselines and the events are invented. The sources below back the ranges and rules, not the readings. The team's research found no public dataset of daily in-flight vital signs, so a real data source would have to be built from the options below or from a mission partner.</p>
-        <div class="group-title">Real data sources to explore (not used yet)</div>
+        <p>Every reading in the app is simulated. The crew members, their personal baselines and the events are invented. The sources below back the ranges and rules, not the readings. Tesai is built so real datasets can replace the simulated ones. These are the datasets the team plans to integrate.</p>
+        <div class="group-title">Real data sources</div>
         <ul class="links">${REAL_SOURCES.map(r => `<li><a href="${r.url}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a> <span class="tag">${esc(r.note)}</span></li>`).join('')}</ul></section>
-      <section class="panel" aria-labelledby="h-refs"><h3 id="h-refs"><span class="grow">References</span></h3>
-        <ul class="apa" data-i18n="off">${Object.keys(SOURCES).sort((a, b) => SOURCES[a].sort.localeCompare(SOURCES[b].sort)).map(id => `<li>${SOURCES[id].apa}${SOURCES[id].unverified ? ' †' : ''}<div class="cites" style="text-indent:0;margin-top:2px">Used for: ${esc((used[id] || []).join('; '))}</div></li>`).join('')}</ul>
-        <p class="note">${esc(EVIDENCE_LEGEND)}</p></section>
       <section class="panel" aria-labelledby="h-notes"><h3 id="h-notes"><span class="grow">Notices</span></h3>
         <ul class="links plain"><li>${esc(C.app)} is an independent prototype made for the ${esc(C.event)}. It is not affiliated with, endorsed by or sponsored by NASA.</li>
         <li>All the data you see is simulated. No reading belongs to a real person, and nothing here is a medical diagnosis or advice.</li>
+        <li>Tesai is open source under the MIT license.</li>
         <li>Fonts: Plus Jakarta Sans and JetBrains Mono, under the SIL Open Font License 1.1.</li></ul></section>`);
     $$('#about-body [data-evslot-static]').forEach(el => { el.outerHTML = _evBtn('data.simulated'); });
   },

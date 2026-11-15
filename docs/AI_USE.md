@@ -5,7 +5,7 @@ NASA Space Apps Challenge allows AI-generated content when its use is stated. Th
 ## The short version
 
 - **No AI runs inside the product.** Every number, level, alert, check-in comparison and message in Tesai comes from deterministic JavaScript and fixed templates. The app makes no calls to any AI service.
-- **AI helped build it.** Claude (Anthropic) was used for the visual design, the code, the research summaries and the documentation, under the team's direction.
+- **AI helped build it.** Claude (Anthropic) was used for the visual design, the code, the research summaries and the documentation. ChatGPT (OpenAI), Gemini (Google) and Bob (IBM) were also used. All of it under the team's direction.
 - **The decisions are the team's.** The choice of challenge, what to build and what to leave out, the evidence-labeling approach, the private-by-default check-in and the visual direction came from the team.
 - **Prototype, not a medical device.** Nothing in Tesai diagnoses anyone.
 
@@ -17,7 +17,7 @@ NASA Space Apps Challenge allows AI-generated content when its use is stated. Th
 | Claude Code | Writing, refactoring, reviewing and testing the code (the move from a single file to ES modules, the alert lifecycle, the evidence system, the daily check-in) |
 | Claude (chat and research) | Searching and summarizing NASA standards, NTRS reports and papers; auditing the cited numbers against their sources; drafting the README, the submission text and the human factors document |
 
-The team used several Claude models (Fable, Opus and Sonnet).
+The team used several Claude models (Fable, Opus and Sonnet), several ChatGPT models (OpenAI), several Gemini models (Google) and Bob (IBM).
 
 ## How the AI output was checked
 

@@ -174,7 +174,7 @@ La carpeta `src/` es el sitio completo de Tesai (estático, sin build): la web c
 
 ## Uso de IA
 
-Hecho con Claude (Anthropic): Claude Design para el diseño visual, Claude Code para la implementación, la revisión y las pruebas, y Claude para resumir la investigación y redactar la documentación. **Dentro de la app no corre ninguna IA.** El equipo decidió qué construir, dirigió el trabajo y tomó las decisiones de producto. Detalle en [`docs/AI_USE.md`](docs/AI_USE.md) y en la pantalla About.
+Hecho con Claude (Anthropic): Claude Design para el diseño visual, Claude Code para la implementación, la revisión y las pruebas, y Claude para resumir la investigación y redactar la documentación. También se usaron ChatGPT (OpenAI) y Gemini (Google), con varios de sus modelos, y Bob (IBM). **Dentro de la app no corre ninguna IA.** El equipo decidió qué construir, dirigió el trabajo y tomó las decisiones de producto. Detalle en [`docs/AI_USE.md`](docs/AI_USE.md) y en la pantalla About.
 
 ## Datos de la NASA
 
@@ -201,6 +201,10 @@ Lista completa con condiciones de uso: [`data/README.md`](data/README.md).
 ## Equipo
 
 **Equipo Higía:** Ezequiel Alfaro, Sebastian Garay, Nataya Flores, Mateo Capararo.
+
+## Licencia
+
+Código bajo licencia [MIT](LICENSE).
 
 ## Aviso
 
@@ -259,7 +263,7 @@ The `src/` folder is the whole Tesai site (static, no build): the main web page 
 
 ## Use of AI
 
-Built with Claude (Anthropic): Claude Design for the visual design, Claude Code for implementation, review and testing, and Claude for research summaries and documentation. **No AI runs inside the app.** The team chose what to build, directed the work and made the product decisions. Details: [`docs/AI_USE.md`](docs/AI_USE.md).
+Built with Claude (Anthropic): Claude Design for the visual design, Claude Code for implementation, review and testing, and Claude for research summaries and documentation. ChatGPT (OpenAI) and Gemini (Google), with several of their models, and Bob (IBM) were also used. **No AI runs inside the app.** The team chose what to build, directed the work and made the product decisions. Details: [`docs/AI_USE.md`](docs/AI_USE.md).
 
 ## NASA data used
 
@@ -278,6 +282,10 @@ Tesai does not ingest a live NASA dataset: no public dataset of daily in-flight 
 ## Team
 
 **Team Higía:** Ezequiel Alfaro, Sebastian Garay, Nataya Flores, Mateo Capararo.
+
+## License
+
+The code is released under the [MIT license](LICENSE).
 
 ## Disclaimer
 
