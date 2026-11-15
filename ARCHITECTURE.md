@@ -61,7 +61,8 @@ astronauts-health-monitor/
     │       ├── lists.css
     │       ├── charts.css
     │       ├── forms.css
-    │       └── evidence.css
+    │       ├── evidence.css
+    │       └── checkin.css             Chequeo diario (escalas 0–10, tira de 14 días)
     └── js/
         ├── app.js                  Entry point: bootstrap, main loop, alert processing
         ├── config.js               SCHEMA, CONFIG, METRICS, LEVELS, CREDITS, ENV_META
@@ -70,6 +71,7 @@ astronauts-health-monitor/
         ├── state.js                Estado mutable global + ciclo de vida de alertas
         ├── i18n.js                 I18N: ES_DICT, ES_PATTERNS, traducción del DOM
         ├── evidence.js             SOURCES (APA), EVIDENCE, helpers de rendering
+        ├── checkin.js              Chequeo diario privado: ítems, almacenamiento local, comparación con la propia historia
         ├── providers/
         │   ├── base.js             Clase abstracta DataProvider
         │   ├── simulated.js        SimulatedProvider (circadian, AR(1), eventos)
@@ -80,6 +82,7 @@ astronauts-health-monitor/
             ├── icons.js            ICONS (27 SVG), LV_ICON
             ├── helpers.js          $ $$ setHtml setText pillHtml chartInner download …
             ├── toasts.js           showToast, dismissToast, closeToastFor
+            ├── checkin.js          Vista del chequeo diario (formulario, tendencia, CO₂)
             └── ui.js               Objeto UI: todas las funciones de render y navegación
 ```
 
@@ -139,6 +142,7 @@ app.js (entry point)
   ├── state.js         → config.js, utils.js, rules.js
   ├── i18n.js          (importado dinámicamente en main())
   ├── evidence.js      → utils.js
+  ├── checkin.js       → config.js, utils.js
   ├── providers/
   │   ├── base.js      (sin dependencias)
   │   ├── simulated.js → base.js, config.js, utils.js, adapters.js
@@ -149,6 +153,7 @@ app.js (entry point)
       ├── icons.js     (sin dependencias)
       ├── helpers.js   → config.js, utils.js, state.js
       ├── toasts.js    → state.js, ui/icons.js
+      ├── checkin.js   → helpers.js, toasts.js, utils.js, state.js, checkin.js
       └── ui.js        → helpers.js, icons.js, toasts.js, config.js,
                           utils.js, state.js, rules.js, i18n.js,
                           evidence.js, app.js  ← (importa refreshSecondary,
@@ -175,6 +180,8 @@ La única referencia circular es `ui.js → app.js` y `app.js → ui.js`. ES mod
 | `ui/icons.js` | 27 íconos SVG exportados como strings. Trazo de 2 px, estilo Lucide. Sin emojis. |
 | `ui/helpers.js` | Helpers de DOM (`$`, `$$`, `setHtml`, `setText`) y de rendering (`pillHtml`, `chartInner`, `fmtVal`, `download`, `beep`). |
 | `ui/toasts.js` | Toast system: cola de máximo 4, auto-dismiss, toasts persistentes para alertas críticas. |
+| `checkin.js` | Chequeo diario: ítems (escalas 0–10 en la misma dirección, con período), guardado en `localStorage` con clave propia (`tesai.checkin.v1`), historial simulado rotulado para la demo y regla de comparación con la propia historia. **No** alimenta al `RulesEngine`, no abre alertas y no da puntos. |
+| `ui/checkin.js` | `CheckinUI`: formulario, panel "Quién ve esto", tira de 14 días por ítem y cruce de síntomas con el CO₂ de cabina (promedio de 30 min convertido a mmHg con la presión de cabina). |
 | `ui/ui.js` | Objeto `UI`: inicialización, navegación, todas las funciones de render (twin, strip, stage, cards, drawer, vistas, misiones, score). |
 | `app.js` | Entry point. Gestiona el ciclo de vida del provider, `onReading`, `onTick`, `refreshSecondary`, `runAlertAction`, y el procesamiento de alertas (`processVitals`, `processEnvironment`, `processDevices`, `checkEscalations`, `checkReminders`). Contiene el `main()` IIFE de arranque. |
 
