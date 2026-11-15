@@ -46,7 +46,7 @@ astronauts-health-monitor/
 ├── tools/twin/                     Geometría de la figura (no se despliega): build.mjs, scene.mjs, stand.mjs, suit.mjs, overlays/, kit/
 ├── react/astronaut/                El astronauta como componentes React/Next.js (no se despliega ni lo usa el dashboard); ver su README
 └── src/
-    ├── index.html                  Web central de Higía: portada, guía de sensores, accesos
+    ├── index.html                  Web central de Tesai: portada, guía de sensores, accesos
     ├── main.js                     Idioma de la portada y enlaces a la simulación
     ├── styles.css                  Estilos de la portada
     ├── assets/                     hero.webp, astronaut.webp

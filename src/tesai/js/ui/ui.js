@@ -468,9 +468,9 @@ export const UI = {
           <p>Bob, an AI assistant by IBM, was also used on this project.</p></section>
       </div>
       <section class="panel" aria-labelledby="h-audio"><h3 id="h-audio"><span class="grow">Built-in audio</span></h3>
-        <p>Tesai has audio built in, like the Higía simulation. When an alert opens it plays a tone, and for critical alerts a voice reads the situation aloud in English or Spanish.</p>
+        <p>Tesai has audio built in, like the simulation. When an alert opens it plays a tone, and for critical alerts a voice reads the situation aloud in English or Spanish.</p>
         <p>The second doctor on the Visor can read each step aloud. Sound needs one click or key press to start, and you can turn it off with the speaker button in the top bar.</p>
-        <p><a href="../simulacion/index.html">Open the Higía simulation</a></p></section>
+        <p><a href="../simulacion/index.html">Open the simulation</a></p></section>
       <section class="panel" aria-labelledby="h-evid"><h3 id="h-evid"><span class="grow">Evidence by data point</span></h3>
         <p class="note">Every number in Tesai is tagged with where it comes from. "Based on a source" means the value follows a published one. "Adapted" means it starts from a source but Tesai changed it, and the note says how. "Team design value" means the team chose it and no published source was found. "No real data source" marks simulated data.</p>
         <p class="note">Open a link to read the original and confirm any number before quoting it.</p>

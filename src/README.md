@@ -1,6 +1,6 @@
-# Higía · sitio
+# Tesai · sitio
 
-Sitio estático (sin build, sin framework) del proyecto **Higía** de Team Higía para el **NASA Space Apps Challenge 2026**. Todos los datos son simulados.
+Sitio estático (sin build, sin framework) del proyecto **Tesai** de Team Higía para el **NASA Space Apps Challenge 2026**. Todos los datos son simulados.
 
 ```
 src/
