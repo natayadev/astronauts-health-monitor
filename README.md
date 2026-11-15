@@ -31,9 +31,8 @@ Equipo Higía · Buenos Aires, Argentina
 5. [Cómo se arma](#cómo-se-arma)
 6. [La app, pantalla por pantalla](#la-app-pantalla-por-pantalla)
 7. [Cada número muestra su base](#cada-número-muestra-su-base)
-8. [Cómo correrla](#cómo-correrla) · [Probala](#probala) · [Publicarla](#publicarla)
-9. [Seguridad y privacidad](#seguridad-y-privacidad) · [Tecnología](#tecnología) · [Estructura del proyecto](#estructura-del-proyecto)
-10. [Uso de IA](#uso-de-ia) · [Datos de la NASA](#datos-de-la-nasa) · [Límites](#límites) · [Equipo](#equipo) · [Aviso](#aviso)
+8. [Seguridad y privacidad](#seguridad-y-privacidad) · [Tecnología](#tecnología) · [Estructura del proyecto](#estructura-del-proyecto)
+9. [Uso de IA](#uso-de-ia) · [Datos de la NASA](#datos-de-la-nasa) · [Límites](#límites) · [Equipo](#equipo) · [Licencia](#licencia) · [Aviso](#aviso)
 
 ## El problema
 
@@ -153,39 +152,6 @@ Los avisos se abren desde la campana, con ciclo de vida (activo, reconocido, pos
 ![Ventana de evidencia: la base de un valor, una nota breve y las referencias](docs/screenshots/evidence.jpg)
 
 La investigación detrás de estas etiquetas está resumida en [`docs/research-summary.md`](docs/research-summary.md) (en inglés).
-
-## Cómo correrla
-
-Es un sitio estático, sin compilación. Los ES modules necesitan HTTP:
-
-```bash
-cd src
-python3 -m http.server 8765
-```
-
-No hace falta internet: las tipografías y three.js están incluidos en el repo.
-
-- `http://localhost:8765/`: la web central de Tesai.
-- `http://localhost:8765/simulacion/`: la simulación inmersiva (tres escenarios en primera persona).
-- `http://localhost:8765/tesai/`: el prototipo Tesai.
-
-## Probala
-
-Todos los datos son simulados (semilla 2026).
-
-1. **Simulación:** en la web, apretá **Iniciar simulación** y elegí un escenario.
-2. **Visor:** abrí el dashboard, entrá a **Visor** y, en **Probá una situación**, elegí un tripulante y disparale una taquicardia. Seguí los pasos del segundo doctor y avisá a la Tierra.
-3. **Overview:** tocá un signo vital del gemelo para ver su historial.
-4. **Biometría:** apretá cualquier "!" para ver de dónde sale un límite.
-5. **Chequeo:** respondé las cinco escalas y guardá. Después mirá la comparación con lo habitual. La historia simulada de Valentina Ruiz muestra una caída de la calidad del sueño en los últimos días.
-6. Cambiá **EN | ES** en la barra superior.
-
-## Publicarla
-
-El sitio es estático: se publica la carpeta `src/` tal cual, sin paso de build.
-
-- **Vercel:** importá el repo como proyecto nuevo, sin elegir framework. `vercel.json` ya indica que se publica `src/` y agrega las cabeceras de seguridad.
-- **Cloudflare Pages:** conectá el repo, dejá vacío el comando de build y poné `src` como directorio de salida.
 
 ## Seguridad y privacidad
 
@@ -311,10 +277,6 @@ Research summary: [`docs/research-summary.md`](docs/research-summary.md).
 HTML, CSS (design tokens, `color-mix`), JavaScript ES modules, SVG charts. No framework and no bundler. Plus Jakarta Sans and JetBrains Mono (SIL OFL), served locally.
 
 The simulation uses three.js 0.170.0 (MIT), included in the repo, plus the Web Speech API for the voice and Web Audio for the tones. No npm and no build step.
-
-## Run and deploy
-
-`cd src && python3 -m http.server 8765`, then open `/`, `/simulacion/` or `/tesai/`. It works offline. To publish, serve `src/` as is: on Vercel, `vercel.json` already points to `src/`; on Cloudflare Pages, leave the build command empty and set the output directory to `src`. See [`src/README.md`](src/README.md).
 
 ## Security and privacy
 
