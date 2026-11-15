@@ -1,9 +1,9 @@
 /**
  * remote.js · RemoteProvider skeleton
- * Ready for fetch with timeout, retries and in-memory cache.
- * Each method throws NotImplementedError until wired to a real endpoint.
- * See the "HOW TO CONNECT REAL DATA" comment at the bottom of the original
- * index.html for the full integration guide.
+ * fetchJson is ready (timeout, retries with backoff, in-memory cache). The data methods are not
+ * connected yet: each one throws NotImplementedError and names the endpoint and adapter it needs,
+ * and the app falls back to the simulation. Real endpoints go behind a server-side proxy that holds
+ * any API key; the browser only knows the proxy's address (CONFIG.api.baseUrl).
  */
 import { DataProvider } from './base.js';
 import { CONFIG } from '../config.js';
@@ -34,7 +34,7 @@ export class RemoteProvider extends DataProvider {
       const ctrl = new AbortController(), to = setTimeout(() => ctrl.abort(), this.api.timeoutMs);
       this.loading.add(key);
       try {
-        const res = await fetch(key, { signal: ctrl.signal, headers: this.api.nasaApiKey ? { 'x-api-key': this.api.nasaApiKey } : {} });
+        const res = await fetch(key, { signal: ctrl.signal, credentials: 'omit' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json(); this.cache.set(key, { t: Date.now(), data }); return data;
       } catch (e) { err = e; await new Promise(r => setTimeout(r, this.api.retryBackoffMs * 2 ** i)); }
@@ -43,11 +43,12 @@ export class RemoteProvider extends DataProvider {
     this.lastError = err; throw err;
   }
 
-  async getCrew()                 { throw new NotImplementedError('RemoteProvider.getCrew: TODO → fetchJson("/crew") + Adapters.adaptRestJson.crew'); }
-  async getVitals(id, from, to)   { throw new NotImplementedError('RemoteProvider.getVitals: TODO → fetchJson(`/vitals/${id}`, {params:{from,to}}) + Adapters.adaptRestJson.vitals'); }
-  subscribeVitals(id, cb)         { console.warn('RemoteProvider.subscribeVitals: TODO → polling or WebSocket/SSE'); return () => {}; }
-  async getEnvironment()          { throw new NotImplementedError('RemoteProvider.getEnvironment: TODO → fetchJson("/environment") + Adapters.adaptRestJson.environment'); }
-  async getDevices(id)            { throw new NotImplementedError('RemoteProvider.getDevices: TODO → fetchJson(`/devices/${id}`) + Adapters.adaptRestJson.devices'); }
-  async getSleepActivity(id, day) { throw new NotImplementedError('RemoteProvider.getSleepActivity: TODO → fetchJson(`/activity/${id}`, {params:{day}}) + Adapters.adaptRestJson.sleepActivity'); }
-  async pushEvent(ev)             { console.warn('RemoteProvider.pushEvent: TODO → POST /events', ev); return { ok: false, reason: 'not implemented' }; }
+  /* Not connected yet. Each message names the endpoint and the adapter it will use. */
+  async getCrew()                 { throw new NotImplementedError('RemoteProvider.getCrew: needs GET /crew + Adapters.adaptRestJson.crew'); }
+  async getVitals(id, from, to)   { throw new NotImplementedError('RemoteProvider.getVitals: needs GET /vitals/:id?from&to + Adapters.adaptRestJson.vitals'); }
+  subscribeVitals(id, cb)         { return () => {}; }   // needs polling, WebSocket or SSE
+  async getEnvironment()          { throw new NotImplementedError('RemoteProvider.getEnvironment: needs GET /environment + Adapters.adaptRestJson.environment'); }
+  async getDevices(id)            { throw new NotImplementedError('RemoteProvider.getDevices: needs GET /devices/:id + Adapters.adaptRestJson.devices'); }
+  async getSleepActivity(id, day) { throw new NotImplementedError('RemoteProvider.getSleepActivity: needs GET /activity/:id?day + Adapters.adaptRestJson.sleepActivity'); }
+  async pushEvent(ev)             { return { ok: false, reason: 'not implemented' }; }   // needs POST /events
 }

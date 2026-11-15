@@ -3,15 +3,15 @@
  * Owns: navigation, stage, cards, drawer, views, alert list, About, Advanced.
  * The astronaut in the middle of the stage is its own component (../twin/twin.js); this file only passes it props.
  */
-import { $, $$, setHtml, setText, pillHtml, alertLevelData, alertIcon, alertPillText, fmtVal, levelOf, trusted, metricKey, histRows, chartInner, download, beep } from './helpers.js';
+import { $, $$, setHtml, setText, pillHtml, alertLevelData, alertIcon, alertPillText, fmtVal, levelOf, trusted, metricKey, histRows, chartInner, download } from './helpers.js';
 import { ICONS, LV_ICON } from './icons.js';
-import { showToast, closeToastFor } from './toasts.js';
+import { showToast } from './toasts.js';
 import { CONFIG, METRICS, LEVELS, SCHEMA, ENV_META, CREDITS } from '../config.js';
 import { esc, fmtTime, pad, clamp, round, dayKey } from '../utils.js';
 import { State, activeAlerts, alertById, visibleAlert, ackAlert, ackNonCritical, snoozeAlert, unsnoozeAlert, snoozeNonCritical, resolveAlert, addPoints, checkMissions, missionState, MISSION_DEFS, PRIORITY_LABEL, nextStep, attention, uplinkStatus, personName, defaultGam } from '../state.js';
-import { RulesEngine, GROUPS } from '../rules.js';
+import { GROUPS } from '../rules.js';
 import { I18N } from '../i18n.js';
-import { EVIDENCE, SOURCES, REAL_SOURCES, BASIS_LABEL, BASIS_LEVEL, citeText, apaItems, hasUnverified, evBtn, evidenceBody, evCell, basisPill } from '../evidence.js';
+import { EVIDENCE, REAL_SOURCES, apaItems, evBtn, evidenceBody, evCell, basisPill } from '../evidence.js';
 import { refreshSecondary, startProvider, runAlertAction } from '../app.js';
 import { Visor } from './visor.js';
 import { Sound } from '../audio.js';
@@ -533,7 +533,7 @@ export const UI = {
       const text = await file.text(); let bundle = { vitals: [] }, rawRows;
       if (/\.json$/i.test(file.name) || text.trim().startsWith('{') || text.trim().startsWith('[')) {
         const j = JSON.parse(text);
-        if (Array.isArray(j)) rawRows = j; else { rawRows = j.vitals || j.readings || []; bundle.crew = j.crew; bundle.environment = j.environment ? Normalizer.environment(j.environment, 'real') : null; bundle.devices = (j.devices || []).map(d => Normalizer.device(d)); bundle.sleepActivity = (j.sleepActivity || []).map(s => Normalizer.sleepActivity(s, 'real')); }
+        if (Array.isArray(j)) rawRows = j; else { rawRows = j.vitals || j.readings || []; bundle.crew = Array.isArray(j.crew) ? j.crew.map((c, i) => Normalizer.crew(c, i)).filter(c => c.id) : undefined; bundle.environment = j.environment ? Normalizer.environment(j.environment, 'real') : null; bundle.devices = (j.devices || []).map(d => Normalizer.device(d)); bundle.sleepActivity = (j.sleepActivity || []).map(s => Normalizer.sleepActivity(s, 'real')); }
         bundle.vitals = rawRows.map(r => Adapters.adaptRestJson.vitals([r])[0]);
       } else { rawRows = parseCsv(text); bundle.vitals = rawRows.map(r => Adapters.adaptCsvRow(r)); }
       const errors = [], warnings = []; bundle.vitals.forEach((v, i) => { const r = validateVital(v, i + 1); errors.push(...r.errors); warnings.push(...r.warnings); });

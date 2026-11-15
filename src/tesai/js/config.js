@@ -1,8 +1,8 @@
 /**
  * config.js · SCHEMA, CONFIG, METRICS, LEVELS, CREDITS, ENV_META, SOURCE_LABEL
  * Single source of truth for data contracts and centralized configuration.
- * API keys are NEVER hardcoded here — load them at runtime via environment
- * variables on your proxy server.
+ * No API keys live in the browser: a real data source goes through a server-side proxy
+ * that holds the keys (see providers/remote.js).
  */
 
 export const SCHEMA = {
@@ -64,8 +64,7 @@ export const CONFIG = {
   historyWindowMin: 30,
   missionStart: '2026-10-04T00:00:00Z',
   api: {
-    baseUrl: '',
-    nasaApiKey: '',           // NEVER hardcode — use a proxy + env var
+    baseUrl: '',              // the proxy's address; empty = no remote source
     timeoutMs: 8000, retries: 2, retryBackoffMs: 800, cacheTtlMs: 30000
   },
   thresholds: {
