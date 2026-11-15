@@ -17,6 +17,7 @@ import { Visor } from './visor.js';
 import { Sound } from '../audio.js';
 import { t } from '../guidance.js';
 import { CheckinUI } from './checkin.js';
+import { Wearables } from './wearables.js';
 import { createTwin, anchorOf } from '../twin/twin.js';
 
 const VIEWS = ['overview', 'visor', 'biometrics', 'checkin', 'alerts', 'history', 'about', 'advanced'];
@@ -375,11 +376,17 @@ export const UI = {
       const rows = (State.history[id] || []).slice(-45);
       return `<div class="vwrap"><button class="vcard" data-m="${g}" data-level="${lvl}" data-fk="v:${g}"><span class="top"><span style="color:var(--color-teal)">${ICONS[m.icon]}</span><b>${m.label}</b>${pillHtml(lvl)}</span><span class="v">${text}<small>${m.unit}</small></span><svg class="chart" viewBox="0 0 280 54" width="100%" height="54" role="img" aria-label="Trend of ${m.short}: latest value ${text} ${m.unit}">${chartInner({ rows, key, W: 280, H: 54, L: 2, R: 2, T: 4, B: 4, th: CONFIG.thresholds[key], baseline: c?.baseline?.[key], labels: false })}</svg><span class="q">${q === 'ok' ? `source: ${esc(r?.source || '—')} · ${r ? fmtTime(r.timestamp) : ''}` : `${q} reading · ${r ? fmtTime(r.timestamp) : ''}`}</span></button>${_evBtn(g)}</div>`;
     }).join(''));
-    this.renderEnv();
+    this.renderEnv(); this.renderQuality(); Wearables.render();
     const s = State.sleepOf(id), gl = CONFIG.gamification.goals;
     if (!s) { setHtml($('#activity-block'), '<div class="empty">No sleep and activity data in this source.</div>'); return; }
     const hist = [...(State.sleepHistory || []), s];
     setHtml($('#activity-block'), `<div class="kv"><div><div class="k">Sleep</div><div class="v">${s.sleepHours ?? '--'}<small>h</small></div></div><div><div class="k">Quality</div><div class="v">${s.sleepQuality ?? '--'}<small>%</small></div></div><div><div class="k">Exercise</div><div class="v">${s.exerciseMin ?? '--'}<small>/${gl.exerciseMin} min</small></div></div><div><div class="k">Hobby</div><div class="v">${s.hobbyMin ?? '--'}<small>/${gl.hobbyMin} min</small></div></div></div><div class="note" style="margin-top:12px">Exercise over the last 7 days (the brightest bar is today)</div><div class="bars" role="img" aria-label="Exercise minutes per day, last 7 days">${hist.map((d, i) => `<i title="${d?.day || ''}: ${d?.exerciseMin ?? '--'} min" class="${i === hist.length - 1 ? 'now' : ''} ${d && d.exerciseMin < gl.exerciseMin * .5 ? 'low' : ''}" style="height:${clamp((d?.exerciseMin || 0) / 120 * 100, 6, 100)}%"></i>`).join('')}</div>`);
+  },
+
+  renderQuality() {
+    const rows = histRows(State.selectedId, 30);
+    const q = { ok: 0, noisy: 0, delayed: 0, missing: 0 }; rows.forEach(r => q[r.quality] = (q[r.quality] || 0) + 1);
+    setHtml($('#bio-quality'), Object.entries(q).map(([k, v]) => `<div data-level="${k !== 'ok' && v > rows.length * .1 ? 'attention' : ''}"><div class="k">${k}</div><div class="v">${v}<small>${rows.length ? round(v / rows.length * 100) : 0}%</small></div></div>`).join(''));
   },
 
   /* ===== Environment ===== */
@@ -437,8 +444,6 @@ export const UI = {
     setHtml(chart, chartInner({ rows, key, W: 900, H: 300, L: 46, R: 10, T: 10, B: 26, th, baseline: c?.baseline?.[key], bands: 'all', dec }));
     const xs = rows.filter(trusted).map(r => r[key]).filter(v => v != null), unit = SCHEMA.VitalReading[key]?.unit || '';
     setHtml($('#hist-stats'), xs.length ? `<div><div class="k">Minimum</div><div class="v">${Math.min(...xs).toFixed(dec)}<small>${unit}</small></div></div><div><div class="k">Average</div><div class="v">${(xs.reduce((a, b) => a + b, 0) / xs.length).toFixed(dec)}<small>${unit}</small></div></div><div><div class="k">Maximum</div><div class="v">${Math.max(...xs).toFixed(dec)}<small>${unit}</small></div></div><div><div class="k">Readings</div><div class="v">${xs.length}</div></div>` : '');
-    const q = { ok: 0, noisy: 0, delayed: 0, missing: 0 }; rows.forEach(r => q[r.quality] = (q[r.quality] || 0) + 1);
-    setHtml($('#hist-quality'), Object.entries(q).map(([k, v]) => `<div data-level="${k !== 'ok' && v > rows.length * .1 ? 'attention' : ''}"><div class="k">${k}</div><div class="v">${v}<small>${rows.length ? round(v / rows.length * 100) : 0}%</small></div></div>`).join(''));
     setHtml($('#hist-baseline'), c?.baseline ? Object.entries(c.baseline).map(([k, v]) => `<div><div class="k">${METRICS[k]?.short || (k === 'bpSys' ? 'Sys. BP' : k === 'bpDia' ? 'Dia. BP' : k)}</div><div class="v">${v ?? '--'}<small>${SCHEMA.VitalReading[k]?.unit || ''}</small></div></div>`).join('') : '<div class="empty" style="grid-column:1/-1">No baseline.</div>');
     setText($('#hist-dev'), String(CONFIG.thresholds.baselineDeviationPct));
   },

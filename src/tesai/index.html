@@ -34,6 +34,7 @@
 <link rel="stylesheet" href="styles/components/visor.css">
 <link rel="stylesheet" href="styles/components/checkin.css">
 <link rel="stylesheet" href="styles/components/twin.css">
+<link rel="stylesheet" href="styles/components/wearables.css">
 <link rel="stylesheet" href="styles/responsive.css">
 </head>
 <body>
@@ -201,6 +202,16 @@
         </h3>
         <div id="activity-block"></div>
       </section>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-q">
+        <h3 id="h-q"><span class="grow">Signal quality</span></h3>
+        <p class="sub">How clean the readings of the last 30 minutes were.</p>
+        <div class="kv" id="bio-quality"></div>
+      </section>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-wear">
+        <h3 id="h-wear"><span class="grow">Wearables</span></h3>
+        <p class="sub">The devices behind these readings. Press Explode to separate the parts.</p>
+        <div class="wz-grid" id="wz-grid"></div>
+      </section>
     </section>
 
     <!-- ===================== ALERTS ===================== -->
@@ -300,20 +311,14 @@
         </div>
         <div class="kv" id="hist-stats"></div>
       </section>
-      <div class="grid g2" style="margin-top:16px">
-        <section class="panel" aria-labelledby="h-q">
-          <h3 id="h-q"><span class="grow">Signal quality</span></h3>
-          <div class="kv" id="hist-quality"></div>
-        </section>
-        <section class="panel" aria-labelledby="h-bl">
-          <h3 id="h-bl">
-            <span class="grow">Your baseline</span>
-            <span data-evslot="rule.baseline"></span>
-          </h3>
-          <div class="kv" id="hist-baseline"></div>
-          <p class="note">A value is flagged as Attention if it deviates more than <b id="hist-dev">25</b>% from your baseline (except HRV).</p>
-        </section>
-      </div>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-bl">
+        <h3 id="h-bl">
+          <span class="grow">Your baseline</span>
+          <span data-evslot="rule.baseline"></span>
+        </h3>
+        <div class="kv" id="hist-baseline"></div>
+        <p class="note">A value is flagged as Attention if it deviates more than <b id="hist-dev">25</b>% from your baseline (except HRV).</p>
+      </section>
 
       <div class="page-head" style="margin-top:34px">
         <div>

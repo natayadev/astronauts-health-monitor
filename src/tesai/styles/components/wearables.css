@@ -1,0 +1,40 @@
+/* ==========================================================================
+   WEARABLES · plates with the isometric, separable (white) device drawings, inside Biometrics
+   The .iso-* drawing rules are in twin.css; colors come from shared/tokens.css.
+   ========================================================================== */
+.wz-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px }
+.wz-grid > * { min-width: 0 }
+@media (min-width: 761px) { .wz-grid .wz-plate:last-child:nth-child(odd) { grid-column: 1 / -1; width: calc(50% - 8px); justify-self: center } }
+@media (max-width: 760px) { .wz-grid { grid-template-columns: minmax(0, 1fr) } }
+
+.wz-plate {
+  margin: 0; border-radius: var(--r-lg); overflow: hidden;
+  background: color-mix(in srgb, var(--color-white) 34%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-white) 70%, transparent);
+}
+.wz-bar {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 18px 0;
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1; letter-spacing: .04em; color: var(--color-muted);
+}
+.wz-ttl { text-transform: uppercase; text-align: right }
+.wz-foot { padding: 0 18px 10px }
+.wz-ro { color: var(--color-ink); font-variant-numeric: tabular-nums; text-align: right; min-height: 1em }
+.wz-plate figcaption { padding: 0 18px 16px; font-size: var(--fs-sm); color: var(--color-muted) }
+
+/* The drawing: the same white palette as the astronaut figure */
+.wz-stage {
+  padding: 6px 10px 0; min-height: 200px;
+  --anatomy-paper: var(--twin-body); --anatomy-card: var(--twin-body); --anatomy-face: var(--color-white); --anatomy-top: var(--color-white);
+  --anatomy-shade-0: color-mix(in srgb, var(--color-deep) 17%, var(--twin-body)); --anatomy-shade-1: color-mix(in srgb, var(--color-deep) 12%, var(--twin-body));
+  --anatomy-shade-2: color-mix(in srgb, var(--color-deep) 7.5%, var(--twin-body)); --anatomy-shade-3: color-mix(in srgb, var(--color-deep) 3.5%, var(--twin-body));
+  --anatomy-hi: color-mix(in srgb, var(--color-deep) 82%, var(--twin-body)); --anatomy-mid: color-mix(in srgb, var(--color-deep) 52%, var(--twin-body));
+  --anatomy-lo: color-mix(in srgb, var(--color-deep) 34%, var(--twin-body)); --anatomy-faint: color-mix(in srgb, var(--color-deep) 19%, var(--twin-body));
+  --anatomy-lit: var(--color-teal-ink); --anatomy-lit-top: color-mix(in srgb, var(--color-teal) 16%, var(--color-white)); --anatomy-lit-shade: color-mix(in srgb, var(--color-teal) 30%, var(--color-white));
+  --anatomy-dot: var(--color-deep); --anatomy-halo: var(--color-deep); --anatomy-halo-opacity: .2; --anatomy-weight: .75px;
+  --anatomy-red: var(--color-crit); --anatomy-green: var(--color-ok); --anatomy-blue: var(--color-sensor);
+}
+.wear-svg { display: block; width: 100%; height: auto; overflow: visible }
+.wear-svg [data-layer] { transition: opacity .25s var(--ease) }
+.wz-stage.dim [data-layer]:not(.hl) { opacity: .25 }
+@media (prefers-reduced-motion: reduce) { .wear-svg [data-layer] { transition: none } }
+html[data-motion="reduced"] .wear-svg [data-layer] { transition: none }
