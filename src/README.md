@@ -73,6 +73,10 @@ Six cabin metrics are tracked with a trend, a reference range and a status: COâ‚
 
 `prefers-reduced-motion` plus a switch to turn off decorative animations, visible focus, stable focus in lists, a drawer with managed focus, SVG icons, and status shown with an icon and text. Below 1000 px the twin moves to the top, the cards become a grid and the navigation moves to a bottom bar.
 
+## Language (EN | ES)
+
+The **EN | ES** button in the top bar switches the whole interface between English and Spanish. The choice is remembered in the browser. English is the source language; Spanish is applied at runtime by translating the rendered text with a dictionary (`ES_DICT` for exact texts and `ES_PATTERNS` for texts with numbers or names in them, in the I18N section of `index.html`). A text without an entry simply stays in English, so to fix or add a Spanish text, edit those two tables. Names, units and the official challenge title are intentionally not translated.
+
 ## Data values
 
 Internal enum values (levels, reading quality, device status, event types) are English identifiers, for example `attention`, `surgeon`, `noisy`, `delayed`, `missing`, `tachycardia`. CSV and JSON imports must use the same values.

@@ -131,7 +131,7 @@ svg{display:block}
 .brand{display:flex; align-items:center; gap:10px}
 .brand-mark{width:30px; height:30px; border-radius:50%; background:var(--grad-brand); display:grid; place-items:center; color:var(--white)}
 .brand-name{font-weight:700; font-size:var(--fs-lg); letter-spacing:-.01em}
-.tabs{display:flex; flex-wrap:wrap; gap:4px; margin-left:8px}
+.tabs{display:flex; flex-wrap:nowrap; white-space:nowrap; gap:4px; margin-left:8px}
 .tab{display:inline-flex; align-items:center; gap:7px; border:0; background:transparent; color:var(--muted); padding:9px 16px; min-height:40px; border-radius:var(--r-pill); font-size:var(--fs-md); font-weight:600; transition:background-color .2s var(--ease),color .2s var(--ease),scale .12s var(--ease)}
 .tab:hover{background:color-mix(in srgb,var(--teal) 8%,transparent); color:var(--ink)}
 .tab:active{scale:.96}
@@ -152,6 +152,9 @@ svg{display:block}
 .menu-item .avatar{width:26px; height:26px; background:var(--deep)}
 .menu-item .t{display:flex; flex-direction:column; line-height:1.2; flex:1} .menu-item .t b{font-size:var(--fs-sm); font-weight:600} .menu-item .t span{font-size:var(--fs-xs); color:var(--muted)}
 .src{display:inline-flex; align-items:center; gap:7px; padding:8px 12px; border-radius:var(--r-pill); font-size:var(--fs-xs); font-weight:700; letter-spacing:.04em; color:var(--warn-ink); background:color-mix(in srgb,var(--warn) 20%,transparent); border:1px solid color-mix(in srgb,var(--warn) 45%,transparent); white-space:nowrap}
+.seg.lang button{padding:6px 10px; font-family:var(--font-mono); font-size:var(--fs-xs); letter-spacing:.02em}
+@media (max-width:460px){.brand-name{display:none}}
+.src .sm{display:none}
 .src.real{color:var(--deep); background:color-mix(in srgb,var(--deep) 10%,transparent); border-color:color-mix(in srgb,var(--deep) 30%,transparent)}
 .live{display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:var(--r-pill); background:color-mix(in srgb,var(--teal) 10%,transparent); color:var(--deep); font-size:var(--fs-sm); font-weight:600; white-space:nowrap}
 .ping{position:relative; width:10px; height:10px; flex:none}
@@ -282,8 +285,8 @@ input:focus-visible,select:focus-visible{outline:none; border-color:var(--teal);
 /* inside the stage (which is scaled) the text is slightly larger to stay legible */
 #stage .metric .lbl{font-size:15px} #stage .metric .sub{font-size:14px} #stage .metric .pill{font-size:12.5px; padding:4px 11px} #stage .metric .val b{font-size:42px} #stage .metric .val small{font-size:17px} #stage .metric .ico{width:30px; height:30px}
 .hint{font-size:15px!important}
-@media (max-width:1240px){.live{display:none}}
-@media (max-width:1120px){.who-text span{display:none} .tab{padding:9px 12px} .src .full{display:none}}
+@media (max-width:1400px){.live{display:none}}
+@media (max-width:1120px){.who-text span{display:none} .tab{padding:9px 12px} .src .lg{display:none} .src .sm{display:inline}}
 .hint{position:absolute; left:96px; top:716px; display:flex; align-items:center; gap:8px; font-size:var(--fs-md); color:var(--muted); white-space:nowrap}
 .hint i{width:6px; height:6px; border-radius:50%; background:var(--teal)}
 
@@ -432,7 +435,7 @@ input:focus-visible,select:focus-visible{outline:none; border-color:var(--teal);
 @media (max-width:1000px){
   .nav-wrap{padding:8px 12px 0} .nav{padding:6px 6px 6px 14px; gap:8px}
   .tabs{display:none} .dock{display:flex}
-  .src{padding:6px 10px} .src .full{display:none}
+  .src{padding:6px 10px} .src .lg{display:none} .src .sm{display:inline}
   .who-text span{display:none}
   .live{display:none}
   .view{padding:16px 14px 120px} .view-wide{padding:0 0 24px}
@@ -496,6 +499,7 @@ html[data-motion="reduced"] .toast{animation:none}
       </div>
       <div class="spacer"></div>
       <span class="src" id="badge-source" role="status"></span>
+      <div class="seg lang" id="lang" role="group" aria-label="Language"><button data-lang="en" lang="en" aria-label="English" aria-pressed="true">EN</button><button data-lang="es" lang="es" aria-label="Español" aria-pressed="false">ES</button></div>
       <div class="live" id="live" data-state="live"><span class="ping" aria-hidden="true"></span><span id="live-label">Live</span><span class="tag" id="live-rate">0,5 Hz</span></div>
       <div class="who" id="bell-wrap">
         <button class="btn icon-btn" id="bell" aria-haspopup="true" aria-expanded="false" aria-controls="notif-pop" aria-label="Active alerts">
@@ -695,7 +699,7 @@ html[data-motion="reduced"] .toast{animation:none}
           <h3 id="h-source"><span class="grow">Data source</span></h3>
           <label class="fld"><span>Active source</span><select id="set-source"><option value="simulated">Simulated (default)</option><option value="remote">Remote (API, not connected yet)</option><option value="file">Imported file</option></select></label>
           <p class="note" id="source-status" role="status"></p>
-          <div class="code" id="provider-info" tabindex="0" aria-label="Provider technical details"></div>
+          <div class="code" data-i18n="off" id="provider-info" tabindex="0" aria-label="Provider technical details"></div>
         </section>
         <section class="panel" aria-labelledby="h-demo">
           <h3 id="h-demo"><span class="grow">Demo mode</span></h3>
@@ -727,7 +731,7 @@ html[data-motion="reduced"] .toast{animation:none}
         <p class="note">Illustrative values defined in <span class="mono">CONFIG.thresholds</span>. They are not validated clinical criteria: a medical source is needed before using them on a real mission. They are changed in code, not from the interface.</p>
         <div style="overflow:auto"><table class="tbl" id="thr-table"></table></div>
       </section>
-      <section class="panel" style="margin-top:16px" aria-labelledby="h-schema"><h3 id="h-schema"><span class="grow">Data schema</span></h3><div class="code" id="schema-view" tabindex="0" aria-label="Data schema"></div></section>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-schema"><h3 id="h-schema"><span class="grow">Data schema</span></h3><div class="code" data-i18n="off" id="schema-view" tabindex="0" aria-label="Data schema"></div></section>
     </section>
   </main>
 
@@ -999,7 +1003,7 @@ class SimulatedProvider extends DataProvider {
         devices: [
           { id: `${c.id}-patch`,  astronautId: c.id, name: 'Biometric patch', type: 'patch',  status: 'connected', battery: 40 + r() * 60, signal: 80 + r() * 20, provides: ['hr', 'resp', 'hrv', 'temp'] },
           { id: `${c.id}-wristband`, astronautId: c.id, name: 'SpO₂/BP wristband',   type: 'wristband', status: 'connected', battery: 20 + r() * 80, signal: 70 + r() * 30, provides: ['spo2', 'bpSys', 'bpDia'] },
-          { id: `${c.id}-helmet`,   astronautId: c.id, name: 'Sensor de helmet',   type: 'helmet',   status: 'connected', battery: 60 + r() * 40, signal: 85 + r() * 15, provides: [] }
+          { id: `${c.id}-helmet`,   astronautId: c.id, name: 'Helmet sensor',   type: 'helmet',   status: 'connected', battery: 60 + r() * 40, signal: 85 + r() * 15, provides: [] }
         ],
         disconnectUntil: {}
       };
@@ -1348,11 +1352,11 @@ const State = {
   env: null, envEval: null, devicesBy: {}, sleepBy: {}, sleepHistory: [],
   alerts: [], alertIndex: {}, cond: {}, uplink: [], toastByAlert: {},
   view: 'overview', alertFilter: 'active', alertScope: 'all', sound: false, demo: true, motion: 'auto', histPaused: false, selMetric: null, drawerWin: 30,
-  gam: defaultGam(), unsub: [], startedAt: Date.now(), sourceNote: '', refreshing: false,
+  gam: defaultGam(), unsub: [], startedAt: Date.now(), sourceNote: '', refreshing: false, lang: 'en',
   devicesOf(id) { return this.devicesBy[id] || []; },
   sleepOf(id) { return this.sleepBy[id] || null; },
-  save() { try { localStorage.setItem(CONFIG.storageKey, JSON.stringify({ gam: this.gam, sound: this.sound, demo: this.demo, motion: this.motion, seed: CONFIG.seed, tickMs: CONFIG.tickMs, dataSource: CONFIG.dataSource })); } catch (e) { } },
-  load() { try { const s = JSON.parse(localStorage.getItem(CONFIG.storageKey) || 'null'); if (!s) return; if (s.gam) this.gam = { ...defaultGam(), ...s.gam }; this.sound = !!s.sound; if (s.demo === false) this.demo = false; if (s.motion) this.motion = s.motion; if (s.seed) CONFIG.seed = s.seed; if (s.tickMs) CONFIG.tickMs = s.tickMs; if (s.dataSource && s.dataSource !== 'file') CONFIG.dataSource = s.dataSource; } catch (e) { } }
+  save() { try { localStorage.setItem(CONFIG.storageKey, JSON.stringify({ gam: this.gam, sound: this.sound, demo: this.demo, motion: this.motion, seed: CONFIG.seed, tickMs: CONFIG.tickMs, dataSource: CONFIG.dataSource, lang: this.lang })); } catch (e) { } },
+  load() { try { const s = JSON.parse(localStorage.getItem(CONFIG.storageKey) || 'null'); if (!s) return; if (s.gam) this.gam = { ...defaultGam(), ...s.gam }; this.sound = !!s.sound; if (s.demo === false) this.demo = false; if (s.motion) this.motion = s.motion; if (s.seed) CONFIG.seed = s.seed; if (s.tickMs) CONFIG.tickMs = s.tickMs; if (s.dataSource && s.dataSource !== 'file') CONFIG.dataSource = s.dataSource; if (s.lang === 'es' || s.lang === 'en') this.lang = s.lang; } catch (e) { } }
   // Thresholds are NOT saved in the browser: they live only in CONFIG (read-only from the interface).
 };
 
@@ -1612,6 +1616,839 @@ async function refreshSecondary() {
 }
 
 /* =============================================================================
+   (f) I18N · English is the source language. Spanish is applied at runtime by translating the rendered DOM
+   (text nodes and a few attributes) with the dictionary below. A text with no entry simply stays in English.
+   To add or fix a Spanish text, edit ES_DICT (exact text) or ES_PATTERNS (text with numbers or names in it).
+   ============================================================================= */
+/*I18N-DATA-START*/
+const ES_DICT = {
+"% from its baseline (except HRV).": "% de su línea base (excepto HRV).",
+"(initial demo streak, simulated)": "(racha inicial de demostración, simulada)",
+"(local time)": "(hora local)",
+"(not configured)": "(sin configurar)",
+"+15 min exercise": "+15 min ejercicio",
+"+15 min hobby": "+15 min de hobby",
+"+15 min of exercise.": "+15 min de ejercicio.",
+". They are not validated clinical criteria: a medical source is needed before using them on a real mission. They are changed in code, not from the interface.": ". No son criterio clínico validado: hace falta una fuente médica antes de usarlos en una misión real. Se cambian en el código, no desde la interfaz.",
+"30 min of hobby or recreation": "30 min de hobby o recreación",
+"360° view": "Vista 360°",
+"A numeric field may be null (missing data). quality describes the whole reading.": "Un campo numérico puede ser null (dato faltante). quality describe la lectura completa.",
+"A simulated notice was logged to the flight surgeons over the ground link. Repeat the measurement in a few minutes and check that the sensor is well placed.": "Se registró un aviso simulado a cirujanos de vuelo por el enlace con Tierra. Repetí la medición en unos minutos y confirmá que el sensor esté bien colocado.",
+"A value is flagged as Attention if it deviates more than": "Un valor se marca como Atención si se desvía más de",
+"API DATA": "DATOS DE API",
+"Abdominal · core": "Abdominal · núcleo",
+"About": "Acerca de",
+"About Tesai": "Acerca de Tesai",
+"Acknowledge": "Reconocer",
+"Acknowledge non-critical": "Reconocer los no críticos",
+"Acknowledged": "Reconocida",
+"Action not available": "Acción no disponible",
+"Active": "Activa",
+"Active alerts": "Avisos activos",
+"Active source": "Fuente activa",
+"Advanced": "Avanzado",
+"Airways": "Vías respiratorias",
+"Alert flight surgeons": "Avisar a cirujanos de vuelo",
+"Alert surgeons": "Avisar a cirujanos",
+"Alert surgeons (outside this)": "Avisar a cirujanos (fuera de esto)",
+"Alerts": "Avisos",
+"Alerts that need attention": "Avisos que requieren atención",
+"All": "Todas",
+"All crew": "Todo el equipo",
+"All good: no pending steps for now.": "Todo en orden: sin pasos pendientes por ahora.",
+"All in range": "Todo en rango",
+"All of today's goals are complete.": "Todos los objetivos de hoy completados.",
+"All vital signs for the selected person, their recent trend and the quality of each reading. Tap a card to open its detail.": "Todos los signos vitales de la persona elegida, su tendencia reciente y la calidad de cada lectura. Tocá una tarjeta para abrir el detalle.",
+"All your devices above 50%": "Todos tus dispositivos arriba del 50%",
+"Appearance and alerts": "Apariencia y avisos",
+"Atmosphere and radiation in the habitat. Ranges come from public NASA material and are illustrative; see About for the sources. Out-of-range values raise alerts in Diagnostics.": "Atmósfera y radiación en el hábitat. Los rangos salen de material público de NASA y son ilustrativos; mirá Acerca de para las fuentes. Los valores fuera de rango generan avisos en Diagnóstico.",
+"Attention": "Atención",
+"Attention (outside normal)": "Atención (fuera de normal)",
+"Average": "Promedio",
+"Avg": "Prom",
+"BP": "PA",
+"Baseline": "Línea base",
+"Best streak:": "Mejor racha:",
+"Biometric patch": "Parche biométrico",
+"Biometrics": "Biometría",
+"Blood oxygen": "Oxígeno en sangre",
+"Blood oxygen · SpO₂": "Oxígeno en sangre · SpO₂",
+"Blood pressure": "Presión arterial",
+"Built with Claude": "Hecho con Claude",
+"CADET": "CADETE",
+"COMMANDER": "COMANDANTE",
+"CONFIG.api.baseUrl is empty: configure the endpoint or proxy.": "CONFIG.api.baseUrl vacío: configurá el endpoint o proxy.",
+"CO₂ spike": "Pico de CO₂",
+"Cabin": "Cabina",
+"Cabin T°": "T° cabina",
+"Cabin details": "Detalle de cabina",
+"Cabin environment": "Entorno de cabina",
+"Cabin pressure": "Presión de cabina",
+"Cardiac · left ventricle": "Cardíaco · ventrículo izquierdo",
+"Charged sensors": "Sensores cargados",
+"Check the ventilation and the cabin equipment. If the value stays out of range, notify Earth.": "Revisá la ventilación y el equipo de cabina. Si el valor sigue fuera de rango, avisá a Tierra.",
+"Choose a CSV or JSON file": "Elegir archivo CSV o JSON",
+"Choose file": "Elegir archivo",
+"Circulatory": "Circulatorio",
+"Circulatory · peripheral": "Circulatorio · periférico",
+"Close detail": "Cerrar detalle",
+"Commander": "Comandante",
+"Complete 60 min of exercise": "Completar 60 min de ejercicio",
+"Connected": "Conectado",
+"Context": "Contexto",
+"Core temperature": "Temperatura central",
+"Crew member and actions": "Tripulante y acciones",
+"Crew overview": "Resumen de la tripulación",
+"Crew performance zone 20–25 °C; operating limit 18–27 °C.": "Zona de desempeño de la tripulación 20–25 °C; límite operativo 18–27 °C.",
+"Crew performance zone 30–60 %; operating limit 25–75 %.": "Zona de desempeño de la tripulación 30–60 %; límite operativo 25–75 %.",
+"Critical": "Crítica",
+"Critical alerts are acknowledged one at a time.": "Los avisos críticos se reconocen de a uno.",
+"DATA": "SIMULADOS",
+"Daily habit goals. Completing all of them keeps the streak going.": "Objetivos diarios de hábitos. Cumplirlos todos mantiene la racha.",
+"Daily streak bonus": "Bonus de racha diaria",
+"Daily training": "Entrenamiento diario",
+"Data schema": "Esquema de datos",
+"Data source": "Fuente de datos",
+"Data source, import and export, simulation and appearance. Clinical thresholds are read-only.": "Fuente de datos, importación y exportación, simulación y apariencia. Los umbrales clínicos son de solo lectura.",
+"Demo mode": "Modo demostración",
+"Detail": "Detalle",
+"Developer tools: data source, import and export, demo mode, appearance, thresholds and schema. This view is not in the main navigation; open it with": "Herramientas para desarrollo: fuente de datos, importación y exportación, modo demostración, apariencia, umbrales y esquema. Esta vista no está en la navegación principal; se abre con",
+"Dia. BP": "PA diast.",
+"Diagnostics": "Diagnóstico",
+"Diastolic BP": "PA diastólica",
+"Diastolic BP (mmHg)": "PA diastólica (mmHg)",
+"Diastolic pressure": "Presión diastólica",
+"Disconnect sensor": "Desconectar sensor",
+"Disconnected": "Desconectado",
+"Done": "Listo",
+"Doubtful reading": "Lectura dudosa",
+"Download CSV template": "Descargar plantilla CSV",
+"Drag a": "Arrastrá un archivo",
+"Drink water: a guideline of 2 L per day.": "Tomá agua: objetivo orientativo de 2 L por día.",
+"ESCALATED": "ESCALADO",
+"Enable simulated events": "Habilitar eventos simulados",
+"Environment ·": "Entorno ·",
+"Error reading the file:": "Error al leer el archivo:",
+"Escalated": "Escalada",
+"Escalated to the flight surgeons over the ground link (simulated).": "Escalado a los cirujanos de vuelo por el enlace con Tierra (simulado).",
+"Event injected": "Evento inyectado",
+"Event not accepted": "Evento no aceptado",
+"Exercise": "Ejercicio",
+"Exercise minutes per day, last 7 days": "Minutos de ejercicio por día, últimos 7 días",
+"Exercise over the last 7 days (the brightest bar is today)": "Ejercicio de los últimos 7 días (la barra más clara es hoy)",
+"Exercise session": "Sesión de ejercicio",
+"Export history": "Exportar historial",
+"Export history (JSON)": "Exportar historial (JSON)",
+"Export report": "Exportar informe",
+"FILE DATA": "DATOS DE ARCHIVO",
+"Fever": "Fiebre",
+"Filter alerts": "Filtrar avisos",
+"Filter alerts by state": "Filtrar avisos por estado",
+"Flight engineer": "Ingeniero de vuelo",
+"Follows a smooth circadian curve. A sustained deviation weighs more than an isolated value.": "Sigue una curva circadiana suave. Una desviación sostenida pesa más que un valor aislado.",
+"Fonts: Plus Jakarta Sans and JetBrains Mono, under the SIL Open Font License 1.1.": "Tipografías: Plus Jakarta Sans y JetBrains Mono, bajo la licencia SIL Open Font License 1.1.",
+"Free time": "Tiempo libre",
+"General information, not a diagnosis.": "Información general, no es un diagnóstico.",
+"Goal streak": "Racha de objetivos",
+"Ground link": "Enlace con Tierra",
+"HOW TO CONNECT REAL DATA": "CÓMO CONECTAR DATOS REALES",
+"HR": "FC",
+"Health and environment": "Salud y entorno",
+"Heart rate": "Frecuencia cardíaca",
+"Heart rate (bpm)": "Frecuencia cardíaca (bpm)",
+"Heart rate variability": "Variabilidad cardíaca",
+"Helmet sensor": "Sensor de casco",
+"History": "Historial",
+"Hum.": "Hum.",
+"Humidity": "Humedad",
+"Hydration": "Hidratación",
+"Hydration logged": "Hidratación registrada",
+"Hypertension": "Hipertensión",
+"Hypoxia": "Hipoxia",
+"I drank water (+10)": "Registré agua (+10)",
+"ISS Live telemetry client example (Lightstreamer)": "Ejemplo de cliente de telemetría ISS Live (Lightstreamer)",
+"ISS cabin atmosphere design parameters (NASA NTRS)": "Parámetros de diseño de la atmósfera de la cabina de la ISS (NASA NTRS)",
+"ISS cabin design range around the nominal 101.3 kPa.": "Rango de diseño de la cabina de la ISS en torno a los 101,3 kPa nominales.",
+"ISS cabin design range for oxygen partial pressure.": "Rango de diseño de la cabina de la ISS para la presión parcial de oxígeno.",
+"ISS effective dose is typically 0.2–0.5 mSv per day (≈ 8–21 µSv/h). NASA career limit: 600 mSv.": "La dosis efectiva en la ISS suele ser de 0,2–0,5 mSv por día (≈ 8–21 µSv/h). Límite de carrera de NASA: 600 mSv.",
+"Illustrative values defined in": "Valores ilustrativos definidos en",
+"Import data": "Importar datos",
+"Imported file": "Archivo importado",
+"In range": "En rango",
+"Interval (ms)": "Intervalo (ms)",
+"It is validated against the schema before use. File data is labeled \"unverified\".": "Se valida contra el esquema antes de usarse. Los datos de archivo se rotulan \"sin verificar\".",
+"JSC 20584: Spacecraft Maximum Allowable Concentrations (Rev C)": "JSC 20584: Concentraciones máximas admisibles en naves espaciales (Rev C)",
+"LEGEND": "LEYENDA",
+"LIEUTENANT": "TENIENTE",
+"Language": "Idioma",
+"Last 7 days": "Últimos 7 días",
+"Latest": "Último",
+"Level key": "Leyenda de niveles",
+"Live": "En vivo",
+"Loading…": "Cargando…",
+"Logged": "Registrado",
+"Main": "Principal",
+"Max": "Máx",
+"Maximum": "Máximo",
+"Medical officer": "Oficial médica",
+"Metric": "Métrica",
+"Min": "Mín",
+"Minimum": "Mínimo",
+"Mission specialist": "Especialista de misión",
+"Missions": "Misiones",
+"Missions and streak": "Misiones y racha",
+"Monitored crew": "Tripulantes monitoreados",
+"Monitored crew members": "Tripulantes monitoreados",
+"Monitoring": "Monitoreo",
+"NASA ISS ops target: below 3 mmHg (≈ 3,950 ppm). Older 180-day limit: 5.3 mmHg (≈ 7,000 ppm).": "Objetivo operativo de la ISS según NASA: menos de 3 mmHg (≈ 3.950 ppm). Límite anterior para 180 días: 5,3 mmHg (≈ 7.000 ppm).",
+"NASA technical brief: ECLSS (temperature, humidity, CO₂)": "Resumen técnico de NASA: ECLSS (temperatura, humedad, CO₂)",
+"NASA technical brief: habitable atmosphere": "Resumen técnico de NASA: atmósfera habitable",
+"NASA technical brief: radiation protection": "Resumen técnico de NASA: protección contra la radiación",
+"Needs attention": "Requiere atención",
+"Neural · autonomic system": "Neural · sistema autónomo",
+"New alert": "Nuevo aviso",
+"Next step": "Siguiente paso",
+"No achievements yet. Complete a mission or log a habit.": "Todavía no hay logros. Completá una misión o registrá un hábito.",
+"No acknowledged alerts are waiting to be resolved.": "No hay avisos reconocidos pendientes de resolverse.",
+"No active alerts": "Sin avisos activos",
+"No active alerts.": "Sin avisos activos.",
+"No active alerts. Each out-of-range condition appears once and closes by itself when it returns to normal.": "No hay avisos activos. Cada condición que salga de rango aparece una sola vez y se cierra sola cuando vuelve a la normalidad.",
+"No active non-critical alerts": "No hay avisos no críticos activos",
+"No active non-critical alerts to snooze": "No hay avisos no críticos activos para posponer",
+"No alert has been resolved yet.": "Todavía no se resolvió ningún aviso.",
+"No alerts yet.": "Sin avisos todavía.",
+"No baseline.": "Sin línea base.",
+"No data": "Sin datos",
+"No data for": "Sin datos de",
+"No devices in this source.": "Sin dispositivos en esta fuente.",
+"No environment data in this source.": "Sin datos de entorno en esta fuente.",
+"No environment data.": "Sin datos de entorno.",
+"No file loaded. Use \"Import data\" in System.": "No hay archivo cargado. Usá \"Importar datos\" en Sistema.",
+"No reading belongs to a real person.": "Ninguna lectura corresponde a una persona real.",
+"No role in file": "Sin rol en archivo",
+"No sleep and activity data in this source.": "Sin datos de sueño y actividad en esta fuente.",
+"No trusted readings in this window": "Sin lecturas confiables en esta ventana",
+"Normal": "Normal",
+"Normal band": "Banda normal",
+"Not acknowledged for over a minute.": "Sin reconocer hace más de un minuto.",
+"Not enough data in this window": "Sin datos suficientes en la ventana",
+"Not enough rest": "Descanso insuficiente",
+"Nothing is snoozed.": "No hay nada pospuesto.",
+"Notices": "Avisos legales",
+"Now": "Ahora",
+"OFFICER": "OFICIAL",
+"One alert per condition, with a lifecycle: active, acknowledged, resolved. Sensor problems are shown separately from health ones.": "Un aviso por condición, con ciclo de vida: activa, reconocida, resuelta. Los problemas de sensores se muestran aparte de los de salud.",
+"Optimal rest": "Descanso óptimo",
+"Overview": "Resumen",
+"Oxygen (ppO₂)": "Oxígeno (ppO₂)",
+"Partial data": "Datos parciales",
+"Partial or no data": "Datos parciales o ausentes",
+"Pause": "Pausar",
+"Peripheral saturation measured by the optical sensor. A noisy reading can show low values without a real problem, which is why it does not raise alerts.": "Saturación periférica medida por el sensor óptico. Una lectura ruidosa puede mostrar valores bajos sin que haya un problema real: por eso no dispara avisos.",
+"Personal baseline": "Línea base personal",
+"Pick a vital sign or a point on the body to open its history": "Elegí un signo vital o un punto del cuerpo para abrir su historial",
+"Points": "Puntos",
+"Points and streak": "Puntos y racha",
+"Points reward real habits: exercise, rest, free time and charged sensors. Acknowledging an alert does not earn points.": "Los puntos premian hábitos reales: ejercicio, descanso, tiempo libre y sensores cargados. Reconocer un aviso no suma puntos.",
+"Press.": "Pres.",
+"Pressure": "Presión",
+"Provider technical details": "Detalle técnico del proveedor",
+"Pulmonary · both lobes": "Pulmonar · lóbulos bilaterales",
+"Quality": "Calidad",
+"READ-ONLY": "SOLO LECTURA",
+"RR": "FR",
+"Rad.": "Rad.",
+"Radiation": "Radiación",
+"Rank": "Rango",
+"Reading": "Leyendo",
+"Reading file": "Leyendo archivo",
+"Readings": "Lecturas",
+"Recent achievements": "Logros recientes",
+"Recent series with the traffic-light bands and the personal baseline. Doubtful readings are marked with an empty circle and do not raise alerts. All times are local.": "Serie reciente con las bandas del semáforo y la línea base personal. Las lecturas dudosas se marcan con un círculo vacío y no generan avisos. Todas las horas son locales.",
+"Recharge": "Recargar",
+"Recharge sensor": "Recargar sensor",
+"Reconnect": "Reconectar",
+"Reduce decorative animations": "Reducir animaciones decorativas",
+"Reference range": "Rango de referencia",
+"Reminder": "Recordatorio",
+"Reminder resolved:": "Recordatorio resuelto:",
+"Reminders": "Recordatorios",
+"Remote (API, not connected yet)": "Remota (API, todavía sin conectar)",
+"Remote source active.": "Fuente remota activa.",
+"Repeat the measurement in a few minutes with the sensor well placed. If the value stays out of range, notify Earth over the link.": "Repetí la medición en unos minutos con el sensor bien colocado. Si el valor sigue fuera de rango, avisá a Tierra por el enlace.",
+"Replaying": "Reproduciendo",
+"Report exported": "Informe exportado",
+"Report generated by Tesai (prototype). Simulated data does not belong to real people and is not a diagnosis.": "Informe generado por Tesai (prototipo). Los datos simulados no corresponden a personas reales ni son un diagnóstico.",
+"Reset points and streak": "Reiniciar puntos y racha",
+"Reset points, streak and missions?": "¿Reiniciar puntos, racha y misiones?",
+"Resolved": "Resuelta",
+"Respiration": "Respiración",
+"Respiration (rpm)": "Respiración (rpm)",
+"Restart simulation": "Reiniciar simulación",
+"Resting rate. Brief peaks usually match physical activity or stress; what matters is how long they last and how far they are from the personal baseline.": "Frecuencia en reposo. Los picos breves suelen coincidir con actividad física o estrés; lo que importa es cuánto dura y qué tan lejos queda de la línea base personal.",
+"Resting respiratory rate. It rises with exercise and with high CO₂ levels in the cabin.": "Frecuencia respiratoria en reposo. Sube con el ejercicio y con niveles altos de CO₂ en cabina.",
+"Resume": "Reanudar",
+"Review of radiation dose on the ISS (PubMed Central)": "Revisión de la dosis de radiación en la ISS (PubMed Central)",
+"SIMULATED": "SIMULADOS",
+"SIMULATED DATA": "DATOS SIMULADOS",
+"Scan complete": "Escaneo completo",
+"Scan system": "Escanear sistema",
+"Scanning…": "Escaneando…",
+"Sections": "Secciones",
+"Seed": "Semilla",
+"Selected person": "Persona elegida",
+"Sensor": "Sensor",
+"Sensor / reminder": "Sensor / recordatorio",
+"Sensor disconnected": "Sensor desconectado",
+"Sensor recharged": "Sensor recargado",
+"Sensor reconnected": "Sensor reconectado",
+"Sensors": "Sensores",
+"Sensors and reminders": "Sensores y recordatorios",
+"Signal quality": "Calidad de señal",
+"Simulated": "Simulado",
+"Simulated (default)": "Simulada (activa por defecto)",
+"Simulated · notice": "Simulado · aviso",
+"Simulated · notice delivered": "Simulado · aviso entregado",
+"Simulation restarted": "Simulación reiniciada",
+"Skip to content": "Saltar al contenido",
+"Sleep": "Sueño",
+"Sleep and activity": "Sueño y actividad",
+"Sleep at least 7 h": "Dormir al menos 7 h",
+"Snooze non-critical": "Posponer no críticos",
+"Snoozed": "Pospuesta",
+"Sorted by priority:": "Ordenados por prioridad:",
+"Sound on critical alerts": "Sonido en avisos críticos",
+"Source changed": "Fuente cambiada",
+"Source not available": "Fuente no disponible",
+"Sources for the cabin ranges": "Fuentes de los rangos de cabina",
+"SpO₂/BP wristband": "Pulsera SpO₂/PA",
+"Streak": "Racha",
+"Sys. BP": "PA sist.",
+"System": "Sistema",
+"System guidance, not a medical diagnosis.": "Orientación del sistema, no es un diagnóstico médico.",
+"Systolic / diastolic pressure. It changes with posture, hydration and exercise; it is compared with each person's baseline.": "Presión sistólica / diastólica. Cambia con la postura, la hidratación y el ejercicio; se compara con la línea base de cada persona.",
+"Systolic BP": "PA sistólica",
+"Systolic BP (mmHg)": "PA sistólica (mmHg)",
+"Systolic pressure": "Presión sistólica",
+"Tachycardia": "Taquicardia",
+"Temperature": "Temperatura",
+"Temperature (°C)": "Temperatura (°C)",
+"The cabin environment ranges come from public NASA material. They are illustrative: check them against the current documents before relying on any value.": "Los rangos del entorno de cabina salen de material público de NASA. Son ilustrativos: contrastalos con los documentos vigentes antes de confiar en cualquier valor.",
+"The file could not be used as a source.": "No se pudo usar el archivo como fuente.",
+"The provider returned no crew": "El proveedor no devolvió tripulación",
+"There are no trusted readings yet.": "No hay lecturas confiables todavía.",
+"They wake up again if the condition is still there.": "Vuelven a sonar si la condición sigue.",
+"This data comes from outside and has not been verified by Tesai.": "Los datos vienen de afuera y no fueron verificados por Tesai.",
+"This data source does not accept that action.": "Esta fuente de datos no acepta esa acción.",
+"Time to exercise": "Hora de ejercitar",
+"Time window": "Ventana de tiempo",
+"Today's missions": "Misiones de hoy",
+"Top rank reached": "Rango máximo alcanzado",
+"Traffic-light thresholds": "Umbrales del semáforo",
+"Trend": "Evolución",
+"Trend chart": "Gráfico de evolución",
+"UNVERIFIED": "SIN VERIFICAR",
+"UNVERIFIED DATA": "DATOS SIN VERIFICAR",
+"Unacknowledged": "Sin reconocer",
+"Unverified": "Sin verificar",
+"Use as data source": "Usar como fuente de datos",
+"Using simulated data with seed": "Usando datos simulados con semilla",
+"Validation errors": "Errores de validación",
+"Variability between heartbeats (RMSSD). It is naturally very variable, so it is not compared with the baseline like the others.": "Variabilidad entre latidos (RMSSD). Es naturalmente muy variable, por eso no se compara con la línea base como las demás.",
+"View alert": "Ver aviso",
+"View all alerts": "Ver todos los avisos",
+"View missions and streak": "Ver misiones y racha",
+"Vital sign": "Signo vital",
+"Vital signs": "Signos vitales",
+"Wake now": "Reactivar ya",
+"Weak sensor signal": "Señal débil del sensor",
+"Weak signal": "Señal débil",
+"Which crew members": "Qué tripulantes",
+"Window": "Ventana",
+"With demo mode on, events can be injected into the simulation to test alerts. With real or file data, events are not available.": "Con el modo activo se pueden inyectar eventos en la simulación para probar avisos. Con datos reales o de archivo, los eventos no están disponibles.",
+"[Tesai] source not available:": "[Tesai] fuente no disponible:",
+"alert": "aviso",
+"alerts": "avisos",
+"array of metrics it provides (e.g. [\"hr\",\"resp\"])": "array de métricas que aporta (ej. [\"hr\",\"resp\"])",
+"body temperature (core)": "temperatura corporal (central)",
+"cabin": "cabina",
+"critical": "crítico",
+"critical,": "crítica,",
+"days": "días",
+"delayed": "retrasada",
+"delayed reading": "lectura retrasada",
+"delivered": "entregado",
+"delivered (simulated)": "entregado (simulado)",
+"diastolic pressure": "presión diastólica",
+"doubtful reading": "lectura dudosa",
+"elevated": "elevado",
+"file here": "acá",
+"free-form object (optional)": "objeto libre (opcional)",
+"health and environment,": "salud y entorno,",
+"heart rate": "frecuencia cardíaca",
+"heart rate variability (RMSSD)": "variabilidad cardíaca (RMSSD)",
+"missing": "faltante",
+"no data": "sin dato",
+"no sensors in this source": "sin sensores en esta fuente",
+"no signal": "sin señal",
+"noisy": "ruidosa",
+"number (optional)": "number (opcional)",
+"object {hr, spo2, bpSys, bpDia, temp, resp, hrv} with the typical resting values of THAT person": "objeto {hr, spo2, bpSys, bpDia, temp, resp, hrv} con los valores típicos en reposo de ESA persona",
+"ok": "ok",
+"oxygen saturation": "saturación de oxígeno",
+"peripheral": "periférico",
+"queued": "en cola",
+"reminders": "recordatorios",
+"reminders. A critical alert that stays unacknowledged for a minute is escalated. Non-critical alerts can be snoozed for 15 minutes.": "recordatorios. Un aviso crítico que queda sin reconocer durante un minuto se escala. Los no críticos se pueden posponer 15 minutos.",
+"respiratory rate": "frecuencia respiratoria",
+"sensor alert": "aviso de sensor",
+"sensor alerts": "avisos de sensores",
+"sensors,": "sensores,",
+"signal": "señal",
+"steps": "pasos",
+"string (2 letters)": "string (2 letras)",
+"string (unique)": "string (único)",
+"systolic pressure": "presión sistólica",
+"tesai-template.csv": "tesai-plantilla.csv",
+"the chart shows systolic": "el gráfico muestra la sistólica",
+"the metrics": "las métricas",
+"the selected person": "la persona elegida",
+"transmitting": "transmitiendo",
+"· the chart shows systolic": "· el gráfico muestra la sistólica"
+};
+const ES_COUNT = {"Active": "Activas", "Snoozed": "Pospuestas", "Acknowledged": "Reconocidas", "Resolved": "Resueltas", "All": "Todas"};
+const ES_PATTERNS = [
+[
+"^(.+) was made with Claude, an AI assistant by Anthropic\\. The visual design comes from Claude Design, and Claude Code helped write, review and test the code\\. Team (.+) chose what to build, directed the work and made the product decisions\\.$",
+"$1 se hizo con Claude, un asistente de IA de Anthropic. El diseño visual viene de Claude Design y Claude Code ayudó a escribir, revisar y probar el código. El equipo $2 eligió qué construir, dirigió el trabajo y tomó las decisiones de producto."
+],
+[
+"^(.+) brings an astronaut\\'s vital signs, cabin environment, alerts and daily habits into one calm view\\. It shows what needs attention first, keeps sensor problems apart from health ones, and every alert has a clear lifecycle\\.$",
+"$1 reúne los signos vitales de un astronauta, el entorno de cabina, los avisos y los hábitos diarios en una vista tranquila. Muestra primero lo que necesita atención, separa los problemas de sensores de los de salud y cada aviso tiene un ciclo de vida claro."
+],
+[
+"^At (.+) µSv/h the equivalent dose is about (.+) mSv per day\\. Typical ISS crew exposure is 0\\.2–0\\.5 mSv per day, with a NASA career limit of 600 mSv\\.$",
+"A $1 µSv/h la dosis equivalente es de unos $2 mSv por día. La exposición típica de la tripulación en la ISS es de 0,2–0,5 mSv por día, con un límite de carrera de NASA de 600 mSv."
+],
+[
+"^All the data you see is simulated\\. No reading belongs to a real person, and nothing here is a medical diagnosis or advice\\.$",
+"Todos los datos que ves son simulados. Ninguna lectura es de una persona real y nada de lo que se muestra es un diagnóstico ni un consejo médico."
+],
+[
+"^(.+) is an independent prototype made for the (.+)\\. It is not affiliated with, endorsed by or sponsored by NASA\\.$",
+"$1 es un prototipo independiente hecho para el $2. No está afiliado, respaldado ni patrocinado por NASA."
+],
+[
+"^The\\ \"(.+?)\"\\ source\\ is\\ not\\ connected\\ yet\\ \\(RemoteProvider\\ is\\ not\\ implemented\\)\\.\\ Simulation\\ stays\\ on\\.$",
+"La fuente \"$1\" todavía no está conectada (falta implementar RemoteProvider). Se mantiene la simulación."
+],
+[
+"^Missing:\\ (.+?)\\.\\ A\\ \"Normal\"\\ status\\ cannot\\ be\\ confirmed\\ without\\ all\\ metrics\\.$",
+"Faltan: $1. El estado \"Normal\" no se puede confirmar sin todas las métricas."
+],
+[
+"^All\\ data\\ is\\ simulated\\ \\(seed\\ (.+?)\\)\\.\\ No\\ reading\\ belongs\\ to\\ a\\ real\\ person\\.$",
+"Todos los datos son simulados (semilla $1). Ninguna lectura es de una persona real."
+],
+[
+"^(.+) is a health twin for astronauts, built by Team (.+) for the (.+)\\.$",
+"$1 es un gemelo de salud para astronautas, creado por el equipo $2 para el $3."
+],
+[
+"^(.+?)\\ slept\\ (.+?)\\ h\\.\\ A\\ short\\ nap\\ and\\ a\\ workload\\ review\\ may\\ help\\.$",
+"$1 durmió $2 h. Conviene una siesta corta y revisar la carga de trabajo."
+],
+[
+"^No notices sent\\. Stable link \\(simulated\\), (.+) s delay\\.$",
+"Sin avisos enviados. Enlace estable (simulado), retardo de $1 s."
+],
+[
+"^Escalated: (.+) has not been acknowledged for (\\d+) seconds\\.$",
+"Escalado: $1 lleva $2 segundos sin reconocerse."
+],
+[
+"^(.+?)\\ ·\\ JSON\\ with\\ alerts\\ and\\ the\\ last\\ 60\\ min\\ of\\ readings\\.$",
+"$1 · JSON con avisos y últimos 60 min de lecturas."
+],
+[
+"^(.+?)\\ of\\ (.+?)\\ metrics\\ ·\\ (.+?)\\ of\\ (.+?)\\ sensors\\ online\\ ·\\ (.+?)\\ active\\ alerts$",
+"$1 de $2 métricas · $3 de $4 sensores en línea · $5 avisos activos"
+],
+[
+"^(.+?):\\ (.+?)\\ min\\ of\\ exercise\\ left\\ for\\ the\\ daily\\ mission\\.$",
+"$1: faltan $2 min de ejercicio para la misión diaria."
+],
+[
+"^Reconnect\\ or\\ recharge\\ the\\ sensor\\ to\\ recover\\ (.+?)\\.$",
+"Reconectá o recargá el sensor para recuperar $1."
+],
+[
+"^Replaying\\ (.+?)\\ readings\\ from\\ (.+?)\\.\\ Unverified\\ data\\.$",
+"Reproduciendo $1 lecturas de $2. Datos sin verificar."
+],
+[
+"^Replaying\\ (.+?)\\ readings\\ from\\ (.+?)\\.\\ Unverified\\ data\\.$",
+"Reproduciendo $1 lecturas de $2. Datos sin verificar."
+],
+[
+"^Trend\\ of\\ (.+?),\\ last\\ (.+?)\\ minutes\\.\\ Latest\\ value\\ (.+?)\\ (.+?)\\.$",
+"Tendencia de $1, últimos $2 minutos. Último valor $3 $4."
+],
+[
+"^Alert\\ flight\\ surgeons\\ ·\\ (.+?)\\ critical\\ alerts$",
+"Avisar a cirujanos de vuelo · $1 avisos críticos"
+],
+[
+"^Not acknowledged for over a minute\\. (.+)$",
+"Sin reconocer hace más de un minuto. $1"
+],
+[
+"^All\\ of\\ (.+?)'s\\ parameters\\ are\\ in\\ range\\.$",
+"Todos los parámetros de $1 están en rango."
+],
+[
+"^Using simulated data with seed (.+)\\.$",
+"Usando datos simulados con semilla $1."
+],
+[
+"^row\\ (.+?):\\ astronautId\\ is\\ missing$",
+"fila $1: falta astronautId"
+],
+[
+"^Partial\\ data\\ ·\\ (.+?)\\ of\\ (.+?)\\ metrics$",
+"Datos parciales · $1 de $2 métricas"
+],
+[
+"^(\\d+) alerts? snoozed for (\\d+) min$",
+"$1 aviso(s) pospuesto(s) por $2 min"
+],
+[
+"^(.+?)\\ deviates\\ (.+?)%\\ from\\ baseline$",
+"$1 se desvía $2% de la línea base"
+],
+[
+"^Trend\\ of\\ (.+?),\\ last\\ (.+?)\\ minutes$",
+"Evolución de $1, últimos $2 minutos"
+],
+[
+"^valid\\ readings\\ out\\ of\\ (.+?)\\ ·$",
+"lecturas válidas de $1 ·"
+],
+[
+"^Alert flight surgeons · (.+)$",
+"Avisar a cirujanos de vuelo · $1"
+],
+[
+"^row\\ (.+?):\\ invalid\\ timestamp$",
+"fila $1: timestamp inválido"
+],
+[
+"^Alert\\ flight\\ surgeons\\ ·\\ (.+?)$",
+"Avisar a cirujanos de vuelo · $1"
+],
+[
+"^Trend\\ of\\ (.+?):\\ latest\\ value\\ (.+?)\\ (.+?)$",
+"Tendencia de $1: último valor $2 $3"
+],
+[
+"^(.+?)\\.\\ Simulation\\ stays\\ on\\.$",
+"$1. Se mantiene la simulación."
+],
+[
+"^Simulated\\ ·\\ stable\\ (.+?)\\ s$",
+"Simulado · estable $1 s"
+],
+[
+"^the (\\d+) missing metrics$",
+"las $1 métricas faltantes"
+],
+[
+"^(.+ disconnected) \\((.+)\\)$",
+"$1 ($2)"
+],
+[
+"^(\\d+) alerts? acknowledged$",
+"$1 aviso(s) reconocido(s)"
+],
+[
+"^(.+?):\\ critical\\ battery\\ (.+?)%$",
+"$1: batería crítica $2%"
+],
+[
+"^seed\\ (.+?)\\ ·\\ interval\\ (.+?)\\ ms$",
+"semilla $1 · intervalo $2 ms"
+],
+[
+"^·\\ (.+?)\\ warnings\\ ·\\ crew:$",
+"· $1 avisos · tripulantes:"
+],
+[
+"^Mission\\ completed:\\ (.+?)$",
+"Misión completada: $1"
+],
+[
+"^Trend of (.+): latest (.+)$",
+"Tendencia de $1: último $2"
+],
+[
+"^Needs\\ attention\\ ·\\ (.+?)\\ (.+?)$",
+"Requiere atención · $1 $2"
+],
+[
+"^Environment\\ ·\\ (.+?)\\ \\((.+?)\\)$",
+"Entorno · $1 ($2)"
+],
+[
+"^Reference: up to (.+)$",
+"Referencia: hasta $1"
+],
+[
+"^Unacknowledged · (.+)$",
+"Sin reconocer · $1"
+],
+[
+"^Open history for (.+)$",
+"Abrir historial de $1"
+],
+[
+"^(.+?)\\ out\\ of\\ range\\ \\((.+?)\\ (.+?)\\)$",
+"$1 fuera de rango ($2 $3)"
+],
+[
+"^Overall\\ status\\ ·\\ (.+?)$",
+"Estado general · $1"
+],
+[
+"^Open\\ history\\ for\\ (.+?)$",
+"Abrir historial de $1"
+],
+[
+"^(.+?):\\ low\\ battery\\ (.+?)%$",
+"$1: batería baja $2%"
+],
+[
+"^(.+?):\\ weak\\ signal\\ (.+?)%$",
+"$1: señal débil $2%"
+],
+[
+"^1 sensor alert$",
+"1 aviso de sensor"
+],
+[
+"^Active\\ alerts:\\ (.+?)$",
+"Avisos activos: $1"
+],
+[
+"^snoozed until (.+)$",
+"pospuesta hasta $1"
+],
+[
+"^(\\d+) sensor alerts$",
+"$1 avisos de sensores"
+],
+[
+"^Snooze ended: (.+)$",
+"Terminó la pausa: $1"
+],
+[
+"^Environment\\ ·\\ (.+?)$",
+"Entorno · $1"
+],
+[
+"^acknowledged (.+)$",
+"reconocida $1"
+],
+[
+"^(.+: .+%) \\((.+)\\)$",
+"$1 ($2)"
+],
+[
+"^Escalated: (.+?)\\. (.+)$",
+"Escalado: $1. $2"
+],
+[
+"^New alert: (.+?)\\. (.+)$",
+"Nuevo aviso: $1. $2"
+],
+[
+"^(.+?)\\ critical\\ \\((.+?)\\ (.+?)\\)$",
+"$1 crítica ($2 $3)"
+],
+[
+"^(.+?)\\ disconnected$",
+"$1 desconectado"
+],
+[
+"^Snooze (\\d+) min$",
+"Posponer $1 min"
+],
+[
+"^(\\d+)/(\\d+) completed$",
+"$1/$2 completadas"
+],
+[
+"^(\\d+)/(\\d+) connected$",
+"$1/$2 conectados"
+],
+[
+"^Crew\\ member\\ (.+?)$",
+"Tripulante $1"
+],
+[
+"^(.+?)\\-day\\ streak$",
+"Racha de $1 días"
+],
+[
+"^View\\ all\\ \\((.+?)\\)$",
+"Ver todos ($1)"
+],
+[
+"^Reference: (.+)$",
+"Referencia: $1"
+],
+[
+"^(.+?)\\ of\\ (.+?)\\ online$",
+"$1 de $2 en línea"
+],
+[
+"^source:\\ (.+?)\\ ·\\ (.+?)$",
+"fuente: $1 · $2"
+],
+[
+"^Resolved: (.+)$",
+"Resuelto: $1"
+],
+[
+"^stable (.+) s$",
+"estable $1 s"
+],
+[
+"^(.+?)\\ reminders$",
+"$1 recordatorios"
+],
+[
+"^(.+?)\\ reading\\ ·\\ (.+?)$",
+"lectura $1 · $2"
+],
+[
+"^resolved (.+)$",
+"resuelta $1"
+],
+[
+"^signal (\\d+)%$",
+"señal $1%"
+],
+[
+"^baseline\\ (.+?)\\ (.+?)$",
+"línea base $1 $2"
+],
+[
+"^1 alert$",
+"1 aviso"
+],
+[
+"^(\\d+)\\.(\\d) Hz$",
+"$1,$2 Hz"
+],
+[
+"^opened (.+)$",
+"abierta $1"
+],
+[
+"^(\\d+) alerts$",
+"$1 avisos"
+],
+[
+"^notice (.+)$",
+"aviso $1"
+],
+[
+"^(.+?)\\ pts\\ to\\ (.+?)$",
+"$1 pts para $2"
+],
+[
+"^(.+?)\\ errors$",
+"$1 errores"
+],
+[
+"^(.+) only$",
+"Solo $1"
+],
+[
+"^Team (.+)$",
+"Equipo $1"
+],
+[
+"^(.+) (elevated|critical): (.+)$",
+"$1 $2: $3"
+]
+];
+/*I18N-DATA-END*/
+const I18N = {
+  lang: 'en', cache: new Map(), rx: [], obs: null, titleEn: '', descEn: '',
+  ATTRS: ['aria-label', 'title', 'label', 'placeholder', 'alt'],
+  has: (o, k) => Object.prototype.hasOwnProperty.call(o, k),
+  // Translates one string. Whitespace around it is preserved. Returns the same string when there is no entry (it stays in English).
+  tx(s) {
+    if (this.lang !== 'es' || !s) return s;
+    const core = s.trim(); if (!core) return s;
+    const out = this.core(core, 0);
+    return out === core ? s : s.slice(0, s.indexOf(core)) + out + s.slice(s.indexOf(core) + core.length);
+  },
+  core(c, d) {
+    if (this.cache.has(c)) return this.cache.get(c);
+    let out;
+    if (this.has(ES_DICT, c)) out = ES_DICT[c];
+    if (out === undefined) { const m = c.match(/^(.*\S) \((\d+)\)$/); if (m) { if (this.has(ES_COUNT, m[1])) out = ES_COUNT[m[1]] + ' (' + m[2] + ')'; else if (this.has(ES_DICT, m[1])) out = ES_DICT[m[1]] + ' (' + m[2] + ')'; } }
+    if (out === undefined && d < 3) for (const [re, tpl] of this.rx) { const m = c.match(re); if (m) { out = tpl.replace(/\$(\d)/g, (_, i) => this.core((m[i] || '').trim(), d + 1)); break; } }
+    if (out === undefined && d < 3 && c.includes(' · ')) { const parts = c.split(' · '), tr = parts.map(p => this.core(p, d + 1)); if (tr.some((x, i) => x !== parts[i])) out = tr.join(' · '); }
+    if (out === undefined) out = c;
+    if (d === 0) { if (this.cache.size > 5000) this.cache.clear(); this.cache.set(c, out); }
+    return out;
+  },
+  skip(n) { const p = n.parentElement; return !p || /^(SCRIPT|STYLE|NOSCRIPT)$/.test(p.tagName) || !!p.closest('[data-i18n="off"]'); },
+  text(n) {
+    if (this.skip(n)) return;
+    const cur = n.nodeValue; if (n.__tr !== undefined && cur === n.__tr) return;
+    const t = this.tx(cur); if (t !== cur) { n.__en = cur; n.__tr = t; n.nodeValue = t; } else n.__tr = undefined;
+  },
+  attrs(el) {
+    for (const a of this.ATTRS) {
+      if (!el.hasAttribute(a)) continue; const cur = el.getAttribute(a), rec = el.__a && el.__a[a]; if (rec && rec.tr === cur) continue;
+      const t = this.tx(cur); if (t !== cur) { (el.__a ||= {})[a] = { en: cur, tr: t }; el.setAttribute(a, t); } else if (rec) delete el.__a[a];
+    }
+  },
+  walk(root) {
+    if (root.nodeType === 3) return this.text(root); if (root.nodeType !== 1 || root.closest('[data-i18n="off"]')) return;
+    this.attrs(root); const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT); let n;
+    while ((n = w.nextNode())) { if (n.nodeType === 3) this.text(n); else this.attrs(n); }
+  },
+  revert(root) {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT); let n;
+    while ((n = w.nextNode())) {
+      if (n.nodeType === 3) { if (n.__tr !== undefined && n.nodeValue === n.__tr) n.nodeValue = n.__en; n.__tr = undefined; }
+      else if (n.__a) { for (const a in n.__a) if (n.getAttribute(a) === n.__a[a].tr) n.setAttribute(a, n.__a[a].en); n.__a = null; }
+    }
+  },
+  connect() { this.obs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: this.ATTRS }); },
+  setLang(l) {
+    this.lang = l === 'es' ? 'es' : 'en'; document.documentElement.lang = this.lang; this.obs.disconnect();
+    if (this.lang === 'es') this.walk(document.body); else this.revert(document.body);
+    document.title = this.tx(this.titleEn); const md = document.querySelector('meta[name="description"]'); if (md) md.content = this.tx(this.descEn);
+    if (this.lang === 'es') this.connect();
+  },
+  init(l) {
+    this.rx = ES_PATTERNS.map(([s, t]) => [new RegExp(s), t]); this.titleEn = document.title; this.descEn = document.querySelector('meta[name="description"]')?.content || '';
+    this.obs = new MutationObserver(muts => {
+      this.obs.disconnect();
+      for (const m of muts) { if (m.type === 'childList') m.addedNodes.forEach(n => this.walk(n)); else if (m.type === 'characterData') this.text(m.target); else if (m.type === 'attributes') this.attrs(m.target); }
+      this.connect();
+    });
+    this.setLang(l);
+  }
+};
+
+/* =============================================================================
    (e) UI · twin, connected cards, drawer, views
    ============================================================================= */
 const $ = s => document.querySelector(s);
@@ -1759,6 +2596,7 @@ const UI = {
     $('#btn-scan').onclick = () => this.runScan();
     $('#btn-export').onclick = () => this.exportReport();
     // alerts
+    $$('#lang button').forEach(b => b.onclick = () => { State.lang = b.dataset.lang; State.save(); this.syncLang(); });
     $$('#alert-scope button').forEach(b => b.onclick = () => { State.alertScope = b.dataset.scope; $$('#alert-scope button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); this.renderDiag(); });
     $('#snooze-soft').onclick = () => { const n = snoozeNonCritical(); showToast({ level: 'normal', title: n ? `${n} alert${n > 1 ? 's' : ''} snoozed for ${CONFIG.alerts.snoozeMs / 60000} min` : 'No active non-critical alerts to snooze', message: 'They wake up again if the condition is still there.' }); };
     $$('#alert-filter button').forEach(b => b.onclick = () => { State.alertFilter = b.dataset.filter; $$('#alert-filter button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); this.renderDiag(); });
@@ -1784,6 +2622,7 @@ const UI = {
   },
 
   /* ---------- navigation ---------- */
+  syncLang() { I18N.setLang(State.lang); $$('#lang button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.lang === State.lang))); },
   go(view, fromHash) {
     if (!VIEWS.includes(view)) view = 'overview';
     State.view = view; $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
@@ -1828,7 +2667,7 @@ const UI = {
     if (State.view === 'overview' && !small) { const r = $('#dockbar').getBoundingClientRect(); if (r.top < innerHeight - 8) b = Math.max(b, innerHeight - r.top + 12); }
     document.documentElement.style.setProperty('--toast-b', b + 'px');
   },
-  renderAll() { this.renderSourceBadge(); this.renderSystem(); this.renderAbout(); this.renderLive(); },
+  renderAll() { this.renderSourceBadge(); this.renderSystem(); this.renderAbout(); this.renderLive(); this.renderDiag(); },
   renderLive() {
     this.renderMet(); this.renderSourceBadge(); this.renderBadges(); this.renderWho();
     if (State.view === 'overview') { this.renderStrip(); this.renderStage(); this.renderDockbar(); this.renderMissions(true); this.renderScore(); this.renderEnv(); }
@@ -1845,8 +2684,8 @@ const UI = {
   },
   renderSourceBadge() {
     const b = $('#badge-source'), d = State.provider?.describe() || {};
-    if (d.source === 'real') { b.className = 'src real'; setHtml(b, `<span aria-hidden="true">●</span><span><span class="full">${d.kind === 'FileProvider' ? 'FILE DATA · ' : 'API DATA · '}</span>UNVERIFIED</span>`); b.title = 'This data comes from outside and has not been verified by Tesai.'; }
-    else { b.className = 'src'; setHtml(b, '<span aria-hidden="true">●</span><span>SIMULATED<span class="full"> DATA</span></span>'); b.title = 'No reading belongs to a real person.'; }
+    if (d.source === 'real') { b.className = 'src real'; const file = d.kind === 'FileProvider'; setHtml(b, `<span aria-hidden="true">●</span><span class="lg">${file ? 'FILE DATA · UNVERIFIED' : 'API DATA · UNVERIFIED'}</span><span class="sm">UNVERIFIED</span>`); b.title = 'This data comes from outside and has not been verified by Tesai.'; }
+    else { b.className = 'src'; setHtml(b, '<span aria-hidden="true">●</span><span class="lg">SIMULATED DATA</span><span class="sm">SIMULATED</span>'); b.title = 'No reading belongs to a real person.'; }
     const live = $('#live'), isFile = d.kind === 'FileProvider';
     setText($('#live-label'), isFile ? 'Replaying' : 'Live'); setText($('#live-rate'), (1000 / CONFIG.tickMs).toFixed(1) + ' Hz');
     live.dataset.state = State.provider ? 'live' : 'paused';
@@ -1930,7 +2769,7 @@ Object.assign(UI, {
     if (mini) { setHtml($('#missions-mini'), MISSION_DEFS.map(d => this.missionRow(d, false)).join('')); return; }
     setText($('#missions-day'), dayKey()); setHtml($('#missions-full'), MISSION_DEFS.map(d => this.missionRow(d, true)).join(''));
     setHtml($('#achievements'), State.gam.achievements.length ? State.gam.achievements.slice(0, 8).map(a => `<div class="up-row"><span class="t">${esc(a.text)}</span><span class="mono">${fmtTime(a.t)}</span><b class="ok-t mono">+${a.pts}</b></div>`).join('') : '<div class="empty">No achievements yet. Complete a mission or log a habit.</div>');
-    const days = []; for (let i = 6; i >= 0; i--) { const d = new Date(Date.now() - i * 86400000), k = dayKey(d), on = State.gam.streakDays[k] || (State.gam.demo && i > 0 && i <= State.gam.streak); days.push(`<i class="${on ? 'on' : ''}" title="${k}">${['S', 'M', 'T', 'W', 'T', 'F', 'S'][d.getDay()]}</i>`); }
+    const days = []; for (let i = 6; i >= 0; i--) { const d = new Date(Date.now() - i * 86400000), k = dayKey(d), on = State.gam.streakDays[k] || (State.gam.demo && i > 0 && i <= State.gam.streak); days.push(`<i class="${on ? 'on' : ''}" title="${k}">${(I18N.lang === 'es' ? 'DLMXJVS' : 'SMTWTFS')[d.getDay()]}</i>`); }
     setHtml($('#streak-days'), days.join('')); setText($('#streak-n'), String(State.gam.streak)); setText($('#streak-best'), String(State.gam.bestStreak)); setText($('#streak-demo'), State.gam.demo ? '(initial demo streak, simulated)' : '');
   },
   renderScore() {
@@ -2074,7 +2913,7 @@ Object.assign(UI, {
     $('#set-sound').onchange = e => { State.sound = e.target.checked; State.save(); };
     $('#set-demo').onchange = e => { State.demo = e.target.checked; State.save(); this.renderSystemLive(); };
     $('#set-motion').onchange = e => { State.motion = e.target.checked ? 'reduced' : 'full'; State.save(); this.applyMotion(); };
-    $('#reset-gam').onclick = () => { if (!confirm('Reset points, streak and missions?')) return; State.gam = defaultGam(); State.gam.streak = 0; State.gam.bestStreak = 0; State.gam.demo = false; State.save(); this.renderLive(); };
+    $('#reset-gam').onclick = () => { if (!confirm(I18N.tx('Reset points, streak and missions?'))) return; State.gam = defaultGam(); State.gam.streak = 0; State.gam.bestStreak = 0; State.gam.demo = false; State.save(); this.renderLive(); };
     const inj = [['tachycardia', 'Tachycardia'], ['hypoxia', 'Hypoxia'], ['fever', 'Fever'], ['hypertension', 'Hypertension'], ['exercise', 'Exercise session'], ['disconnect', 'Disconnect sensor'], ['co2', 'CO₂ spike']];
     $('#inject-buttons').innerHTML = inj.map(([k, l]) => `<button class="btn sm" data-inj="${k}">${l}</button>`).join('');
     $('#inject-buttons').addEventListener('click', async e => { const b = e.target.closest('[data-inj]'); if (!b || b.disabled) return; const r = await State.provider.pushEvent({ type: b.dataset.inj, astronautId: b.dataset.inj === 'co2' ? null : State.selectedId }); showToast({ level: r?.ok ? 'normal' : 'attention', title: r?.ok ? 'Event injected' : 'Event not accepted', message: `${b.textContent} · ${personName(State.selectedId) || 'cabin'}` }); });
@@ -2134,7 +2973,7 @@ let audioCtx; function beep() { try { audioCtx ||= new (window.AudioContext || w
 
 /* ---------- startup ---------- */
 (async function main() {
-  State.load(); UI.init();
+  State.load(); UI.init(); I18N.init(State.lang); UI.syncLang();
   const v = location.hash.replace(/^#\/?/, ''); if (VIEWS.includes(v)) State.view = v;
   await startProvider(CONFIG.dataSource);
   UI.go(State.view, true);
