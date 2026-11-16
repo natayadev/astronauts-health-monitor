@@ -35,7 +35,10 @@ What the app does use from real sources are **limits, ranges and design decision
 
 - Fonts: Plus Jakarta Sans and JetBrains Mono, SIL Open Font License 1.1, served locally from `src/assets/fonts/`.
 - three.js 0.170.0, MIT license (`src/simulacion/vendor/three-LICENSE`), served locally so the simulation works offline.
-- No NASA logos or mission identifiers are used.
+- Isometric drawing kit (`tools/twin/kit/` and `react/astronaut/kit/`: `iso-kit`, `lathe`, `tube`, `audit`, `live`), MIT License, Copyright (c) 2026 Ryan. The license file is kept in each folder. It is used only to generate the twin drawing and the wearable figures; it is not part of the deployed site.
+- Astronaut illustration (`src/tesai/assets/human.png` and derived pictures): made by the team in Canva with Canva AI.
+- Scenario pictures (`src/simulacion/img/` and `src/tesai/assets/visor/`): AI-generated illustrations. See [`../docs/AI_USE.md`](../docs/AI_USE.md).
+- No NASA logos, flags or mission identifiers are used.
 
 ## Rules
 

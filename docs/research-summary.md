@@ -21,10 +21,10 @@ A short English summary of the team's research for the judges. The full basis of
 
 ## What we did not find
 
-- **No public, individual, daily in-flight vital-sign data.** It exists in NASA repositories but is restricted and available on request. All Tesai readings are simulated.
+- **No public, individual, daily in-flight vital-sign data.** It exists in NASA repositories but is restricted and available on request. Tesai therefore replays public datasets of healthy adults on Earth (PhysioNet MMASH and a small BIDSleep sample) for heart rate, heart rate variability and sleep, and real ISS cabin temperature, humidity and CO₂ from NASA OSDR. The other vital signs are only available in the simulated source.
 - **No validated daily psychosocial instrument with public access.** The check-in questions are our own. In flight, NASA's Reaction Self-Test ran about every four days, with about 79 % of sessions completed (Jones et al., 2022), and the Standard Measures questionnaires are monthly.
 - **No validated alert design for crews with communication delay.** NASA reviews report large research gaps.
 
 ## Mars versus the demo scenario
 
-The demo uses ISS-like cabin values and a short simulated ground delay. On the way to Mars, a message can take up to about 20 minutes each way, and the measured radiation rate in transit (about 1.84 mSv/day, roughly 77 µSv/h, Curiosity) would sit above Tesai's red line all the time. A Mars version should show cumulative dose against the 600 mSv career limit, with the expected rate for each mission phase.
+The demo uses ISS cabin values and a short simulated ground delay. On the way to Mars, a message can take up to about 20 minutes each way, and the measured radiation rate in transit (about 1.84 mSv/day, roughly 77 µSv/h, Curiosity) would sit above Tesai's red line all the time. A Mars version should show cumulative dose against the 600 mSv career limit, with the expected rate for each mission phase.
