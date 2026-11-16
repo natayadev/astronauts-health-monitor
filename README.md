@@ -30,8 +30,8 @@ Team Higía · Buenos Aires, Argentina
 
 <table>
   <tr>
-    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai in 30 seconds (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">Tesai in 30 seconds (0:30)</a></b><br>Our video for NASA, in English.</td>
-    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/presentacion.webp" alt="The full presentation (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">The full presentation (2:49)</a></b><br>In Spanish with subtitles.</td>
+    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai in 30 seconds (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">Tesai in 30 seconds (0:30)</a></b><br>Our video for NASA, in English.</td>
+    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/presentacion.webp" alt="The full presentation (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">The full presentation (2:49)</a></b><br>In Spanish with subtitles.</td>
   </tr>
 </table>
 
@@ -162,8 +162,8 @@ Supplementary documents `ARCHITECTURE.md` and `docs/psicologia-social.md` are wr
 
 <table>
   <tr>
-    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai en 30 segundos (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">Tesai en 30 segundos (0:30)</a></b><br>El video para la NASA, en inglés.</td>
-    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/presentacion.webp" alt="La presentación completa (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">La presentación completa (2:49)</a></b><br>En español, con subtítulos.</td>
+    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai en 30 segundos (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">Tesai en 30 segundos (0:30)</a></b><br>El video para la NASA, en inglés.</td>
+    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/presentacion.webp" alt="La presentación completa (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">La presentación completa (2:49)</a></b><br>En español, con subtítulos.</td>
   </tr>
 </table>
 
