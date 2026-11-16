@@ -1,6 +1,6 @@
 # Tesai · sitio
 
-Sitio estático (sin build, sin framework) del proyecto **Tesai** de Team Higía para el **NASA Space Apps Challenge 2026**. Todos los datos son simulados.
+Sitio estático (sin build, sin framework) del proyecto **Tesai** de Team Higía para el **NASA Space Apps Challenge 2026**. Por defecto Tesai reproduce datasets públicos reales (adultos sanos, no astronautas, y cabina de la ISS); la fuente simulada sigue disponible en Avanzado.
 
 ```
 src/
@@ -40,4 +40,4 @@ python3 -m http.server 8765
 
 Ninguna página tiene `<script>` inline: todo el código está en archivos `.js` del propio sitio.
 
-La simulación y Tesai son simulaciones educativas con datos simulados: no diagnostican y no reemplazan al cirujano de vuelo. La guía de RCP es simplificada y no reemplaza un curso certificado.
+La simulación y Tesai son material educativo, con datos simulados o tomados de datasets públicos: no diagnostican y no reemplazan al cirujano de vuelo. La guía de RCP es simplificada y no reemplaza un curso certificado.

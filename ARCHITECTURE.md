@@ -19,6 +19,7 @@
 7. [Cómo agregar una fuente de datos real](#7-cómo-agregar-una-fuente-de-datos-real)
 8. [Despliegue y seguridad](#8-despliegue-y-seguridad)
 9. [Convenciones](#9-convenciones)
+10. [Mejoras recomendadas](#10-mejoras-recomendadas-auditoría-del-15-de-noviembre-de-2026)
 
 ---
 
@@ -113,6 +114,7 @@ astronauts-health-monitor/
             │   └── overlays/           index.js (registro métrica → overlay), heart.js (frecuencia cardíaca)
             ├── providers/
             │   ├── base.js             Clase abstracta DataProvider
+            │   ├── dataset.js          DatasetProvider (fuente por defecto): reproduce data/mmash.json, bidsleep.json y osdr-eda.json
             │   ├── simulated.js        SimulatedProvider (circadian, AR(1), eventos)
             │   ├── remote.js           RemoteProvider skeleton (fetch + retries + caché)
             │   ├── file.js             FileProvider (CSV / JSON importado por el usuario)
@@ -403,3 +405,43 @@ cd src && python3 -m http.server 8765
 - Drawer: `role="dialog"` con `aria-modal="false"` (el contenido de fondo sigue siendo accesible) y foco gestionado manualmente.
 - Toasts: `role="status"` para los informativos; los toasts vinculados a alertas con ciclo de vida no usan `role` para no duplicar el anuncio.
 - `prefers-reduced-motion`: desactiva animaciones decorativas (twin spin, scan, ECG, pulso del dot crítico). También hay un switch manual en Advanced.
+
+---
+
+## 10. Mejoras recomendadas (auditoría del 15 de noviembre de 2026)
+
+Ninguna cambia lo que se ve en la entrega. Quedan anotadas para después del hackathon.
+
+### Código
+
+- **Líneas muy largas.** `ui/ui.js`, `ui/visor.js` y `simulacion/js/sim.js` arman HTML en líneas de hasta unos 1.000 caracteres. Conviene partir cada pantalla en funciones de render más chicas, una por bloque.
+- **Listeners sin baja.** `ui.js` y `sim.js` registran 19 listeners cada uno y no los quitan. Hoy no molesta porque las páginas no se desmontan; si alguna vez pasan a montarse y desmontarse, cada módulo necesita su `destroy()`, como ya tienen los proveedores y el gemelo.
+- **Módulos conservados sin uso.** `twin/art.js` (unos 340 KB), `twin/figure.js` y `twin/overlays/` no se importan desde `app.js`: no se descargan, pero pesan en el repo. Si la figura isométrica no vuelve, se pueden mover a `tools/`.
+- **`FileProvider._tick`** filtra todas las lecturas en cada tick. Con archivos grandes conviene agrupar por tripulante una sola vez en el constructor.
+- **`catch` vacíos.** Los de `localStorage`, audio y bloqueo de puntero son intencionales; conviene dejar un comentario de una línea en cada uno, como ya hacen `state.js` y `checkin.js`.
+- **Pruebas.** No hay pruebas automáticas del normalizador, del parser CSV ni del motor de reglas. Son funciones puras: se pueden probar con `node --test` sin sumar dependencias.
+
+### Rendimiento
+
+- **`tesai/assets/human.png`** (1920 × 1080, unos 250 KB) se puede servir como WebP con transparencia. Requiere comparar la figura antes y después.
+- **Caché.** `vercel.json` da una hora a los `.js` y `.css`. Con nombres de archivo con versión se podría pasar a caché larga.
+- **Minificación.** El sitio no tiene paso de build a propósito. Si se suma uno, three.js ya está minificado y el resto baja cerca de un tercio.
+- **Simulación en equipos modestos.** No se midió en dispositivos de gama baja; conviene una opción de calidad reducida (resolución del canvas y sombras).
+
+### Datasets reales (fuente por defecto desde `49dce93`)
+
+- **El panel "Probá una situación" del Visor no actúa sobre datos grabados.** `DatasetProvider` no implementa `pushEvent`. Ahora el aviso lo dice; para que funcione con la fuente por defecto haría falta superponer el evento sobre la lectura reproducida.
+- **Muchos avisos por actividad normal.** En MMASH entre un cuarto y la mitad de los minutos caen en "atención" (frecuencia cardíaca de la vida diaria, hasta 162 lpm en ejercicio) y el estado general queda en "datos parciales", porque cuatro de los seis signos no se midieron. Para datos de vida diaria conviene una regla que tenga en cuenta la actividad.
+- **`mmash.json` pesa cerca de 1 MB** y se descarga al abrir el panel. Se puede bajar la resolución o cargar bajo demanda.
+- **El CO₂ de OSDR** (3.183 a 4.023 ppm en el extracto) no fue contrastado contra la unidad original de la API; conviene dejar asentada la conversión en `build_osdr_eda.py`.
+- **Licencias.** El extracto de MMASH conserva ODbL 1.0 (compartir igual); la licencia MIT del repo cubre solo el código.
+
+### Corregido en esta revisión
+
+- Una fecha inválida en un archivo importado ya no interrumpe la importación: la fila se informa como error y el resto sigue.
+- El parser CSV acepta campos entre comillas que contienen el separador y comillas dobles escapadas.
+- `sleepActivity` importado pasa por el mismo saneo de id y de fecha que el resto.
+- El intervalo de simulación leído de `localStorage` se acota a 250–60.000 ms.
+- La tabla de umbrales de `#/advanced` muestra la franja de atención en su columna, en vez de repetir el rango normal.
+- El panel "Probá una situación" ya no anuncia un evento que la fuente no acepta.
+- La guía de presión arterial habla de la muñequera, que es el sensor del modelo, y la nota de SpO₂ dice que Tesai avisa antes que las fuentes.

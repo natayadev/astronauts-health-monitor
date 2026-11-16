@@ -257,7 +257,8 @@ export const Visor = {
     const p = State.provider; if (!p?.pushEvent) return;
     Sound.unlock();
     const r = await p.pushEvent({ type, astronautId: type === 'co2' ? null : V.simWho, durationMs: 120000 });
-    showToast({ level: 'normal', title: t('Simulated event started', 'Evento simulado iniciado'), message: r?.ok === false ? t('This data source does not accept events.', 'Esta fuente de datos no acepta eventos.') : t('The notice can take a few seconds to appear.', 'El aviso puede tardar unos segundos en aparecer.') });
+    showToast(r?.ok ? { level: 'normal', title: t('Simulated event started', 'Evento simulado iniciado'), message: t('The notice can take a few seconds to appear.', 'El aviso puede tardar unos segundos en aparecer.') }
+      : { level: 'attention', title: t('Event not accepted', 'Evento no aceptado'), message: t('This data source does not accept events. Switch to the simulated source in Advanced.', 'Esta fuente de datos no acepta eventos. Cambiá a la fuente simulada en Avanzado.') });
   }
 };
 

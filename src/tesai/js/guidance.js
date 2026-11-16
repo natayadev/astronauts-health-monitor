@@ -39,7 +39,7 @@ const GUIDE = {
   bp: {
     high: { title: S('High blood pressure', 'Presión arterial alta'), steps: [
       S('Sit and rest for 5 minutes.', 'Sentate y descansá 5 minutos.'),
-      S('Check the cuff is well placed and measure again.', 'Verificá que el brazalete esté bien puesto y volvé a medir.'),
+      S('Check the wristband is snug and measure again.', 'Verificá que la muñequera esté bien puesta y volvé a medir.'),
       S('Drink water and skip caffeine and salty food for now.', 'Tomá agua y evitá cafeína y comidas saladas por ahora.'),
       S('If it stays high, or you have a headache or blurred vision, notify the flight surgeon now.', 'Si sigue alta, o tenés dolor de cabeza o visión borrosa, avisá ya al cirujano de vuelo.')] },
     low: { title: S('Low blood pressure', 'Presión arterial baja'), steps: [

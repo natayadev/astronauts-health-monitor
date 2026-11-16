@@ -4,7 +4,7 @@ Made by **Team Higía** (Ezequiel Alfaro, Sebastian Garay, Nataya Flores, Mateo 
 
 Web prototype for monitoring astronaut health. It uses a "digital twin" look (mint and teal, glass surfaces, mono numbers) taken from the Claude Design mockup, with a traffic-light scale: **Normal / Attention / Alert flight surgeons**, plus separate states for partial data, missing data and sensor problems.
 
-> **All data is simulated.** The About page says so and every reading is labeled "source: simulated". Imported file or API data shows an "unverified" badge in the top bar.
+> **Default data: real public datasets, not astronauts.** Heart rate, heart rate variability and sleep come from PhysioNet MMASH and a small BIDSleep sample (healthy adults); cabin temperature, humidity and CO₂ are ISS telemetry from NASA OSDR (see `data/NOTICE.md`). The About page says so. The simulated source is in Advanced, and the Visor's "Try a situation" panel only works with it.
 
 ## Run
 
@@ -33,7 +33,7 @@ src/tesai/
 │  ├─ i18n.js            # Spanish dictionary applied at runtime
 │  ├─ audio.js           # built-in audio: alert tones and spoken alerts (Web Audio + speech synthesis)
 │  ├─ guidance.js        # second doctor: step-by-step guides per alert, EN/ES
-│  ├─ providers/         # simulated, file and remote data providers + normalizer
+│  ├─ providers/         # dataset (default), simulated, file and remote data providers + normalizer
 │  ├─ twin/              # astronaut: twin.js (component), astronaut.js (figure in use), plate/spin/scan.js
 │  └─ ui/                # UI controller, Visor, check-in view, wearables, helpers, icons, toasts
 └─ assets/
