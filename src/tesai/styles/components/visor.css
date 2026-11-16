@@ -1,0 +1,197 @@
+/* ==========================================================================
+   VISOR · crew vitals always in view, situation notice, second doctor.
+   Page chrome uses the Tesai tokens; the first-person HUD below copies the simulation's glass look.
+   ========================================================================== */
+
+.vz-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.vz-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px; border-radius: var(--r-pill);
+  border: 1px solid var(--line-2); background: var(--glass-2); color: var(--color-ink);
+  font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
+}
+.vz-chip .ic { width: 16px; height: 16px }
+.vz-chip:hover { background: var(--color-white) }
+.vz-chip[aria-pressed="true"] { background: var(--grad-brand); color: var(--color-white); border-color: transparent }
+.vz-chip.static { cursor: default; background: var(--glass); color: var(--color-muted); font-weight: 500 }
+.vz-chip.static:hover { background: var(--glass) }
+
+/* ----- Second-doctor steps (base; the glass HUD below restyles them) ----- */
+.vz-steps { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px }
+.vz-steps button {
+  display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left;
+  padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line);
+  background: var(--glass-2); color: var(--color-ink); font: inherit; cursor: pointer;
+}
+.vz-steps button:hover { background: var(--color-white) }
+.vz-n {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 700;
+  background: var(--color-white); color: var(--color-teal-ink); border: 1px solid var(--line-2);
+}
+.vz-n .ic { width: 14px; height: 14px; stroke-width: 3 }
+.vz-t { padding-top: 2px }
+.vz-steps .is-next button { border-color: var(--color-teal); box-shadow: 0 0 0 3px var(--focus-ring) }
+.vz-steps .is-done button { opacity: .72 }
+.vz-steps .is-done .vz-n { background: var(--grad-brand); color: var(--color-white); border-color: transparent }
+.vz-steps .is-done .vz-t { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--color-ink) 35%, transparent) }
+.vz-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px }
+.vz-actions .grow { flex: 1 }
+.vz-actions .btn .ic { width: 16px; height: 16px; margin-right: 6px }
+
+/* ----- Demo panel ----- */
+#vz-sim { margin-top: 16px }
+.vz-simrow { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end }
+.vz-simrow label { display: grid; gap: 4px; font-size: var(--fs-sm); color: var(--color-muted) }
+.vz-simrow select { padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--color-white); font: inherit; color: var(--color-ink) }
+.vz-simbtns { display: flex; flex-wrap: wrap; gap: 8px }
+
+/* ----- Top-bar audio button ----- */
+#btn-audio[aria-pressed="false"] { color: var(--color-muted) }
+#btn-audio[aria-pressed="true"]  { color: var(--color-teal-ink) }
+#btn-audio .ic { width: 18px; height: 18px }
+
+.vz-scenes { display: inline-flex; gap: 6px }
+
+/* ==========================================================================
+   FIRST-PERSON VIEW · what the crew member sees through the helmet visor.
+   Photo behind, helmet frame and glass on top, Tesai projected on the glass.
+   ========================================================================== */
+.vz-pov {
+  position: relative; isolation: isolate; overflow: hidden;
+  margin-top: 16px; min-height: 720px; border-radius: 40px;
+  background: #0a171c; box-shadow: 0 28px 70px rgba(6, 28, 34, .38);
+}
+.vz-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
+  opacity: 0; transform: scale(1.06); transition: opacity .7s ease, transform 1.2s ease;
+}
+.vz-pov[data-scene="ship"]  .vz-bg[data-scene="ship"],
+.vz-pov[data-scene="rover"] .vz-bg[data-scene="rover"] { opacity: 1; transform: scale(1) }
+
+/* Helmet: same dark rim, glare and alert glow as the immersive simulation */
+.vz-helmet { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 40% 22% at 30% 16%, rgba(255,255,255,.08), transparent 70%),
+    radial-gradient(ellipse 84% 90% at 50% 50%, transparent 62%, rgba(4,5,7,.75) 80%, #040507 92%);
+}
+.vz-helmet::after { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .4s }
+.vz-pov[data-alert="attention"] .vz-helmet::after { opacity: 1; box-shadow: inset 0 0 120px rgba(255,214,10,.35) }
+.vz-pov[data-alert="surgeon"]   .vz-helmet::after { opacity: 1; box-shadow: inset 0 0 140px rgba(255,69,58,.55); animation: vz-pulse 1.6s ease-in-out infinite }
+@keyframes vz-pulse { 0%, 100% { opacity: .35 } 50% { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) {
+  .vz-pov[data-alert="surgeon"] .vz-helmet::after { animation: none }
+  .vz-bg { transition: none }
+}
+
+/* HUD on the glass · the simulation's visual language:
+   dark glass cards, small uppercase labels, mono numbers, Apple-like status colors */
+.vz-pov {
+  --h-ink: #f5f5f7; --h-dim: rgba(245,245,247,.64); --h-faint: rgba(245,245,247,.42);
+  --h-glass: rgba(22,24,28,.42); --h-line: rgba(255,255,255,.14);
+  --h-blue: #0a84ff; --h-red: #ff453a; --h-green: #30d158; --h-yellow: #ffd60a;
+  min-height: 720px; border-radius: 32px; background: #050608;
+  font-family: "Geist", -apple-system, system-ui, sans-serif; color: var(--h-ink);
+}
+.vz-pov .mono { font-family: "Geist Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums }
+.vz-hud {
+  position: relative; z-index: 3; min-height: inherit;
+  display: grid; grid-template-columns: 268px minmax(0, 1fr) 268px; gap: 20px; align-items: start;
+  padding: 96px 6% 56px;
+}
+.vz-col { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.vz-left  { grid-column: 1; grid-row: 1 }
+.vz-right { grid-column: 3; grid-row: 1 }
+#vz-crew { display: flex; flex-direction: column; gap: 10px }
+
+.hc {
+  background: var(--h-glass); border: 1px solid var(--h-line); border-radius: 18px; padding: 12px 14px;
+  -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
+  color: var(--h-ink);
+}
+.hc .hl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--h-dim) }
+.hc .hv { font-size: 13px }
+.hc .hrow { display: flex; align-items: baseline; justify-content: space-between; gap: 10px }
+.hc .hrow.base { margin-top: 4px }
+.hc .big { font-size: 22px; font-weight: 600; letter-spacing: -.02em }
+.hc .big small, .hc .kv small { font-size: 11px; font-weight: 500; color: var(--h-dim); margin-left: 3px }
+.hc .hgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 14px; margin-top: 8px }
+.hc .kv { display: flex; flex-direction: column; gap: 1px; min-width: 0 }
+.hc .kv .hl { font-size: 10px }
+.hc .kv b { font-size: 14px; font-weight: 500; white-space: nowrap }
+.hc .kv b.big { font-size: 20px; font-weight: 600 }
+.hc .hnote { font-size: 11px; color: var(--h-faint); margin-top: 8px; line-height: 1.4 }
+/* A value out of range keeps its text and adds color: never color alone */
+.hc [data-level="attention"] > b, .hc b[data-level="attention"], .hc .hv[data-level="attention"] { color: var(--h-yellow) }
+.hc [data-level="surgeon"] > b,   .hc b[data-level="surgeon"],   .hc .hv[data-level="surgeon"]   { color: var(--h-red) }
+.hstate { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--h-dim); white-space: nowrap }
+.hstate i { width: 7px; height: 7px; border-radius: 50%; background: var(--h-faint) }
+.hstate[data-level="normal"] i    { background: var(--h-green) }
+.hstate[data-level="attention"]   { color: var(--h-yellow) }
+.hstate[data-level="attention"] i { background: var(--h-yellow) }
+.hstate[data-level="surgeon"]     { color: var(--h-red); font-weight: 600 }
+.hstate[data-level="surgeon"] i   { background: var(--h-red) }
+.vz-mate[data-level="surgeon"], .vz-ai.crit, .vz-banner.crit { border-color: rgba(255,69,58,.6); background: rgba(60,12,12,.45) }
+.vz-mate[data-level="attention"] { border-color: rgba(255,214,10,.45) }
+.ecg { display: block; width: 100%; height: 32px; margin-top: 4px }
+.ecg path { fill: none; stroke: var(--h-ink); stroke-width: 1.4; stroke-linejoin: round; vector-effect: non-scaling-stroke }
+.ecg[data-level="surgeon"] path { stroke: var(--h-red) }
+
+/* Top pill */
+#vz-top { position: absolute; top: 30px; left: 50%; transform: translateX(-50%) }
+.vz-top { display: flex; align-items: center; gap: 10px; padding: 8px 18px; border-radius: 999px; white-space: nowrap }
+.vz-top .sep { width: 1px; height: 16px; background: var(--h-line) }
+.vz-top .hv { font-size: 15px }
+
+/* Second doctor */
+.vz-ai { border-color: rgba(10,132,255,.35) }
+.vz-ai .msg { font-size: 13px; line-height: 1.45; margin-top: 6px; text-wrap: pretty }
+.vz-pov .vz-steps { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px }
+.vz-pov .vz-steps button {
+  display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 4px 6px; margin: 0 -6px;
+  background: none; border: 0; border-radius: 8px; box-shadow: none; text-align: left;
+  font: inherit; font-size: 12px; line-height: 1.4; color: var(--h-faint); cursor: pointer;
+}
+.vz-pov .vz-steps button:hover { background: rgba(255,255,255,.06) }
+.vz-pov .vz-n { width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; border: 1.5px solid currentColor; background: none; flex: none }
+.vz-pov .vz-steps .is-done button { color: var(--h-dim); opacity: 1 }
+.vz-pov .vz-steps .is-done .vz-n { background: var(--h-ink); border-color: var(--h-ink) }
+.vz-pov .vz-steps .is-done .vz-t { text-decoration: none }
+.vz-pov .vz-steps .is-next button { color: var(--h-ink); font-weight: 500; box-shadow: none }
+.vz-pov .vz-steps .is-next .vz-n { border-color: var(--h-blue); background: var(--h-blue); box-shadow: 0 0 0 3px rgba(10,132,255,.28) }
+.vz-pov .vz-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px }
+.hbtn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--h-line); background: rgba(255,255,255,.08); color: var(--h-ink);
+  font: inherit; font-size: 11.5px; cursor: pointer;
+}
+.hbtn .ic { width: 13px; height: 13px }
+.hbtn:hover { background: rgba(255,255,255,.16) }
+.hbtn.primary { background: var(--h-blue); border-color: var(--h-blue) }
+.hbtn:disabled { opacity: .5; cursor: default }
+.vz-pov :focus-visible { outline: 2px solid var(--h-blue); outline-offset: 2px }
+
+/* Situation banner, centered like the simulation's */
+#vz-sit { grid-column: 2; grid-row: 1; justify-self: center; width: min(400px, 100%) }
+.vz-banner { border-color: rgba(10,132,255,.5) }
+.vz-banner h3 { font-size: 16px; font-weight: 600; letter-spacing: -.01em; margin-top: 4px; text-wrap: balance }
+.vz-banner p { font-size: 13px; color: var(--h-dim); line-height: 1.45; margin-top: 4px }
+.vz-banner .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px }
+.vz-banner .chip { font: inherit; font-size: 11px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--h-line); color: var(--h-faint); background: none }
+.vz-banner .chip.lit, .vz-banner button.chip[aria-pressed="true"] { color: var(--h-ink); border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.08) }
+.vz-banner button.chip { cursor: pointer }
+
+@media (max-width: 1180px) {
+  .vz-hud { grid-template-columns: 240px minmax(0, 1fr) 240px; padding-left: 3%; padding-right: 3% }
+}
+.hc .hgrid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px 10px }
+.vz-mate .hnote { margin-top: 6px; color: var(--h-yellow) }
+@media (max-width: 1000px) {
+  .vz-pov { min-height: 0; border-radius: 24px }
+  .vz-hud { display: flex; flex-direction: column; gap: 10px; padding: 24px 16px; align-items: stretch }
+  #vz-crew { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) }
+  #vz-top { position: static; transform: none } #vz-sit, .vz-col { width: auto }
+  .vz-top { white-space: normal; flex-wrap: wrap; justify-content: center }
+  .vz-helmet { background: linear-gradient(rgba(4,5,7,.35), rgba(4,5,7,.55)) }
+  #vz-sit { order: 1 } .vz-left { order: 2 } .vz-right { order: 3 }
+}

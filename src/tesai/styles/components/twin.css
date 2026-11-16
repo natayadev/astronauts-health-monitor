@@ -1,0 +1,179 @@
+/* ==========================================================================
+   TWIN · isometric astronaut figure, its plate, and the metric overlays
+   Colours come from tokens.css. The .iso-* and .tb-* rules are the drawing
+   kit's own (tools/twin/kit), mapped onto the dashboard palette here.
+   ========================================================================== */
+
+/* ===== Root: fills the stage; children paint back to front (plate, figure, scan) ===== */
+.twin { position: absolute; inset: 0 }
+
+/* ===== Plate: the frame around the figure ===== */
+.twin-plate {
+  position: absolute; left: 436px; top: 4px; width: 568px; height: 772px;
+  border-radius: var(--r-xl);
+  background: color-mix(in srgb, var(--color-white) 34%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-white) 70%, transparent);
+  box-shadow: var(--shadow-s);
+  pointer-events: none;
+  transition: opacity .4s var(--ease);
+}
+.twin-plate > span {
+  position: absolute; font-family: var(--font-mono); font-size: 12.5px; line-height: 1;
+  letter-spacing: .04em; color: var(--color-muted); white-space: nowrap;
+}
+.twin-plate-fig     { left: 20px; top: 18px }
+.twin-plate-title   { right: 20px; top: 18px; text-transform: uppercase }
+.twin-plate-readout { right: 20px; bottom: 18px; color: var(--color-ink); font-variant-numeric: tabular-nums }
+.twin[data-spinning] .twin-plate > span { opacity: .25 }
+/* The original astronaut picture stands on the stage as it did in the first design, without the plate. */
+.twin[data-figure="astronaut"] .twin-plate { display: none }
+
+/* The stage hint sits in the left column, clear of the plate. */
+#stage .hint { max-width: 300px; white-space: normal; align-items: flex-start; line-height: 1.35 }
+#stage .hint i { flex: none; margin-top: 7px }
+
+/* ===== 360° view (spin.js) ===== */
+.twin-persp { position: absolute; inset: 0; perspective: 1600px }
+.twin-spin  { position: absolute; inset: 0; transform-origin: 720px 400px }
+.twin-spin.on { animation: twinSpin 6s linear infinite }
+@keyframes twinSpin { 0% { transform: rotateY(0deg) } 100% { transform: rotateY(360deg) } }
+
+/* ===== Scan sweep (scan.js) ===== */
+.twin-scan { position: absolute; inset: 0; overflow: visible; pointer-events: none }
+.scan-band { animation: scanY 3s linear forwards }
+.scan-line  { animation: scanY 3s linear forwards }
+@keyframes scanY { from { transform: translateY(0) } to { transform: translateY(820px) } }
+
+/* ===== Figure (figure.js) ===== */
+.twin-host { position: absolute; inset: 0 }
+.twin-fig {
+  position: absolute; display: block; overflow: visible;
+  --anatomy-paper: var(--twin-body);
+  --anatomy-face: var(--color-white);
+  --anatomy-top: var(--color-white);
+  --anatomy-shade-0: color-mix(in srgb, var(--color-deep) 17%, var(--twin-body));
+  --anatomy-shade-1: color-mix(in srgb, var(--color-deep) 12%, var(--twin-body));
+  --anatomy-shade-2: color-mix(in srgb, var(--color-deep) 7.5%, var(--twin-body));
+  --anatomy-shade-3: color-mix(in srgb, var(--color-deep) 3.5%, var(--twin-body));
+  --anatomy-hi:    color-mix(in srgb, var(--color-deep) 82%, var(--twin-body));
+  --anatomy-mid:   color-mix(in srgb, var(--color-deep) 52%, var(--twin-body));
+  --anatomy-lo:    color-mix(in srgb, var(--color-deep) 34%, var(--twin-body));
+  --anatomy-faint: color-mix(in srgb, var(--color-deep) 19%, var(--twin-body));
+  --anatomy-lit: var(--color-teal-ink);
+  --anatomy-lit-top: color-mix(in srgb, var(--color-teal) 16%, var(--color-white));
+  --anatomy-lit-shade: color-mix(in srgb, var(--color-teal) 30%, var(--color-white));
+  --anatomy-dot: var(--color-deep);
+  --anatomy-halo: var(--color-deep); --anatomy-halo-opacity: .2;
+  --anatomy-weight: .75px;
+}
+
+/* Rubber: boots, gloves and hoses. Same tones, darker ground. */
+.twin-mat-rubber {
+  --anatomy-paper: color-mix(in srgb, var(--color-deep) 34%, var(--twin-body));
+  --anatomy-face:  color-mix(in srgb, var(--color-deep) 30%, var(--twin-body));
+  --anatomy-top:   color-mix(in srgb, var(--color-deep) 24%, var(--twin-body));
+  --anatomy-shade-0: color-mix(in srgb, var(--color-deep) 50%, var(--twin-body));
+  --anatomy-shade-1: color-mix(in srgb, var(--color-deep) 44%, var(--twin-body));
+  --anatomy-shade-2: color-mix(in srgb, var(--color-deep) 38%, var(--twin-body));
+  --anatomy-shade-3: color-mix(in srgb, var(--color-deep) 31%, var(--twin-body));
+  --anatomy-hi:    color-mix(in srgb, var(--color-forest) 92%, var(--twin-body));
+  --anatomy-faint: color-mix(in srgb, var(--color-deep) 58%, var(--twin-body));
+}
+
+.twin-visor  { fill: color-mix(in srgb, var(--color-forest) 86%, var(--color-deep)); stroke: none }
+.twin-glint  { fill: none; stroke: var(--color-soft); stroke-width: 1.4; stroke-linecap: round; opacity: .8 }
+.twin-screen { fill: color-mix(in srgb, var(--color-forest) 80%, var(--color-deep)); stroke: none }
+.twin-iris   { fill: var(--anatomy-paper); stroke: none }
+
+/* ===== Drawing kit (tools/twin/kit/iso.css, the rules this figure uses) ===== */
+.iso-svg path, .iso-svg circle, .iso-svg line, .iso-svg rect { vector-effect: non-scaling-stroke }
+.iso-fill { fill: var(--anatomy-paper); stroke: none }
+.iso-solid[data-lit] > .iso-fill { fill: var(--anatomy-face) }
+.iso-shade, .iso-top { stroke: none }
+.iso-shade[data-shade="0"] { fill: var(--anatomy-shade-0) }
+.iso-shade[data-shade="1"] { fill: var(--anatomy-shade-1) }
+.iso-shade[data-shade="2"] { fill: var(--anatomy-shade-2) }
+.iso-shade[data-shade="3"] { fill: var(--anatomy-shade-3) }
+.iso-top { fill: var(--anatomy-top) }
+.iso-solid[data-lit] > .iso-top   { fill: var(--anatomy-lit-top) }
+.iso-solid[data-lit] > .iso-shade { fill: var(--anatomy-lit-shade) }
+.iso-solid[data-seamless] > .iso-shade, .iso-solid[data-seamless] > .iso-top { stroke-width: .4; stroke-linejoin: round }
+.iso-solid[data-seamless] > .iso-shade[data-shade="0"] { stroke: var(--anatomy-shade-0) }
+.iso-solid[data-seamless] > .iso-shade[data-shade="1"] { stroke: var(--anatomy-shade-1) }
+.iso-solid[data-seamless] > .iso-shade[data-shade="2"] { stroke: var(--anatomy-shade-2) }
+.iso-solid[data-seamless] > .iso-shade[data-shade="3"] { stroke: var(--anatomy-shade-3) }
+.iso-solid[data-seamless] > .iso-top { stroke: var(--anatomy-top) }
+.iso-solid[data-seamless][data-lit] > .iso-top   { stroke: var(--anatomy-lit-top) }
+.iso-solid[data-seamless][data-lit] > .iso-shade { stroke: var(--anatomy-lit-shade) }
+.iso-solid[data-lit] > .iso-edge { stroke: var(--anatomy-lit) }
+.iso-halo { fill: var(--anatomy-halo); stroke: none; filter: blur(10px); opacity: var(--anatomy-halo-opacity); transform: translateY(4px) }
+.iso-line { fill: none; stroke: var(--anatomy-lo); stroke-width: var(--anatomy-weight); stroke-linecap: round; stroke-linejoin: round }
+.iso-line[data-tone="hi"]    { stroke: var(--anatomy-hi) }
+.iso-line[data-tone="mid"]   { stroke: var(--anatomy-mid) }
+.iso-line[data-tone="lo"]    { stroke: var(--anatomy-lo) }
+.iso-line[data-tone="faint"] { stroke: var(--anatomy-faint) }
+.iso-line[data-tone="lit"]   { stroke: var(--anatomy-lit) }
+.iso-dots circle { fill: var(--anatomy-dot); stroke: none; opacity: .32 }
+.iso-dots[data-tone="hi"] circle  { opacity: .85 }
+.iso-dots[data-tone="mid"] circle { opacity: .45 }
+.iso-dots[data-tone="lo"] circle  { opacity: .22 }
+.tb-body  { fill: var(--anatomy-shade-2); stroke: none }
+.tb-shine { fill: var(--anatomy-top); stroke: none }
+.tb-shade { fill: var(--anatomy-shade-0); stroke: none }
+
+/* ===== Heart rate: parts that live on the machine ===== */
+.twin-hr-live { --hr: var(--lv, var(--color-none)); --hr-ink: var(--lv-ink, var(--color-none-ink)) }
+.twin-dial-band  { stroke: var(--color-teal); stroke-width: 1.6px; opacity: .55 }
+.twin-dial-limit { fill: var(--color-crit); opacity: .7 }
+.twin-needle { stroke: var(--hr-ink); stroke-width: 1.5px; stroke-linecap: round; transition: stroke .4s var(--ease) }
+.twin-trace  { fill: none; stroke: var(--color-aqua); stroke-width: 1.1px; stroke-linejoin: round; stroke-linecap: round }
+.twin-hr-live[data-level="attention"] .twin-trace { stroke: var(--color-warn-soft) }
+.twin-hr-live[data-level="surgeon"]   .twin-trace { stroke: var(--color-crit-toast) }
+.twin-hr-live[data-signal="off"] .twin-trace { stroke: var(--color-none-soft); opacity: .6 }
+.twin-pip { fill: var(--hr); opacity: .35; transition: opacity .25s ease-out }
+.twin-hr-live[data-beat] .twin-pip { opacity: 1; transition-duration: 0s }
+.twin-hr-live[data-signal="off"] .twin-pip { fill: var(--color-none); opacity: .4 }
+
+/* The lamp lens lights on each beat. */
+[data-part="lamp"] .iso-top, [data-part="lamp"] .iso-shade { transition: fill .22s ease-out }
+.twin-fig [data-part="lamp"][data-on] .iso-top   { fill: var(--color-aqua); transition-duration: 0s }
+.twin-fig [data-part="lamp"][data-on] .iso-shade { fill: var(--color-teal); transition-duration: 0s }
+
+/* ===== Heart rate: what the open port shows ===== */
+.twin-ov { pointer-events: none; --anatomy-lit: var(--lv-ink);
+  --anatomy-lit-top:   color-mix(in srgb, var(--lv) 34%, var(--color-white));
+  --anatomy-lit-shade: color-mix(in srgb, var(--lv) 60%, var(--color-white));
+  --anatomy-face:      color-mix(in srgb, var(--lv) 30%, var(--color-white)) }
+.twin-cavity      { fill: color-mix(in srgb, var(--color-deep) 30%, var(--twin-body)); stroke: none }
+.twin-cavity-back { fill: color-mix(in srgb, var(--color-deep) 42%, var(--twin-body)); stroke: none }
+.twin-lung        { fill: color-mix(in srgb, var(--color-deep) 34%, var(--twin-body)); stroke: none }
+.twin-ov .iso-line[data-tone="faint"] { stroke: color-mix(in srgb, var(--color-deep) 60%, var(--twin-body)) }
+.twin-ov .tb-body  { fill: color-mix(in srgb, var(--lv) 46%, var(--color-white)) }
+.twin-ov .tb-shine { fill: color-mix(in srgb, var(--lv) 28%, var(--color-white)) }
+.twin-ov .tb-shade { fill: color-mix(in srgb, var(--lv) 64%, var(--color-white)) }
+.twin-ov .tb .iso-line { stroke: var(--lv-ink) }
+.twin-ov[data-signal="off"] .tb-body, .twin-ov[data-signal="off"] .tb-shine, .twin-ov[data-signal="off"] .tb-shade { fill: var(--twin-body) }
+.twin-aperture { fill: none; stroke: var(--lv-ink); stroke-width: 1.4px }
+.twin-ov[data-state="pinned"] .twin-aperture { stroke-width: 2.2px }
+.twin-pulse { fill: none; stroke: var(--lv); stroke-width: 1.6px; opacity: 0 }
+.twin-glow  { fill: var(--lv); filter: blur(22px); mix-blend-mode: multiply; opacity: 0 }
+
+/* The bpm tag beside the port: fades in with it, its dot blinks on each beat. */
+.twin-bpm rect { fill: var(--color-white); stroke: color-mix(in srgb, var(--lv) 55%, var(--color-white)); stroke-width: 1px }
+.twin-ov[data-state="pinned"] .twin-bpm rect { stroke: var(--lv-ink); stroke-width: 1.5px }
+.twin-bpm text { font-family: var(--font-mono); font-size: 13px; fill: var(--color-ink); font-variant-numeric: tabular-nums }
+.twin-bpm .twin-bpm-v { font-weight: 700 }
+.twin-bpm .twin-bpm-u { fill: var(--color-muted); font-size: 11.5px }
+.twin-bpm-dot { fill: var(--lv); opacity: .35; transition: opacity .25s ease-out }
+.twin-bpm[data-beat] .twin-bpm-dot { opacity: 1; transition-duration: 0s }
+.twin-ov[data-signal="off"] .twin-bpm-dot { fill: var(--color-none); opacity: .4 }
+.twin-ov[data-signal="off"] .twin-bpm text { fill: var(--color-muted) }
+
+/* No trusted reading: the heart is shown as an unlit model and nothing beats. */
+.twin-ov[data-signal="off"] { --anatomy-lit: var(--color-none-ink);
+  --anatomy-lit-top: var(--twin-body); --anatomy-lit-shade: color-mix(in srgb, var(--color-none) 22%, var(--twin-body)); --anatomy-face: var(--twin-body) }
+.twin-ov[data-signal="off"] .twin-heart { opacity: .7 }
+.twin-ov[data-signal="off"] .twin-heart .iso-edge { stroke-dasharray: 2.5 2.5 }
+
+/* Compact layout: the stage is drawn at 40 %, so the corner texts are too small to read. */
+#view-overview.compact .twin-plate > span { display: none }

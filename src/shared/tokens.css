@@ -1,0 +1,113 @@
+/* ==========================================================================
+   TOKENS · Tesai visual system (mint + deep teal, glass, mono numbers)
+   Single source of truth — edit only this file to retheme the whole app.
+   ========================================================================== */
+
+/* Registered custom properties: allow smooth CSS transitions on color tokens */
+@property --tw1 { syntax: '<color>'; inherits: true; initial-value: #48C9B0 }
+@property --tw2 { syntax: '<color>'; inherits: true; initial-value: #0B556B }
+
+:root {
+  /* ===== 1. BASE PALETTE ===== */
+  --color-white:   #FFFFFF;
+  --color-bg:      #C8E8EB;
+  --color-ink:     #0D2B26;
+  --color-muted:   #42655F;
+  --color-slate:   #4A706A;
+  --color-teal:    #138D75;
+  --color-teal-ink:#0B6E5B;
+  --color-deep:    #0B556B;
+  --color-aqua:    #48C9B0;
+  --color-navy:    #1F4E78;
+  --color-brand-1: #169873;
+  --color-mint:    #B8E6C4;
+  --color-halo:    #8ECFD4;
+  --color-forest:  #0A362C;
+  --color-soft:    #A6DCD0;
+  --color-toast-text: #CFE8E2;
+
+  /* ===== 2. TRAFFIC LIGHT ===== */
+  --color-ok:         var(--color-teal);
+  --color-ok-ink:     var(--color-teal-ink);
+  --color-warn:       #E39A0B;
+  --color-warn-ink:   #7A4800;
+  --color-warn-soft:  #F2B84B;
+  --color-warn-deep:  #B36A00;
+  --color-on-warn:    #2B1A00;
+  --color-crit:       #D4324F;
+  --color-crit-ink:   #A81C38;
+  --color-crit-soft:  #F0788A;
+  --color-crit-toast: #FF8DA0;
+  --color-sensor:     #4F6D8F;
+  --color-sensor-ink: #2F4A68;
+  --color-sensor-toast: #9DB8D6;
+  --color-none:       #7C9A95;
+  --color-none-ink:   #3F5D58;
+  --color-none-soft:  #A9BDB9;
+
+  /* ===== 3. SURFACES & LINES (derived) ===== */
+  --glass:   color-mix(in srgb, var(--color-white) 55%, transparent);
+  --glass-2: color-mix(in srgb, var(--color-white) 74%, transparent);
+  --glass-3: color-mix(in srgb, var(--color-white) 90%, transparent);
+  --line:    color-mix(in srgb, var(--color-deep)  12%, transparent);
+  --line-2:  color-mix(in srgb, var(--color-deep)  20%, transparent);
+  --tint:    color-mix(in srgb, var(--color-teal)  12%, transparent);
+  --tint-soft: color-mix(in srgb, var(--color-teal)  8%, transparent);
+  --focus-ring: color-mix(in srgb, var(--color-teal) 25%, transparent);
+
+  /* ===== 4. GRADIENTS ===== */
+  --grad-brand:  linear-gradient(135deg, var(--color-brand-1) 0%, var(--color-deep) 100%);
+  --grad-accent: linear-gradient(135deg, var(--color-aqua)    0%, var(--color-navy) 100%);
+  --grad-dark:   linear-gradient(135deg, var(--color-forest)  0%, var(--color-deep) 100%);
+  --grad-page:
+    radial-gradient(ellipse 38% 52% at 50% 48%, var(--color-halo) 0%, color-mix(in srgb, var(--color-halo)  0%, transparent) 100%),
+    radial-gradient(ellipse 40% 40% at 14% 82%, var(--color-mint) 0%, color-mix(in srgb, var(--color-mint)  0%, transparent) 100%),
+    radial-gradient(ellipse 36% 36% at 88% 12%, var(--color-mint) 0%, color-mix(in srgb, var(--color-mint)  0%, transparent) 100%),
+    var(--color-bg);
+
+  /* ===== 5. SHADOWS ===== */
+  --shadow-s: 0  6px 20px color-mix(in srgb, var(--color-deep) 6%,  transparent);
+  --shadow-m: 0 10px 30px color-mix(in srgb, var(--color-deep) 10%, transparent);
+  --shadow-l: 0 30px 60px color-mix(in srgb, var(--color-deep) 18%, transparent);
+  --shadow-dark: 0 20px 40px color-mix(in srgb, var(--color-forest) 25%, transparent);
+
+  /* ===== 6. CHARTS & TWIN ===== */
+  --chart-line: var(--color-teal);
+  --chart-base: var(--color-deep);
+  --chart-grid: color-mix(in srgb, var(--color-deep) 9%, transparent);
+  --chart-area: color-mix(in srgb, var(--color-aqua) 20%, transparent);
+  --chart-dot-bad: var(--color-muted);
+  --band-ok:   color-mix(in srgb, var(--color-teal) 13%, transparent);
+  --band-warn: color-mix(in srgb, var(--color-warn) 20%, transparent);
+  --band-crit: color-mix(in srgb, var(--color-crit) 12%, transparent);
+  --twin-body: #F4FCFB;
+  --scan-hi:   #E9FFF9;
+
+  /* ===== 7. TYPOGRAPHY ===== */
+  --font-ui:   'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  --fs-xs:   12px;
+  --fs-sm:   13px;
+  --fs-md:   14px;
+  --fs-lg:   15.5px;
+  --fs-xl:   18px;
+  --fs-num:  38px;
+  --fs-hero: 54px;
+
+  /* ===== 8. SHAPE & MOTION ===== */
+  --r-pill: 999px;
+  --r-xl:   24px;
+  --r-lg:   20px;
+  --r-md:   16px;
+  --r-sm:   12px;
+  --ease:   cubic-bezier(.2, .8, .2, 1);
+}
+
+/* ===== Traffic-light data-level bindings ===== */
+[data-level="normal"]  { --lv: var(--color-ok);     --lv-ink: var(--color-ok-ink);   --lv-bg: color-mix(in srgb, var(--color-ok)   12%, transparent) }
+[data-level="attention"]{ --lv: var(--color-warn);   --lv-ink: var(--color-warn-ink); --lv-bg: color-mix(in srgb, var(--color-warn) 20%, transparent) }
+[data-level="surgeon"] { --lv: var(--color-crit);   --lv-ink: var(--color-crit-ink); --lv-bg: color-mix(in srgb, var(--color-crit) 13%, transparent) }
+[data-level="partial"],
+[data-level="nodata"]  { --lv: var(--color-none);   --lv-ink: var(--color-none-ink); --lv-bg: color-mix(in srgb, var(--color-slate) 13%, transparent) }
+[data-level="sensor"]  { --lv: var(--color-sensor); --lv-ink: var(--color-sensor-ink); --lv-bg: color-mix(in srgb, var(--color-sensor) 15%, transparent) }

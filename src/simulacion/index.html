@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Simulation · Tesai</title>
+<link rel="icon" href="../assets/logo/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="../assets/logo/tesai-logo.svg">
+<link rel="apple-touch-icon" href="../assets/logo/tesai-logo-180.png">
+<meta name="theme-color" content="#C8E8EB">
+<meta name="author" content="Team Higía">
+<meta property="og:site_name" content="Tesai">
+<link rel="stylesheet" href="../shared/fonts.css">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/site-bar.css">
+<link rel="stylesheet" href="../shared/buttons.css">
+<script src="../shared/lang.js"></script>
+<script src="../shared/site-bar.js" defer></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<canvas id="scene" aria-label="Vista en primera persona de la simulación"></canvas>
+<div id="dust"></div><div id="tint"></div><div id="alertGlow"></div><div id="glare"></div><div id="helmet"></div><div id="flash"></div>
+
+<div id="hud">
+  <button type="button" id="menuBtn" aria-label="Pausa y menú"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg><span>Menú</span><kbd>Esc</kbd></button>
+  <div id="top" class="card">
+    <span class="label">MET</span><span id="clock" class="mono v">00:00</span>
+    <span class="sep"></span>
+    <span class="label" id="infoLabel">Rumbo</span><span id="infoVal" class="mono v">—</span>
+    <span class="sep"></span>
+    <span class="label" id="lvlTag">Sol 214</span>
+  </div>
+
+  <div id="left" class="col">
+    <div id="suit" class="card">
+      <span class="label" id="suitLabel">Tu traje · Tomás</span>
+      <div class="grid2">
+        <div class="kv"><span class="label">Tu pulso</span><b class="big" id="myHr">88</b></div>
+        <div class="kv"><span class="label" id="o2Label">O<sub>2</sub> traje</span><b class="big" id="o2">78%</b></div>
+        <div class="kv"><span class="label">CO<sub>2</sub></span><b id="co2">0.4 kPa</b></div>
+        <div class="kv"><span class="label">Presión</span><b id="pres">4.3 psi</b></div>
+        <div class="kv"><span class="label">Temp.</span><b id="temp">21.4 °C</b></div>
+        <div class="kv"><span class="label">Batería</span><b id="batt">86%</b></div>
+        <div class="kv"><span class="label">Radiación</span><b id="rad">0.64 mSv/d</b></div>
+        <div class="kv"><span class="label" id="xLabel">Polvo visor</span><b id="xVal">0%</b></div>
+      </div>
+    </div>
+    <div id="ai" class="card">
+      <div class="row"><span class="label">Tesai · segundo médico</span><span class="label mono" id="voiceState">Voz · M</span></div>
+      <p class="msg" id="aiMsg">Listo.</p>
+      <ul id="aiSteps"></ul>
+    </div>
+  </div>
+
+  <div id="right" class="col">
+    <div id="crew" class="card">
+      <div class="row"><span class="label" id="crewLabel">Ana · biomonitor</span><span class="label mono" id="crewDist">—</span></div>
+      <div class="row" style="margin-top:6px"><span class="big mono" id="crewHr">76</span><span class="mono" style="font-size:14px">SpO<sub>2</sub> <span id="crewSpo2">98%</span></span></div>
+      <div class="label" id="crewRhythm">Ritmo sinusal</div>
+      <canvas id="ecg" width="460" height="108"></canvas>
+      <div class="grid2">
+        <div class="kv"><span class="label">Presión art.</span><b id="crewBp">118/76</b></div>
+        <div class="kv"><span class="label">Respiración</span><b id="crewRr">14 rpm</b></div>
+        <div class="kv"><span class="label">Temp.</span><b id="crewTemp">36.8 °C</b></div>
+        <div class="kv"><span class="label" id="crewXLabel">Confianza</span><b id="crewX">99%</b></div>
+      </div>
+    </div>
+    <div id="earth" class="card">
+      <div class="row"><span class="label">Tierra · envío automático</span><span class="label mono" id="pkCount">0</span></div>
+      <div class="row" style="margin-top:6px"><span class="label">Retardo una vía</span><span class="big mono" id="delay">20:00</span></div>
+      <div id="pkList" style="margin-top:6px"></div>
+      <div class="row" style="margin-top:6px"><span class="label">Respuesta médica</span><span class="mono" id="reply" style="font-size:13px">—</span></div>
+    </div>
+  </div>
+
+  <div id="banner" class="card" role="alert">
+    <h2 id="bTitle"></h2><p id="bBody"></p>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div id="dustWarn" class="card">Regolito en el visor · mantén <kbd>R</kbd></div>
+  <div id="marker"><div class="d"></div><span id="markerLabel"></span></div>
+  <div id="reticle"></div>
+  <svg id="ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="3"/><circle id="ringArc" cx="32" cy="32" r="28" fill="none" stroke="#f5f5f7" stroke-width="3" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="176" transform="rotate(-90 32 32)"/></svg>
+  <div id="med" class="card">
+    <span class="label" id="medTitle">DEA</span>
+    <div id="medBig">—</div>
+    <div id="medSub"></div>
+    <div id="metro"></div>
+    <div id="medRate" class="mono"></div>
+    <div class="bar"><i id="medBar"></i></div>
+    <p id="medNote"></p>
+  </div>
+  <div id="objective" class="card">
+    <span class="label" id="objLabel">Objetivo</span>
+    <div class="t" id="objText"></div>
+    <div class="h" id="objHint"></div>
+  </div>
+</div>
+
+<div id="watch"><span class="wl" id="wTitle">Ana</span><span class="wv mono" id="wVal">76</span><span class="ws" id="wSub">Todo bien</span></div>
+<div id="lookHint">Haz clic para mirar con el mouse · Esc para pausar y abrir el menú</div>
+<div id="touch">
+  <button class="tbtn" data-k="KeyE">E</button>
+  <button class="tbtn" data-k="KeyR" data-only="eva">R</button>
+  <button class="tbtn" data-k="KeyC" data-only="ship">C</button>
+  <button class="tbtn wide" data-k="Space">Espacio</button>
+</div>
+
+<div id="menu" class="overlay">
+  <div class="tesai-bar is-sticky"><tesai-brand root="../"></tesai-brand><span class="bar-label">NASA Space Apps 2026</span><div class="bar-right"><tesai-lang></tesai-lang></div></div>
+  <div class="menuWrap">
+    <header class="hero">
+      <h1>Un segundo médico dentro de tu visor.</h1>
+      <p>Tesai lee los signos vitales de toda la tripulación, te guía paso a paso en una emergencia y envía todo a la Tierra automáticamente, porque desde Marte la Tierra tarda hasta 20 minutos en enterarse.</p>
+    </header>
+    <div class="levels">
+      <button class="lv" data-level="eva">
+        <img src="./img/eva.webp" alt="Astronauta caminando sobre la superficie rojiza de Marte con un rover al fondo" />
+        <div class="body"><span class="label">Simulación 1</span><h2>EVA en Marte</h2><p>Ana colapsa en plena caminata. Con el traje puesto no hay RCP posible: el DEA del rover es la clave. Y el regolito no deja ver.</p><div class="tags"><span class="tag">Retardo 20 min</span><span class="tag">Regolito</span><span class="tag">DEA</span></div><span class="go">Iniciar simulación</span></div>
+      </button>
+      <button class="lv" data-level="rover">
+        <img src="./img/rover.webp" alt="Interior de un rover presurizado con vista al desierto marciano" />
+        <div class="body"><span class="label">Simulación 2</span><h2>Rover presurizado</h2><p>Luis se desploma al volante. Tesai detiene el rover, avisa a todos y te guía con el DEA y la RCP dentro de la cabina.</p><div class="tags"><span class="tag">Retardo 20 min</span><span class="tag">RCP guiada</span><span class="tag">DEA</span></div><span class="go">Iniciar simulación</span></div>
+      </button>
+      <button class="lv" data-level="ship">
+        <img src="./img/ship.webp" alt="Interior blanco de una nave espacial con una ventana redonda que muestra Marte" />
+        <div class="body"><span class="label">Simulación 3</span><h2>Nave en tránsito</h2><p>Día 96 rumbo a Marte. Mei pierde el conocimiento en microgravedad: hay que fijarla a la camilla antes de reanimarla.</p><div class="tags"><span class="tag">Retardo 12 min</span><span class="tag">Microgravedad</span><span class="tag">RCP guiada</span></div><span class="go">Iniciar simulación</span></div>
+      </button>
+    </div>
+    <div class="features">
+      <div class="feat"><b>Visor con datos</b><span>ECG, SpO₂, presión, respiración y estado del traje de cada tripulante, siempre a la vista.</span></div>
+      <div class="feat"><b>Segundo médico</b><span>Detecta el paro, te dice qué hacer y te marca el ritmo de la RCP en tiempo real, con voz.</span></div>
+      <div class="feat"><b>Envío automático</b><span>Cada evento sale solo hacia la Tierra. Cuando responden, tú ya actuaste.</span></div>
+    </div>
+    <div class="controlsRow">
+      <span><kbd>W A S D</kbd> moverse</span><span><kbd>Mouse</kbd> mirar</span><span><kbd>E</kbd> mantener para actuar</span><span><kbd>Espacio</kbd> RCP · saltar · subir</span><span><kbd>R</kbd> limpiar visor</span><span><kbd>M</kbd> voz del asistente</span>
+    </div>
+    <p class="note">Simulación educativa. La guía de RCP es simplificada y no reemplaza un curso certificado.</p>
+  </div>
+</div>
+
+<div id="pause" class="overlay hide" role="dialog" aria-modal="true" aria-labelledby="pauseT">
+  <div class="panel">
+    <span class="label">Pausa</span>
+    <h1 id="pauseT">Simulación en pausa</h1>
+    <p>El reloj y la guía están detenidos. Tu progreso en esta simulación se pierde si cambias de simulación o vuelves a Tesai.</p>
+    <div class="btns">
+      <button class="btn brand" id="resume" type="button">Continuar</button>
+      <button class="btn" id="pAgain" type="button">Elegir otra simulación</button>
+      <a class="btn" href="../">Volver a Tesai</a>
+    </div>
+  </div>
+</div>
+
+<div id="end" class="overlay hide">
+  <div class="panel">
+    <span class="label">Resumen de la simulación</span>
+    <h1 id="endTitle"></h1>
+    <div>
+      <div class="stat"><span>Alerta → pulso recuperado</span><b class="mono" id="sReact">—</b></div>
+      <div class="stat"><span>Primera respuesta posible de la Tierra</span><b class="mono" id="sEarth">—</b></div>
+      <div class="stat"><span>Paquetes enviados solos a la Tierra</span><b class="mono" id="sPk">0</b></div>
+      <div class="stat"><span>Calidad de la RCP (100–120 cpm)</span><b class="mono" id="sCpr">—</b></div>
+      <div class="stat"><span>Dispositivos alertados</span><b id="sDev">—</b></div>
+    </div>
+    <p id="endBody"></p>
+    <div class="btns"><button class="btn brand" id="again">Elegir otra simulación</button><a class="btn" href="../">Volver a Tesai</a></div>
+  </div>
+</div>
+
+<script src="js/i18n.js"></script>
+<script type="module" src="js/scene.js"></script>
+<script type="module" src="js/sim.js"></script>
+</body>
+</html>

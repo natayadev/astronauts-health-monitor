@@ -1,0 +1,60 @@
+/* ==========================================================================
+   RESPONSIVE · every @media block of layout.css, loaded after the components so it wins over them
+   ========================================================================== */
+
+@media (max-width: 1400px) { .live { display: none } }
+
+@media (max-width: 1120px) {
+  .who-text span { display: none }
+  .tab { padding: 9px 12px }
+  .src .lg { display: none }
+  .src .sm { display: inline }
+}
+
+@media (max-width: 1000px) {
+  .nav-wrap { padding: 8px 12px 0 }
+  .nav { padding: 6px 6px 6px 14px; gap: 8px }
+  .tabs { display: none }
+  .dock { display: flex }
+  .src { padding: 6px 10px }
+  .src .lg { display: none }
+  .src .sm { display: inline }
+  .who-text span { display: none }
+  .live { display: none }
+  .view { padding: 16px 14px 120px }
+  .view-wide { padding: 0 0 24px }
+  .strip-wrap { padding: 8px 12px 0 }
+  .dockbar { width: calc(100% - 24px) }
+  .today { padding: 0 12px 120px }
+  .drawer {
+    top: auto; left: 8px; right: 8px; bottom: 8px;
+    width: auto; max-width: none; max-height: 78vh;
+    transform: translateY(calc(100% + 24px));
+  }
+  .drawer.open { transform: none }
+  .scrim {
+    display: block; position: fixed; inset: 0; z-index: 39;
+    background: color-mix(in srgb, var(--color-ink) 30%, transparent);
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s var(--ease);
+  }
+  .scrim.on { opacity: 1; pointer-events: auto }
+  #view-overview { padding-bottom: 110px }
+  .diag-grid { grid-template-columns: minmax(0, 1fr) }
+}
+
+@media (max-width: 760px) {
+  .g2 { grid-template-columns: minmax(0, 1fr) }
+  .page-head h2 { font-size: 22px }
+  .arow { grid-template-columns: auto minmax(0, 1fr) }
+  .arow .side { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center }
+  .dockbar .sep { display: none }
+  .dockbar .acts { width: 100% }
+  .dockbar .acts .btn { flex: 1 }
+}
+
+@media (max-width: 560px) {
+  .who-text, .who-btn > .ic { display: none }
+  .who-btn { padding: 4px }
+  .nav { padding: 6px 6px 6px 12px }
+}

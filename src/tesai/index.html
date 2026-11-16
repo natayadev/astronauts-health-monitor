@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · Tesai</title>
+<meta name="description" content="Tesai: health twin for space crews. Simulated data, with an abstract data layer ready for real sources.">
+<link rel="icon" href="../assets/logo/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="../assets/logo/tesai-logo.svg">
+<link rel="apple-touch-icon" href="../assets/logo/tesai-logo-180.png">
+<meta name="theme-color" content="#C8E8EB">
+<meta name="author" content="Team Higía">
+<meta property="og:site_name" content="Tesai">
+
+<link rel="stylesheet" href="../shared/fonts.css">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/site-bar.css">
+<script src="../shared/lang.js"></script>
+<script src="../shared/site-bar.js" defer></script>
+
+<!-- Design system: tokens → base → layout → components -->
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/layout.css">
+<link rel="stylesheet" href="../shared/buttons.css">
+<link rel="stylesheet" href="styles/components/nav.css">
+<link rel="stylesheet" href="styles/components/cards.css">
+<link rel="stylesheet" href="styles/components/badges.css">
+<link rel="stylesheet" href="styles/components/drawer.css">
+<link rel="stylesheet" href="styles/components/toasts.css">
+<link rel="stylesheet" href="styles/components/lists.css">
+<link rel="stylesheet" href="styles/components/charts.css">
+<link rel="stylesheet" href="styles/components/forms.css">
+<link rel="stylesheet" href="styles/components/evidence.css">
+<link rel="stylesheet" href="styles/components/visor.css">
+<link rel="stylesheet" href="styles/components/checkin.css">
+<link rel="stylesheet" href="styles/components/twin.css">
+<link rel="stylesheet" href="styles/components/wearables.css">
+<link rel="stylesheet" href="styles/responsive.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div id="app">
+
+
+  <!-- ===================== TOP BAR ===================== -->
+  <header class="nav-wrap">
+    <nav class="nav" aria-label="Main">
+      <tesai-brand root="../"></tesai-brand>
+      <div class="tabs" id="tabs">
+        <button class="tab" data-view="overview" aria-current="page">Overview</button>
+        <button class="tab" data-view="visor">Visor</button>
+        <button class="tab" data-view="biometrics">Biometrics</button>
+        <button class="tab" data-view="checkin">Check-in</button>
+        <button class="tab" data-view="history">History</button>
+        <button class="tab" data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>About</button>
+      </div>
+      <div class="spacer"></div>
+      <tesai-lang></tesai-lang>
+      <button class="btn icon-btn" id="btn-audio" type="button" aria-pressed="true" aria-label="Audio on" title="Audio on">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button>
+      <div class="who" id="bell-wrap">
+        <button class="btn icon-btn" id="bell" aria-haspopup="true" aria-expanded="false" aria-controls="notif-pop" aria-label="Active alerts">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="bell-count" id="bell-count" aria-hidden="true"></span>
+        </button>
+        <div class="menu" id="notif-pop" hidden role="region" aria-label="Alerts that need attention" style="width:360px"></div>
+      </div>
+      <div class="who" id="who-wrap">
+        <button class="who-btn" id="who-btn" aria-haspopup="true" aria-expanded="false" aria-controls="who-menu">
+          <span class="avatar" id="who-av" data-level="nodata">--</span>
+          <span class="who-text"><b id="who-name">Loading…</b><span id="who-sid"></span></span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--color-muted)"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="menu" id="who-menu" hidden role="menu" aria-label="Monitored crew members"></div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+
+    <!-- ===================== OVERVIEW ===================== -->
+    <section class="view view-wide active" id="view-overview" aria-labelledby="h-overview">
+      <h2 class="sr-only" id="h-overview">Crew overview</h2>
+      <div class="strip-wrap"><div class="strip" id="strip" data-level="nodata"></div></div>
+
+      <div id="stage-wrap">
+        <div id="stage-box">
+          <div id="stage" data-level="normal">
+            <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id="tz-tint" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" style="stop-color:var(--tw1)"/>
+                  <stop offset="1" style="stop-color:var(--tw2)"/>
+                </linearGradient>
+                <filter id="tz-glow" x="-100%" y="-100%" width="300%" height="300%">
+                  <feGaussianBlur stdDeviation="3.5" result="b"/>
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <pattern id="tz-lines" width="12" height="11" patternUnits="userSpaceOnUse">
+                  <line x1="0" y1="0.5" x2="12" y2="0.5" style="stroke:var(--color-teal)" stroke-width=".7" stroke-opacity=".45"/>
+                </pattern>
+              </defs>
+            </svg>
+            <svg viewBox="0 0 1440 780" width="1440" height="780" aria-hidden="true" focusable="false">
+              <g fill="none" style="stroke:var(--color-deep)" stroke-opacity=".12">
+                <circle cx="720" cy="400" r="190"/>
+                <circle cx="720" cy="400" r="290" stroke-dasharray="2 6"/>
+                <circle cx="720" cy="400" r="390" stroke-opacity=".07"/>
+                <line x1="720" y1="0" x2="720" y2="780" stroke-dasharray="2 8"/>
+              </g>
+            </svg>
+            <!-- astronaut twin (plate, figure, 360° view, scan sweep): drawn by js/twin/twin.js -->
+            <div id="twin" aria-hidden="true"></div>
+            <svg id="layer-links" viewBox="0 0 1440 780" width="1440" height="780" style="position:absolute;inset:0;overflow:visible" focusable="false"></svg>
+            <div id="cards"></div>
+            <div class="hint"><i></i>Pick a vital sign or a point on the body to open its history</div>
+          </div>
+        </div>
+      </div>
+      <div id="compact-host"></div>
+
+      <div class="dockbar on-dark" id="dockbar" role="region" aria-label="Crew member and actions">
+        <div class="person">
+          <span class="avatar" id="db-av" data-level="nodata">--</span>
+          <div><b id="db-name">—</b><span id="db-profile"></span></div>
+        </div>
+        <div class="sep" aria-hidden="true"></div>
+        <div class="stat"><span class="k">Monitoring</span><span class="v mono" id="db-met">--:--:--</span></div>
+        <div class="stat"><span class="k">Sensors</span><span class="v" id="db-sensors">--</span></div>
+        <div class="stat"><span class="k">Ground link</span><span class="v" id="db-link">--</span></div>
+        <div class="spacer"></div>
+        <div class="acts">
+          <button class="btn" id="btn-spin" aria-pressed="false">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5"/></svg>
+            360° view
+          </button>
+          <button class="btn" id="btn-scan" aria-pressed="false">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg>
+            <span id="scan-label">Scan system</span>
+          </button>
+          <button class="btn primary" id="btn-export">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Export report
+          </button>
+        </div>
+      </div>
+
+      <!-- Mini panels shown in the dockbar area: missions and environment summary -->
+      <div id="missions-mini" class="sr-only" aria-hidden="true"></div>
+      <span id="missions-summary" class="sr-only"></span>
+      <span id="score-streak" class="sr-only"></span>
+    </section>
+
+    <!-- ===================== BIOMETRICS ===================== -->
+    <!-- ===================== VISOR (crew vitals always in view + situation notice + second doctor) ===================== -->
+    <section class="view" id="view-visor" aria-labelledby="h-visor">
+      <div class="page-head" id="vz-head"></div>
+      <!-- First-person view: what the crew member sees through the helmet visor, with Tesai projected on the glass -->
+      <div class="vz-pov" id="vz-pov" data-scene="ship" data-alert="none">
+        <img class="vz-bg" data-scene="ship" src="assets/visor/ship.webp" alt="" width="1312" height="816" decoding="async">
+        <img class="vz-bg" data-scene="rover" src="assets/visor/rover.webp" alt="" width="1312" height="816" decoding="async" loading="lazy">
+        <div class="vz-helmet" aria-hidden="true"></div>
+        <div class="vz-hud">
+          <div id="vz-top"></div>
+          <div class="vz-col vz-left"><div id="vz-me"></div><div id="vz-doc"></div></div>
+          <div class="vz-col vz-right"><div id="vz-crew"></div><div id="vz-earth"></div></div>
+          <div id="vz-sit" aria-live="polite"></div>
+        </div>
+      </div>
+      <div id="vz-sim"></div>
+    </section>
+
+    <section class="view" id="view-biometrics" aria-labelledby="h-bio">
+      <div class="page-head">
+        <div>
+          <h2 id="h-bio">Biometrics</h2>
+          <p>All your vital signs, their recent trend and the quality of each reading. Tap a card to open its detail.</p>
+        </div>
+      </div>
+      <div class="vgrid" id="vgrid"></div>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-env">
+        <h3 id="h-env">
+          <span class="grow">Cabin environment</span>
+          <span id="env-mini-pill"></span>
+          <span id="env-overall"></span>
+        </h3>
+        <p class="sub">Atmosphere and radiation in the habitat. Ranges come from public NASA material and are illustrative; see About for the sources. Out-of-range values raise alerts; open them from the bell.</p>
+        <div class="vgrid" id="env-grid"></div>
+        <!-- Mini inline environment rows for the overview strip -->
+        <div id="env-mini" hidden aria-hidden="true"></div>
+        <p class="note" id="env-dose"></p>
+      </section>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-act">
+        <h3 id="h-act">
+          <span class="grow">Sleep and activity</span>
+          <span data-evslot="goal.activity"></span>
+        </h3>
+        <div id="activity-block"></div>
+      </section>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-q">
+        <h3 id="h-q"><span class="grow">Signal quality</span></h3>
+        <p class="sub">How clean the readings of the last 30 minutes were.</p>
+        <div class="kv" id="bio-quality"></div>
+      </section>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-wear">
+        <h3 id="h-wear"><span class="grow">Wearables</span></h3>
+        <p class="sub">The devices behind these readings. Press Explode to separate the parts.</p>
+        <div class="wz-grid" id="wz-grid"></div>
+      </section>
+    </section>
+
+    <!-- ===================== ALERTS ===================== -->
+    <section class="view" id="view-alerts" aria-labelledby="h-diag">
+      <div class="page-head">
+        <div>
+          <h2 id="h-diag">Alerts</h2>
+          <p>One alert per condition, with a lifecycle: active, acknowledged, resolved. Sensor problems are shown separately from health ones. You see all your own alerts, and your teammates' alerts only when they are critical (red).</p>
+        </div>
+        <div class="toolbar">
+          <div class="seg" id="alert-filter" role="group" aria-label="Filter alerts by state">
+            <button data-filter="active"       data-label="Active"       aria-pressed="true">Active</button>
+            <button data-filter="snoozed"      data-label="Snoozed"      aria-pressed="false">Snoozed</button>
+            <button data-filter="acknowledged" data-label="Acknowledged" aria-pressed="false">Acknowledged</button>
+            <button data-filter="resolved"     data-label="Resolved"     aria-pressed="false">Resolved</button>
+            <button data-filter="all"          data-label="All"          aria-pressed="false">All</button>
+          </div>
+        </div>
+      </div>
+      <div class="grid diag-grid">
+        <section class="panel" aria-labelledby="h-alerts">
+          <h3 id="h-alerts">
+            <span class="grow">Alert list <span class="tag">(local time)</span></span>
+            <span data-evslot="rule.escalation"></span>
+            <span data-evslot="rule.quality"></span>
+            <button class="btn sm" id="snooze-soft">Snooze non-critical</button>
+            <button class="btn sm" id="ack-soft">Acknowledge non-critical</button>
+          </h3>
+          <p class="sub" style="margin-top:0">Sorted by priority: <b>P1</b> critical, <b>P2</b> health and environment, <b>P3</b> sensors, <b>P4</b> reminders. A critical alert that stays unacknowledged for a minute is escalated. Non-critical alerts can be snoozed for 15 minutes.</p>
+          <div class="key" aria-label="Level key">
+            <span data-level="normal"><i class="lvdot"></i>Normal</span>
+            <span data-level="attention"><i class="lvdot"></i>Attention</span>
+            <span data-level="surgeon"><i class="lvdot"></i>Alert flight surgeons</span>
+            <span data-level="sensor"><i class="lvdot"></i>Sensor / reminder</span>
+            <span data-level="partial"><i class="lvdot"></i>Partial or no data</span>
+          </div>
+          <div id="alerts-list"></div>
+        </section>
+        <div class="grid" style="align-content:start">
+          <section class="dark-card on-dark" aria-labelledby="h-next">
+            <div class="eyebrow" id="h-next">Next step</div>
+            <p id="next-step" style="font-size:var(--fs-md);line-height:1.55;margin-top:6px"></p>
+            <p class="note" style="color:var(--color-soft);margin-top:8px">System guidance, not a medical diagnosis.</p>
+          </section>
+          <section class="panel" aria-labelledby="h-uplink">
+            <h3 id="h-uplink">
+              <span class="grow">Ground link</span>
+              <span data-evslot="rule.groundlink"></span>
+              <span class="pill" data-level="sensor">SIMULATED</span>
+            </h3>
+            <div class="alist" id="uplink"></div>
+          </section>
+          <section class="panel" aria-labelledby="h-dev">
+            <h3 id="h-dev">
+              <span class="grow">Sensors</span>
+              <span data-evslot="goal.batteries"></span>
+              <span class="tag" id="dev-note"></span>
+            </h3>
+            <div class="alist" id="dev-list"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HISTORY ===================== -->
+    <section class="view" id="view-history" aria-labelledby="h-hist">
+      <div class="page-head">
+        <div>
+          <h2 id="h-hist">History</h2>
+          <p>Recent series with the traffic-light bands and your personal baseline. Doubtful readings are marked with an empty circle and do not raise alerts. All times are local.</p>
+        </div>
+      </div>
+      <section class="panel" aria-labelledby="h-chart">
+        <h3 id="h-chart"><span class="grow">Trend</span></h3>
+        <div class="toolbar">
+          <label class="fld"><span>Vital sign</span><select id="hist-metric"></select></label>
+          <div class="fld">
+            <span id="lbl-win">Window</span>
+            <div class="seg" id="hist-window" role="group" aria-labelledby="lbl-win">
+              <button data-w="10" aria-pressed="false">10 min</button>
+              <button data-w="30" aria-pressed="true">30 min</button>
+              <button data-w="60" aria-pressed="false">60 min</button>
+            </div>
+          </div>
+          <span class="spacer"></span>
+          <button class="btn sm" id="hist-pause" aria-pressed="false">Pause</button>
+        </div>
+        <div class="chartbox">
+          <svg id="hist-chart" class="chart" viewBox="0 0 900 300" width="100%" role="img" aria-label="Trend chart" style="display:block"></svg>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--band-ok)"></i>Normal band</span>
+          <span><i style="background:var(--band-warn)"></i>Attention</span>
+          <span><i style="background:var(--band-crit)"></i>Alert flight surgeons</span>
+          <span><i style="background:none;border:1.5px dashed var(--color-deep)"></i>Baseline</span>
+          <span><i style="background:var(--color-white);border:1.5px solid var(--color-muted);border-radius:50%;width:9px;height:9px"></i>Doubtful reading</span>
+        </div>
+        <div class="kv" id="hist-stats"></div>
+      </section>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-bl">
+        <h3 id="h-bl">
+          <span class="grow">Your baseline</span>
+          <span data-evslot="rule.baseline"></span>
+        </h3>
+        <div class="kv" id="hist-baseline"></div>
+        <p class="note">A value is flagged as Attention if it deviates more than <b id="hist-dev">25</b>% from your baseline (except HRV).</p>
+      </section>
+
+      <div class="page-head" style="margin-top:34px">
+        <div>
+          <h2 id="h-miss">Missions and streak</h2>
+          <p>Daily habit goals. Completing all of them keeps the streak going.</p>
+        </div>
+      </div>
+      <div class="grid g2" style="align-items:start">
+        <section class="panel" aria-labelledby="h-miss">
+          <h3>
+            <span class="grow">Missions <span class="tag" id="missions-day"></span></span>
+            <span id="missions-summary"></span>
+          </h3>
+          <div class="alist" id="missions-full"></div>
+          <div class="toolbar">
+            <button class="btn sm" id="log-ex">+15 min exercise</button>
+            <button class="btn sm" id="log-hobby">+15 min hobby</button>
+            <button class="btn sm" id="log-water">I drank water (+10)</button>
+          </div>
+        </section>
+        <div class="grid" style="align-content:start">
+          <section class="panel">
+            <h3>
+              <span class="grow">Goal streak</span>
+              <span class="pill solid"><span id="streak-n">0</span> days</span>
+            </h3>
+            <div class="streak" id="streak-days" aria-label="Last 7 days"></div>
+            <p class="note">Best streak: <b id="streak-best">0</b> days <span id="streak-demo"></span></p>
+            <p class="note">Points: <b><span id="score-pts">0</span> pts</b> · Streak: <b><span id="score-streak">0</span> days</b></p>
+          </section>
+          <section class="panel">
+            <h3><span class="grow">Recent achievements</span></h3>
+            <div class="alist" id="achievements"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DAILY CHECK-IN ===================== -->
+    <section class="view" id="view-checkin" aria-labelledby="h-ci">
+      <div class="page-head">
+        <div>
+          <h2 id="h-ci">Daily check-in</h2>
+          <p>A short, private check-in about how you are today. It is not a clinical questionnaire and it does not diagnose anything. It never raises alerts and never earns points.</p>
+        </div>
+        <span data-evslot="checkin.items"></span>
+      </div>
+      <p class="banner-demo">The days before today are simulated for the demo. What you answer today is saved only on this device.</p>
+      <div class="grid g2" style="align-items:start;margin-top:16px">
+        <section class="panel" aria-labelledby="h-ci-today">
+          <h3 id="h-ci-today"><span class="grow">Today <span class="tag" id="ci-day"></span></span><span id="ci-state"></span></h3>
+          <p class="sub">Answering for <b id="ci-who"></b>. Every scale goes from 0 (worst) to 10 (best).</p>
+          <form id="ci-form" novalidate>
+            <div id="ci-items"></div>
+            <div class="toolbar ci-actions">
+              <button class="btn primary" type="submit" id="ci-submit">Save today’s check-in</button>
+              <button class="btn" type="button" id="ci-skip">Skip today</button>
+              <span class="spacer"></span>
+              <button class="btn sm" type="button" id="ci-clear">Delete my answers</button>
+            </div>
+          </form>
+        </section>
+        <div class="grid" style="align-content:start">
+          <section class="panel" aria-labelledby="h-ci-priv">
+            <h3 id="h-ci-priv"><span class="grow">Who sees this</span><span data-evslot="checkin.privacy"></span></h3>
+            <ul class="ci-who">
+              <li><b>You:</b> everything you answer.</li>
+              <li><b>Rest of the crew:</b> nothing, ever. No group averages either.</li>
+              <li><b>Crew medical officer:</b> nothing, unless you turn on sharing below.</li>
+              <li><b>Flight surgeons on Earth:</b> nothing in this prototype. Health and psychological communications are private under NASA standards.</li>
+            </ul>
+            <label class="switch"><input type="checkbox" id="ci-share"> Share a trend summary with the crew medical officer</label>
+            <div id="ci-share-note"></div>
+          </section>
+          <section class="panel" aria-labelledby="h-ci-trend">
+            <h3 id="h-ci-trend"><span class="grow">Compared with your usual</span><span data-evslot="checkin.trend"></span></h3>
+            <p class="sub">Last 14 days. Empty cells are skipped or missing days, which is normal.</p>
+            <div id="ci-trend"></div>
+          </section>
+          <section class="panel" aria-labelledby="h-ci-co2">
+            <h3 id="h-ci-co2"><span class="grow">Symptoms and cabin CO₂</span><span data-evslot="checkin.co2"></span></h3>
+            <div id="ci-co2"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ABOUT ===================== -->
+    <section class="view" id="view-about" aria-labelledby="h-about">
+      <div class="page-head">
+        <div>
+          <h2 id="h-about">About Tesai</h2>
+          <p id="about-tag"></p>
+        </div>
+      </div>
+      <div class="grid" id="about-body"></div>
+    </section>
+
+    <!-- ===================== ADVANCED (not in main nav; open via #/advanced) ===================== -->
+    <section class="view" id="view-advanced" aria-labelledby="h-sys">
+      <div class="page-head">
+        <div>
+          <h2 id="h-sys">Advanced</h2>
+          <p>Developer tools: data source, import and export, demo mode, appearance, thresholds and schema. This view is not in the main navigation; open it with <span class="mono">#/advanced</span>.</p>
+        </div>
+      </div>
+      <div class="grid g2" style="align-items:start">
+        <section class="panel" aria-labelledby="h-source">
+          <h3 id="h-source"><span class="grow">Data source</span></h3>
+          <label class="fld">
+            <span>Active source</span>
+            <select id="set-source">
+              <option value="dataset">Real data: MMASH, BIDSleep and OSDR (default)</option>
+              <option value="simulated">Simulated</option>
+              <option value="remote">Remote (API, not connected yet)</option>
+              <option value="file">Imported file</option>
+            </select>
+          </label>
+          <p class="note" id="source-status" role="status"></p>
+          <div class="code" data-i18n="off" id="provider-info" tabindex="0" aria-label="Provider technical details"></div>
+        </section>
+        <section class="panel" aria-labelledby="h-demo">
+          <h3 id="h-demo"><span class="grow">Demo mode</span></h3>
+          <label class="switch"><input type="checkbox" id="set-demo"> Enable simulated events</label>
+          <p class="note">With demo mode on, events can be injected into the simulation to test alerts. With real or file data, events are not available.</p>
+          <div class="toolbar" id="inject-buttons"></div>
+          <div class="toolbar">
+            <label class="fld"><span>Seed</span><input type="number" id="set-seed" step="1"></label>
+            <label class="fld"><span>Interval (ms)</span><input type="number" id="set-tick" min="250" max="60000" step="250"></label>
+            <button class="btn" id="apply-sim" style="align-self:flex-end">Restart simulation</button>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="h-imp">
+          <h3 id="h-imp"><span class="grow">Import data</span></h3>
+          <div class="drop" id="drop">
+            <p>Drag a <b>CSV</b> or <b>JSON</b> file here</p>
+            <p class="note" style="margin:6px 0 12px">It is validated against the schema before use. File data is labeled "unverified".</p>
+            <input type="file" id="file-input" accept=".csv,.json,application/json,text/csv" class="sr-only" aria-label="Choose a CSV or JSON file">
+            <button class="btn" id="pick-file">Choose file</button>
+          </div>
+          <div id="import-report" role="status"></div>
+          <div class="toolbar">
+            <button class="btn sm" id="dl-template">Download CSV template</button>
+            <button class="btn sm" id="dl-export">Export history (JSON)</button>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="h-look">
+          <h3 id="h-look"><span class="grow">Appearance and alerts</span></h3>
+          <label class="switch"><input type="checkbox" id="set-motion"> Reduce decorative animations</label>
+          <label class="switch"><input type="checkbox" id="set-sound"> Sound on critical alerts</label>
+          <div class="toolbar">
+            <button class="btn danger sm" id="reset-gam">Reset points and streak</button>
+          </div>
+        </section>
+      </div>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-thr">
+        <h3 id="h-thr">
+          <span class="grow">Traffic-light thresholds</span>
+          <span class="pill" data-level="sensor">READ-ONLY</span>
+        </h3>
+        <p class="note">Illustrative values defined in <span class="mono">CONFIG.thresholds</span>. They are not validated clinical criteria: a medical source is needed before using them on a real mission. They are changed in code, not from the interface.</p>
+        <div style="overflow:auto"><table class="tbl" id="thr-table"></table></div>
+      </section>
+      <section class="panel" style="margin-top:16px" aria-labelledby="h-schema">
+        <h3 id="h-schema"><span class="grow">Data schema</span></h3>
+        <div class="code" data-i18n="off" id="schema-view" tabindex="0" aria-label="Data schema"></div>
+      </section>
+    </section>
+
+  </main>
+
+  <!-- ===================== DETAIL DRAWER ===================== -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="false" aria-labelledby="dr-title" tabindex="-1" inert>
+    <div class="dh">
+      <span class="ico" id="dr-ico" aria-hidden="true"></span>
+      <div style="flex:1"><h2 id="dr-title">Detail</h2><p id="dr-region"></p></div>
+      <span id="dr-ev"></span>
+      <button class="btn icon-btn" id="dr-close" aria-label="Close detail">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="big">
+      <div><b id="dr-value">--</b><small id="dr-unit"></small></div>
+      <span id="dr-badge"></span>
+    </div>
+    <div>
+      <div class="row">
+        <h3>Trend</h3>
+        <div class="seg" id="dr-range" role="group" aria-label="Time window">
+          <button data-w="10" aria-pressed="false">10 min</button>
+          <button data-w="30" aria-pressed="true">30 min</button>
+          <button data-w="60" aria-pressed="false">60 min</button>
+        </div>
+      </div>
+      <svg id="dr-chart" class="chart" viewBox="0 0 352 170" width="100%" role="img" aria-label="Trend" style="margin-top:12px;overflow:visible"></svg>
+    </div>
+    <div class="stats" id="dr-stats"></div>
+    <div>
+      <div class="row" style="font-size:var(--fs-sm);margin-bottom:10px">
+        <b>Reference range</b>
+        <span id="dr-ref-label" style="color:var(--color-muted)"></span>
+      </div>
+      <div class="refbar"><div class="band" id="dr-band"></div><div class="mark" id="dr-mark"></div></div>
+    </div>
+    <div class="dark-card on-dark">
+      <div class="eyebrow">Context</div>
+      <p id="dr-note" style="font-size:var(--fs-md);line-height:1.55;margin-top:6px;text-wrap:pretty"></p>
+      <p style="font-size:var(--fs-xs);color:var(--color-soft);margin-top:8px">General information, not a diagnosis.</p>
+    </div>
+  </aside>
+
+  <div id="toasts"></div>
+  <div class="sr-only" id="live-polite" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="live-assertive" role="alert" aria-live="assertive"></div>
+
+  <!-- Mobile bottom dock -->
+  <nav class="dock" id="dock" aria-label="Sections">
+    <button data-view="overview" aria-current="page">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12 12 3l9 9M5 10v10h14V10"/></svg>
+      Overview
+    </button>
+    <button data-view="visor">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="6"/><path d="M8 12h8"/></svg>
+      Visor
+    </button>
+    <button data-view="biometrics">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Biometrics
+    </button>
+    <button data-view="checkin">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>
+      Check-in
+    </button>
+    <button data-view="history">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg>
+      History
+    </button>
+    <button data-view="about">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+      About
+    </button>
+  </nav>
+</div>
+
+<!-- Evidence popup (outside #app to avoid inert) -->
+<div class="evscrim" id="evscrim"></div>
+<div class="evpop" id="evpop" role="dialog" aria-modal="true" aria-labelledby="ev-title" tabindex="-1" hidden>
+  <div class="evh">
+    <div>
+      <div class="eyebrow">Evidence for this data point</div>
+      <h2 id="ev-title"></h2>
+    </div>
+    <button class="btn icon-btn" id="ev-close" aria-label="Close">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div id="ev-body"></div>
+</div>
+
+<!-- Bootstrap: ES module entry point -->
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

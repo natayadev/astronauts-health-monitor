@@ -1,0 +1,178 @@
+/* ==========================================================================
+   CARDS · .panel, .metric, .vcard, .ecard, .dark-card, .kv, .dockbar
+   ========================================================================== */
+
+/* ===== Panel (generic glass card) ===== */
+.panel {
+  background: var(--glass-2);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--color-white) 85%, transparent);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-s);
+  padding: 20px;
+}
+.panel h3 {
+  font-size: var(--fs-xl); font-weight: 700; letter-spacing: -.01em;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.panel h3 .grow { flex: 1 }
+.panel .sub { color: var(--color-muted); font-size: var(--fs-sm); margin-top: 4px }
+.panel > * + *      { margin-top: 14px }
+.panel > h3 + .sub  { margin-top: 4px }
+
+/* ===== Dark card ===== */
+.dark-card {
+  background: var(--grad-dark); color: var(--color-white);
+  border-radius: var(--r-lg); padding: 16px;
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--color-forest) 20%, transparent);
+}
+.dark-card .eyebrow {
+  font-size: var(--fs-xs); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--color-soft); font-weight: 600;
+}
+
+/* ===== Key-value grid (dashboard stats) ===== */
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px }
+.kv > div { padding: 12px 14px; border-radius: var(--r-md); background: color-mix(in srgb, var(--color-white) 60%, transparent) }
+.kv .k { font-size: var(--fs-xs); color: var(--color-muted) }
+.kv .v { font-size: var(--fs-xl); font-weight: 600; font-variant-numeric: tabular-nums }
+.kv .v small { font-size: var(--fs-xs); color: var(--color-teal-ink); font-weight: 600; margin-left: 3px }
+.kv > div[data-level] { box-shadow: inset 0 0 0 1px var(--lv) }
+
+/* ===== Metric card (stage overlay) ===== */
+.metric {
+  position: absolute; left: var(--x); top: var(--y); width: var(--w);
+  display: flex; flex-direction: column; gap: 7px;
+  padding: 15px 17px; border-radius: var(--r-lg); cursor: pointer;
+  background: color-mix(in srgb, var(--color-white) 40%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--color-white) 70%, transparent);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--color-deep) 5%, transparent);
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease), background-color .25s var(--ease), scale .12s var(--ease);
+  touch-action: manipulation;
+  -webkit-user-select: none; user-select: none;
+}
+.metric:hover  { transform: translateY(-2px); background: color-mix(in srgb, var(--color-white) 60%, transparent) }
+.metric:active { scale: .98 }
+.metric[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-white) 90%, transparent);
+  box-shadow: 0 0 0 1.5px var(--color-teal), 0 20px 40px color-mix(in srgb, var(--color-deep) 16%, transparent);
+}
+.metric[data-level="attention"] { box-shadow: 0 0 0 1px var(--lv), 0 8px 24px color-mix(in srgb, var(--color-warn) 14%, transparent) }
+.metric[data-level="surgeon"]   { background: color-mix(in srgb, var(--color-white) 82%, transparent); box-shadow: 0 0 0 1.5px var(--lv), 0 10px 28px color-mix(in srgb, var(--color-crit) 18%, transparent) }
+.metric[data-level="surgeon"]::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit;
+  box-shadow: 0 0 0 4px var(--lv); opacity: 0;
+  animation: critPulse 2s ease-in-out infinite; pointer-events: none;
+}
+@keyframes critPulse { 0%, 100% { opacity: 0 } 50% { opacity: .28 } }
+.metric:focus-visible { outline: 2px solid var(--color-deep); outline-offset: 3px }
+
+.metric .hd  { display: flex; align-items: center; gap: 9px }
+.metric .ico {
+  width: 28px; height: 28px; border-radius: 9px;
+  background: color-mix(in srgb, var(--color-teal) 12%, transparent); color: var(--color-teal);
+  display: grid; place-items: center; flex: none;
+  transition: background-color .25s var(--ease), color .25s var(--ease);
+}
+.metric .ico .ic { width: 15px; height: 15px; stroke-width: 2.2 }
+.metric[aria-pressed="true"] .ico { background: var(--grad-brand); color: var(--color-white) }
+.metric[data-level="attention"] .ico,
+.metric[data-level="surgeon"]   .ico { background: var(--lv-bg); color: var(--lv-ink) }
+.metric .lbl { font-size: var(--fs-md); font-weight: 600; color: var(--color-muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.metric .val { display: flex; align-items: baseline; gap: 6px }
+.metric .val b     { font-size: var(--fs-num); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums }
+.metric .val small { font-size: var(--fs-lg); font-weight: 600; color: var(--color-teal-ink) }
+.metric .ecg { display: block; overflow: hidden }
+.metric .ecg path { animation: ecg var(--beat, .9s) linear infinite }
+.metric .ecg-p { fill: none; stroke: var(--color-teal); stroke-width: 1.8; stroke-linejoin: round }
+@keyframes ecg { from { transform: translateX(0) } to { transform: translateX(-100px) } }
+.metric .bar { height: 4px; border-radius: 4px; background: color-mix(in srgb, var(--color-deep) 10%, transparent); overflow: hidden }
+.metric .bar i { display: block; height: 100%; border-radius: 4px; background: var(--grad-accent); transition: width .5s var(--ease) }
+.metric .meta { display: flex; align-items: center; gap: 4px 10px; flex-wrap: wrap; min-height: 24px }
+.metric .sub  { font-size: var(--fs-sm); color: var(--color-muted) }
+.metric.dim .val b { opacity: .55 }
+
+/* Inside the stage the text is slightly larger to stay legible at the CSS scale */
+#stage .metric .lbl   { font-size: 15px }
+#stage .metric .sub   { font-size: 14px }
+#stage .metric .pill  { font-size: 12.5px; padding: 4px 11px }
+#stage .metric .val b { font-size: 42px }
+#stage .metric .val small { font-size: 17px }
+#stage .metric .ico   { width: 30px; height: 30px }
+
+/* ===== Vitals grid cards (.vcard) ===== */
+.vgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px }
+.vcard {
+  display: flex; flex-direction: column; gap: 8px; padding: 16px;
+  border-radius: 22px; background: var(--glass-2);
+  border: 1px solid var(--color-white); box-shadow: var(--shadow-s);
+  text-align: left; width: 100%;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease), scale .12s var(--ease);
+}
+.vcard:hover  { transform: translateY(-2px) }
+.vcard:active { scale: .98 }
+.vcard[data-level="attention"] { box-shadow: 0 0 0 1px var(--lv), var(--shadow-s) }
+.vcard[data-level="surgeon"]   { box-shadow: 0 0 0 1.5px var(--lv), var(--shadow-s) }
+.vcard .top, .ecard .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.vcard .top b, .ecard .top b { flex: 1; font-size: var(--fs-md); color: var(--color-muted); font-weight: 600 }
+.vcard .v { font-size: var(--fs-num); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums }
+.vcard .v small { font-size: var(--fs-lg); color: var(--color-teal-ink); margin-left: 5px }
+.vcard .q { font-size: var(--fs-sm); color: var(--color-muted) }
+
+/* ===== Environment card (.ecard) ===== */
+.ecard {
+  display: flex; flex-direction: column; gap: 8px; padding: 16px;
+  border-radius: 22px; background: var(--glass-2);
+  border: 1px solid var(--color-white); box-shadow: var(--shadow-s);
+}
+.ecard[data-level="attention"] { box-shadow: 0 0 0 1px var(--lv), var(--shadow-s) }
+.ecard[data-level="surgeon"]   { box-shadow: 0 0 0 1.5px var(--lv), var(--shadow-s) }
+.ecard .v { font-size: var(--fs-num); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums }
+.ecard .v small { font-size: var(--fs-lg); color: var(--color-teal-ink); margin-left: 5px }
+.ecard .q   { font-size: var(--fs-sm); color: var(--color-ink) }
+
+/* ===== Bottom dock bar ===== */
+.dockbar {
+  width: calc(100% - 48px); max-width: 1320px; margin: 12px auto 0;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px;
+  padding: 14px 14px 14px 18px;
+  border-radius: var(--r-xl); background: var(--grad-dark); color: var(--color-white);
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--color-forest) 25%, transparent);
+}
+.dockbar .person { display: flex; align-items: center; gap: 12px; min-width: 0 }
+.dockbar .person .avatar { width: 40px; height: 40px; font-size: var(--fs-md); border: 2px solid color-mix(in srgb, var(--color-white) 20%, transparent) }
+.dockbar .person .avatar[data-level]::after { border-color: var(--color-forest) }
+.dockbar .person b    { font-weight: 600; font-size: var(--fs-lg); display: block }
+.dockbar .person span { font-size: var(--fs-sm); color: var(--color-soft) }
+.dockbar .sep  { width: 1px; height: 32px; background: color-mix(in srgb, var(--color-white) 15%, transparent) }
+.dockbar .stat { display: flex; flex-direction: column; gap: 2px }
+.dockbar .stat .k { font-size: var(--fs-xs); color: var(--color-soft); letter-spacing: .06em; text-transform: uppercase; font-weight: 600 }
+.dockbar .stat .v { font-size: var(--fs-lg); font-weight: 500; font-variant-numeric: tabular-nums }
+.dockbar .stat .v.mono { font-family: var(--font-mono) }
+.dockbar .acts { display: flex; flex-wrap: wrap; gap: 8px }
+
+/* ===== Mini bar charts ===== */
+.bars { display: flex; align-items: flex-end; gap: 5px; height: 54px }
+.bars i { flex: 1; background: var(--grad-accent); border-radius: 5px 5px 2px 2px; min-height: 4px; opacity: .5 }
+.bars i.now { opacity: 1 }
+.bars i.low { background: var(--color-warn) }
+
+/* ===== Environment row ===== */
+.envrow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 14px;
+  background: color-mix(in srgb, var(--color-white) 62%, transparent);
+  font-size: var(--fs-sm);
+}
+.envrow b { flex: 1; font-weight: 600 }
+.envrow .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums }
+
+/* ===== Member card ===== */
+.member {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-white) 62%, transparent);
+}
+.member .avatar { width: 36px; height: 36px; font-size: var(--fs-sm) }
+.member b { font-weight: 600; font-size: var(--fs-lg) }

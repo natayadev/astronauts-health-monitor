@@ -1,0 +1,152 @@
+/* ==========================================================================
+   LAYOUT · views, grids, stage/twin, strip, responsive, reduced motion
+   ========================================================================== */
+
+/* ===== Main & view containers ===== */
+main { flex: 1; width: 100%; position: relative }
+
+.view {
+  display: none; width: 100%;
+  max-width: 1180px; margin: 0 auto;
+  padding: 20px 24px 140px;
+  animation: viewIn .35s var(--ease);
+}
+.view.active   { display: block }
+.view-wide     { max-width: none; padding: 0 0 24px }
+@keyframes viewIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+
+/* ===== Page heading ===== */
+.page-head {
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  justify-content: space-between; gap: 12px; margin-bottom: 20px;
+}
+.page-head h2 { font-size: 26px; font-weight: 700; letter-spacing: -.02em }
+.page-head p  { color: var(--color-muted); font-size: var(--fs-md); max-width: 62ch; margin-top: 4px }
+
+/* ===== Grid helpers ===== */
+.grid            { display: grid; gap: 16px }
+.g2              { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+.grid > *        { min-width: 0 }
+.diag-grid       { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start }
+
+/* ===== Status strip ===== */
+.strip-wrap { width: 100%; max-width: 1320px; margin: 0 auto; padding: 10px 24px 0 }
+.strip {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 12px 14px; border-radius: 22px;
+  background: var(--glass-2);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-white); box-shadow: var(--shadow-s);
+  transition: box-shadow .3s var(--ease), background-color .3s var(--ease);
+}
+.strip[data-level="attention"] { box-shadow: 0 0 0 1px var(--lv), var(--shadow-m) }
+.strip[data-level="surgeon"]   { background: color-mix(in srgb, var(--color-white) 94%, transparent); box-shadow: 0 0 0 1.5px var(--lv), 0 14px 34px color-mix(in srgb, var(--color-crit) 16%, transparent) }
+.strip .tile { width: 42px; height: 42px; border-radius: 14px; background: var(--lv-bg); color: var(--lv-ink); display: grid; place-items: center; flex: none }
+.strip .tile .ic { width: 20px; height: 20px }
+.strip .txt  { flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 2px }
+.strip .txt b    { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -.01em }
+.strip .txt span { font-size: var(--fs-sm); color: var(--color-muted) }
+.strip .nxt  { flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding-left: 16px; border-left: 1px solid var(--line) }
+.strip .nxt .k   { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted) }
+.strip .nxt span { font-size: var(--fs-sm); color: var(--color-ink) }
+.strip .acts { display: flex; gap: 8px; flex-wrap: wrap }
+
+/* ===== Twin stage ===== */
+#stage-wrap { position: relative; width: 100%; padding: 6px 0 0 }
+#stage-box  { position: relative; width: 100%; overflow: visible }
+#stage {
+  position: absolute; left: 50%; top: 0;
+  width: 1440px; height: 780px;
+  transform-origin: top center;
+  transition: transform .5s var(--ease), --tw1 .6s ease, --tw2 .6s ease;
+  --tw1: var(--color-aqua); --tw2: var(--color-deep);
+}
+#stage[data-level="attention"] { --tw1: var(--color-warn-soft); --tw2: var(--color-warn-deep) }
+#stage[data-level="surgeon"]   { --tw1: var(--color-crit-soft); --tw2: var(--color-crit-ink) }
+#stage[data-level="partial"],
+#stage[data-level="nodata"]    { --tw1: var(--color-none-soft); --tw2: var(--color-slate) }
+#stage > svg { position: absolute; inset: 0; overflow: visible }
+
+/* The astronaut itself (plate, figure, 360° view, scan sweep) is styled in components/twin.css. */
+#layer-links, #cards { transition: opacity .4s var(--ease) }
+#stage.spinning #layer-links,
+#stage.spinning #cards { opacity: .25 }
+
+/* SVG link lines */
+.link polyline { fill: none; stroke: var(--color-deep); stroke-width: 1.1; stroke-opacity: .55; stroke-linejoin: round; transition: stroke-opacity .3s var(--ease), stroke-width .3s var(--ease) }
+.link[data-level="attention"] polyline,
+.link[data-level="surgeon"]   polyline { stroke: var(--lv); stroke-width: 1.6; stroke-opacity: .9 }
+.link.sel polyline { stroke: var(--color-teal); stroke-width: 2.2; stroke-opacity: 1; stroke-dasharray: 6 5; animation: dashFlow 1s linear infinite }
+.link.sel[data-level="attention"] polyline,
+.link.sel[data-level="surgeon"]   polyline { stroke: var(--lv) }
+@keyframes dashFlow { from { stroke-dashoffset: 22 } to { stroke-dashoffset: 0 } }
+#stage.has-sel .link:not(.sel) { opacity: .3 }
+.link .dot  { fill: var(--color-deep); opacity: .55 }
+.link .node { fill: var(--color-deep); stroke: var(--color-white); stroke-width: 2 }
+.link[data-level="attention"] .node,
+.link[data-level="surgeon"]   .node,
+.link.sel .node { fill: var(--lv) }
+.link .ring { fill: none; stroke: var(--color-teal); stroke-width: 1.4; transform-box: fill-box; transform-origin: center; animation: nodePulse 2.4s ease-out infinite }
+.link[data-level="attention"] .ring,
+.link[data-level="surgeon"]   .ring { stroke: var(--lv) }
+.link.sel .ring { animation-duration: 1s }
+@keyframes nodePulse { 0% { transform: scale(1); opacity: .9 } 100% { transform: scale(3.2); opacity: 0 } }
+.link .hit { fill: transparent; cursor: pointer }
+.link .hit:focus-visible { outline: none }
+.link:has(.hit:focus-visible) .node { stroke: var(--color-ink); stroke-width: 3 }
+
+/* Cards layer */
+#cards { position: absolute; inset: 0; pointer-events: none }  /* the layer is empty space; only its cards take the pointer, so the body points under it stay clickable */
+#cards .metric { pointer-events: auto }
+
+/* Hint text */
+.hint { position: absolute; left: 96px; top: 716px; display: flex; align-items: center; gap: 8px; font-size: var(--fs-md) !important; color: var(--color-muted); white-space: nowrap }
+.hint i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-teal) }
+
+/* Overview view */
+#view-overview { padding-bottom: 24px }
+.today { width: 100%; max-width: 1180px; margin: 20px auto 0; padding: 0 24px 140px }
+
+/* Compact mode (stage on top, cards in grid below) */
+#view-overview.compact #layer-links,
+#view-overview.compact .hint { display: none }
+#compact-host { display: none }
+#view-overview.compact #compact-host { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; padding: 0 14px; margin-top: 8px }
+#compact-host #cards { display: contents }
+#compact-host .metric { position: static; width: auto }
+#compact-host .metric .val b { font-size: 34px }
+
+/* About page hero */
+.about-hero h3 { font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin: 6px 0 8px; max-width: 30ch }
+.about-hero p  { color: var(--color-toast-text); max-width: 68ch; line-height: 1.6 }
+
+/* ===== Responsive breakpoints ===== */
+
+
+
+
+
+
+
+
+
+
+/* ===== Reduced motion ===== */
+html[data-motion="reduced"] .ping::after,
+html[data-motion="reduced"] .link .ring,
+html[data-motion="reduced"] .link.sel polyline,
+html[data-motion="reduced"] .metric .ecg path,
+html[data-motion="reduced"] .metric[data-level="surgeon"]::before,
+html[data-motion="reduced"] .lvdot { animation: none }
+html[data-motion="reduced"] .view  { animation: none }
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after { scroll-behavior: auto !important }
+html[data-motion="reduced"] .metric:hover,
+html[data-motion="reduced"] .vcard:hover  { transform: none }
+html[data-motion="reduced"] .drawer,
+html[data-motion="reduced"] .menu,
+html[data-motion="reduced"] #stage { transition-property: opacity, visibility, background-color, color, box-shadow }
+html[data-motion="reduced"] .toast { animation: none }
+
+/* Responsive and reduced-motion rules live in responsive.css (loaded last). */

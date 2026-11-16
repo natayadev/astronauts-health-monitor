@@ -1,0 +1,74 @@
+/* ==========================================================================
+   BUTTONS · .btn, .icon-btn, variants: primary, brand, ghost, sm, danger
+   ========================================================================== */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 40px; padding: 9px 16px;
+  border-radius: var(--r-pill); border: 1px solid var(--line-2);
+  background: var(--glass-3); color: var(--color-ink);
+  font-size: var(--fs-sm); font-weight: 600; line-height: 1.2;
+  transition:
+    background-color .2s var(--ease), border-color .2s var(--ease),
+    box-shadow .2s var(--ease), scale .12s var(--ease), filter .2s var(--ease);
+  touch-action: manipulation;
+}
+.btn:hover { background: var(--color-white); border-color: color-mix(in srgb, var(--color-teal) 45%, transparent) }
+.btn:active { scale: .96 }
+.btn:disabled,
+.btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; scale: 1 }
+
+/* Variants */
+.btn.primary {
+  border: 0; background: var(--grad-accent); color: var(--color-white);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--color-aqua) 28%, transparent);
+}
+.btn.primary:hover { filter: brightness(1.08); background: var(--grad-accent) }
+
+.btn.brand { border: 0; background: var(--grad-brand); color: var(--color-white) }
+.btn.brand:hover { filter: brightness(1.08); background: var(--grad-brand) }
+
+.btn.ghost { background: transparent; border-color: transparent; color: var(--color-teal-ink) }
+.btn.ghost:hover { background: color-mix(in srgb, var(--color-teal) 8%, transparent) }
+
+.btn.sm { min-height: 34px; padding: 6px 12px; font-size: var(--fs-xs) }
+
+.btn.danger { border-color: color-mix(in srgb, var(--color-crit) 40%, transparent); color: var(--color-crit-ink) }
+.btn.danger:hover { background: color-mix(in srgb, var(--color-crit) 8%, transparent) }
+
+/* On-dark surface overrides */
+.on-dark .btn {
+  background: color-mix(in srgb, var(--color-white) 6%, transparent);
+  border-color: color-mix(in srgb, var(--color-white) 18%, transparent);
+  color: var(--color-white);
+}
+.on-dark .btn:hover { background: color-mix(in srgb, var(--color-white) 14%, transparent) }
+.on-dark .btn[aria-pressed="true"] { background: var(--color-mint); color: var(--color-forest); border-color: transparent }
+.on-dark .btn.primary { background: var(--grad-accent); border: 0 }
+
+/* Icon button */
+.icon-btn { width: 40px; height: 40px; padding: 0; border-radius: 50%; position: relative }
+.icon-btn.on { background: var(--grad-brand); color: var(--color-white); border-color: transparent }
+.icon-btn::after { content: ""; position: absolute; inset: -4px }
+
+/* Segmented control */
+.seg {
+  display: inline-flex; gap: 2px; padding: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--color-deep) 7%, transparent);
+}
+.seg button {
+  border: 0; background: transparent; color: var(--color-muted);
+  padding: 6px 14px; min-height: 32px; border-radius: var(--r-pill);
+  font-size: var(--fs-sm); font-weight: 600;
+  transition: background-color .2s var(--ease), color .2s var(--ease), box-shadow .2s var(--ease), scale .12s var(--ease);
+}
+.seg button:active { scale: .96 }
+.seg button[aria-pressed="true"] {
+  background: var(--color-white); color: var(--color-ink);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--color-deep) 12%, transparent);
+}
+.seg.lang button { padding: 6px 10px; font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: .02em }
+
+/* links styled as buttons */
+a.btn { text-decoration: none }
