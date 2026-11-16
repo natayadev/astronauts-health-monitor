@@ -26,6 +26,17 @@ Team Higía · Buenos Aires, Argentina
 
 ![Tesai simulation: a first-person Mars walk with the crew's vital signs on the helmet visor](docs/screenshots/simulation.jpg)
 
+## Videos
+
+<table>
+  <tr>
+    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai in 30 seconds (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">Tesai in 30 seconds (0:30)</a></b><br>Our video for NASA, in English.</td>
+    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/presentacion.webp" alt="The full presentation (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">The full presentation (2:49)</a></b><br>In Spanish with subtitles.</td>
+  </tr>
+</table>
+
+Try it live at **[higia.pages.dev](https://higia.pages.dev/)**: the simulation and the dashboard run in the browser, no install needed.
+
 ## The problem
 
 NASA's Human Research Program groups the risks of long missions into five hazards: space radiation, isolation and confinement, distance from Earth, altered gravity, and hostile, closed environments. They can bring bone and muscle loss, cardiovascular changes, poor sleep and behavioral health problems.
@@ -137,7 +148,7 @@ Supplementary documents `ARCHITECTURE.md` and `docs/psicologia-social.md` are wr
 
 ## Contenido
 
-1. [El problema](#el-problema)
+1. [Los videos](#los-videos) · [El problema](#el-problema)
 2. [Nuestra solución](#nuestra-solución)
 3. [La simulación](#la-simulación)
 4. [El Visor y el segundo doctor](#el-visor-y-el-segundo-doctor)
@@ -146,6 +157,17 @@ Supplementary documents `ARCHITECTURE.md` and `docs/psicologia-social.md` are wr
 7. [Cada número muestra su base](#cada-número-muestra-su-base)
 8. [Cómo correrla](#cómo-correrla) · [Seguridad y privacidad](#seguridad-y-privacidad) · [Tecnología](#tecnología) · [Estructura del proyecto](#estructura-del-proyecto)
 9. [Uso de IA](#uso-de-ia) · [Datos de la NASA](#datos-de-la-nasa) · [Material de terceros](#material-de-terceros) · [Límites](#límites) · [Equipo](#equipo) · [Licencia](#licencia) · [Aviso](#aviso)
+
+## Los videos
+
+<table>
+  <tr>
+    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai en 30 segundos (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">Tesai en 30 segundos (0:30)</a></b><br>El video para la NASA, en inglés.</td>
+    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/presentacion.webp" alt="La presentación completa (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">La presentación completa (2:49)</a></b><br>En español, con subtítulos.</td>
+  </tr>
+</table>
+
+Probalo en vivo en **[higia.pages.dev](https://higia.pages.dev/)**: la simulación y el dashboard andan en el navegador, sin instalar nada.
 
 ## El problema
 
