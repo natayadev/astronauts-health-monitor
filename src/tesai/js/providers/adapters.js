@@ -11,6 +11,9 @@ import { round, dayKey } from '../utils.js';
 const VITAL_KEYS = ['hr', 'spo2', 'bpSys', 'bpDia', 'temp', 'resp', 'hrv'];
 const safeId = v => String(v ?? '').trim().replace(/[^\w.:-]/g, '').slice(0, 64);
 const safeText = (v, max = 80) => (v == null ? '' : String(v)).slice(0, max);
+/* An unreadable date must not throw: it becomes '' so validateVital can report that row. */
+const isoOr = (v, fallback) => { const d = new Date(v); return Number.isNaN(d.getTime()) ? fallback : d.toISOString(); };
+const safeDay = v => (/^\d{4}-\d{2}-\d{2}$/.test(String(v ?? '')) ? String(v) : dayKey());
 
 export const Normalizer = {
   num(v, [lo, hi]) {
@@ -21,14 +24,14 @@ export const Normalizer = {
   },
   vital(o, source) {
     const S = SCHEMA.VitalReading;
-    const out = { astronautId: safeId(o.astronautId), timestamp: new Date(o.timestamp).toISOString(), source, quality: ['ok', 'noisy', 'delayed', 'missing'].includes(o.quality) ? o.quality : 'ok' };
+    const out = { astronautId: safeId(o.astronautId), timestamp: isoOr(o.timestamp, ''), source, quality: ['ok', 'noisy', 'delayed', 'missing'].includes(o.quality) ? o.quality : 'ok' };
     for (const k of VITAL_KEYS) out[k] = this.num(o[k], S[k].range);
     if (VITAL_KEYS.every(k => out[k] == null)) out.quality = 'missing';
     return out;
   },
   environment(o, source) {
     const S = SCHEMA.Environment;
-    return { timestamp: new Date(o?.timestamp || Date.now()).toISOString(), source, co2: this.num(o?.co2, S.co2.range), oxygen: this.num(o?.oxygen, S.oxygen.range), temp: this.num(o?.temp, S.temp.range), humidity: this.num(o?.humidity, S.humidity.range), pressure: this.num(o?.pressure, S.pressure.range), radiation: this.num(o?.radiation, S.radiation.range) };
+    return { timestamp: isoOr(o?.timestamp || Date.now(), new Date().toISOString()), source, co2: this.num(o?.co2, S.co2.range), oxygen: this.num(o?.oxygen, S.oxygen.range), temp: this.num(o?.temp, S.temp.range), humidity: this.num(o?.humidity, S.humidity.range), pressure: this.num(o?.pressure, S.pressure.range), radiation: this.num(o?.radiation, S.radiation.range) };
   },
   device(o) {
     const id = safeId(o?.id);
@@ -41,7 +44,7 @@ export const Normalizer = {
   },
   sleepActivity(o, source) {
     const S = SCHEMA.SleepActivity;
-    return { astronautId: String(o?.astronautId ?? ''), day: o?.day || dayKey(), source, sleepHours: this.num(o?.sleepHours, S.sleepHours.range), sleepQuality: this.num(o?.sleepQuality, S.sleepQuality.range), exerciseMin: this.num(o?.exerciseMin, S.exerciseMin.range), hobbyMin: this.num(o?.hobbyMin, S.hobbyMin.range), steps: this.num(o?.steps, S.steps.range) };
+    return { astronautId: safeId(o?.astronautId), day: safeDay(o?.day), source, sleepHours: this.num(o?.sleepHours, S.sleepHours.range), sleepQuality: this.num(o?.sleepQuality, S.sleepQuality.range), exerciseMin: this.num(o?.exerciseMin, S.exerciseMin.range), hobbyMin: this.num(o?.hobbyMin, S.hobbyMin.range), steps: this.num(o?.steps, S.steps.range) };
   }
 };
 
@@ -85,19 +88,34 @@ export const Adapters = {
 export function validateVital(r, i) {
   const errors = [], warnings = [];
   if (!r.astronautId) errors.push(`row ${i}: astronautId is missing`);
-  if (isNaN(new Date(r.timestamp))) errors.push(`row ${i}: invalid timestamp`);
+  if (!r.timestamp || isNaN(new Date(r.timestamp))) errors.push(`row ${i}: invalid timestamp`);
   if (VITAL_KEYS.every(k => r[k] == null)) warnings.push(`row ${i}: no numeric metrics (quality=missing)`);
   return { ok: !errors.length, errors, warnings };
 }
 
-/* ===== CSV parser (comma or semicolon, quoted fields) ===== */
+/* ===== CSV parser (comma or semicolon; quoted fields may hold the separator and "" for a quote) ===== */
+function splitCsvLine(line, sep) {
+  const cells = []; let cur = '', quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (quoted) {
+      if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else quoted = false; }
+      else cur += ch;
+    } else if (ch === '"' && cur.trim() === '') { cur = ''; quoted = true; }
+    else if (ch === sep) { cells.push(cur.trim()); cur = ''; }
+    else cur += ch;
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
 export function parseCsv(text) {
-  const lines = text.replace(/\r/g, '').split('\n').filter(l => l.trim());
+  const lines = text.replace(/^\uFEFF/, '').replace(/\r/g, '').split('\n').filter(l => l.trim());
   if (!lines.length) return [];
   const sep = (lines[0].match(/;/g) || []).length > (lines[0].match(/,/g) || []).length ? ';' : ',';
-  const head = lines[0].split(sep).map(s => s.trim().replace(/^"|"$/g, ''));
+  const head = splitCsvLine(lines[0], sep);
   return lines.slice(1).map(l => {
-    const cells = l.split(sep).map(s => s.trim().replace(/^"|"$/g, ''));
+    const cells = splitCsvLine(l, sep);
     const o = {}; head.forEach((h, i) => o[h] = cells[i]); return o;
   });
 }

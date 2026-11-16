@@ -49,7 +49,7 @@ export const State = {
       if (s.demo === false) this.demo = false;
       if (s.motion) this.motion = s.motion;
       if (s.seed)   CONFIG.seed = s.seed;
-      if (s.tickMs) CONFIG.tickMs = s.tickMs;
+      if (Number.isFinite(+s.tickMs) && +s.tickMs > 0) CONFIG.tickMs = Math.min(60000, Math.max(250, +s.tickMs));
       if (s.dsv === 2 && s.dataSource && s.dataSource !== 'file') CONFIG.dataSource = s.dataSource;   // a choice saved before the real data existed is ignored once
       if (s.lang === 'es' || s.lang === 'en') this.lang = s.lang;
     } catch (e) { /* corrupt storage */ }
