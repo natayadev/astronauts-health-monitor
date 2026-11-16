@@ -126,7 +126,7 @@ Full list: [`data/README.md`](data/README.md).
 
 ## Team
 
-**Team Higía:** Ezequiel Alfaro, Sebastian Garay, Nataya Flores, Mateo Capararo.
+**Team Higía:** [Ezequiel Alfaro](https://github.com/EzeAlfaro), [Sebastian Garay](https://github.com/SGGaray), [Nataya Flores](https://github.com/natayadev), Mateo Capararo.
 
 ## License
 
@@ -376,7 +376,7 @@ Lista completa: [`data/README.md`](data/README.md).
 
 ## Equipo
 
-**Equipo Higía:** Ezequiel Alfaro, Sebastian Garay, Nataya Flores, Mateo Capararo.
+**Equipo Higía:** [Ezequiel Alfaro](https://github.com/EzeAlfaro), [Sebastian Garay](https://github.com/SGGaray), [Nataya Flores](https://github.com/natayadev), Mateo Capararo.
 
 ## Licencia
 
