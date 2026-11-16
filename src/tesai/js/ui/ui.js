@@ -367,7 +367,7 @@ export const UI = {
       const m = METRICS[g], key = metricKey(g), lvl = ev.metrics[g]?.level || 'nodata';
       const text = g === 'bp' ? (r?.bpSys == null ? '--' : `${fmtVal(r.bpSys, 0)}/${fmtVal(r.bpDia, 0)}`) : fmtVal(r?.[g], m.dec);
       const rows = (State.history[id] || []).slice(-45);
-      return `<div class="vwrap"><button class="vcard" data-m="${g}" data-level="${lvl}" data-fk="v:${g}"><span class="top"><span style="color:var(--color-teal)">${ICONS[m.icon]}</span><b>${m.label}</b>${pillHtml(lvl)}</span><span class="v">${text}<small>${m.unit}</small></span><svg class="chart" viewBox="0 0 280 54" width="100%" height="54" role="img" aria-label="Trend of ${m.short}: latest value ${text} ${m.unit}">${chartInner({ rows, key, W: 280, H: 54, L: 2, R: 2, T: 4, B: 4, th: CONFIG.thresholds[key], baseline: c?.baseline?.[key], labels: false })}</svg><span class="q">${q === 'ok' ? `source: ${esc(r?.source || '—')} · ${r ? fmtTime(r.timestamp) : ''}` : `${q} reading · ${r ? fmtTime(r.timestamp) : ''}`}</span></button>${_evBtn(g)}</div>`;
+      return `<div class="vwrap"><button class="vcard" data-m="${g}" data-level="${lvl}" data-fk="v:${g}"><span class="top"><span style="color:var(--color-teal)">${ICONS[m.icon]}</span><b>${m.label}</b>${pillHtml(lvl)}</span><span class="v">${text}<small>${m.unit}</small></span><svg class="chart" viewBox="0 0 280 54" width="100%" height="54" role="img" aria-label="Trend of ${m.short}: latest value ${text} ${m.unit}">${chartInner({ rows, key, W: 280, H: 54, L: 2, R: 2, T: 4, B: 4, th: CONFIG.thresholds[key], baseline: c?.baseline?.[key], labels: false })}</svg><span class="q">${q === 'ok' ? `source: ${esc(r?.sources?.[g === 'bp' ? 'bpSys' : g] || r?.source || '—')} · ${r ? fmtTime(r.timestamp) : ''}` : `${q} reading · ${r ? fmtTime(r.timestamp) : ''}`}</span></button>${_evBtn(g)}</div>`;
     }).join(''));
     this.renderEnv(); this.renderQuality(); Wearables.render();
     const s = State.sleepOf(id), gl = CONFIG.gamification.goals;
@@ -389,7 +389,7 @@ export const UI = {
     setHtml($('#env-overall'), e ? pillHtml(ee.overall, ee.overall === 'normal' ? 'All in range' : LEVELS[ee.overall].label) : pillHtml('nodata'));
     setHtml($('#env-grid'), e ? Object.keys(ENV_META).map(k => {
       const m = ENV_META[k], lvl = ee.metrics[k] || 'nodata', th = CONFIG.thresholds.env[k], v = e[k] == null ? '--' : Number(e[k]).toFixed(m.dec);
-      return `<article class="ecard" data-level="${lvl}"><div class="top"><span style="color:var(--color-teal)">${ICONS[m.icon]}</span><b>${m.label}</b>${_evBtn('env.' + k)}${pillHtml(lvl)}</div><div class="v">${v}<small>${m.unit}</small></div><svg class="chart" viewBox="0 0 280 54" width="100%" height="54" role="img" aria-label="Trend of ${m.label}: latest ${v} ${m.unit}">${chartInner({ rows: State.envHistory.slice(-120), key: k, W: 280, H: 54, L: 2, R: 2, T: 4, B: 4, th, labels: false })}</svg><div class="q">Reference: ${this.envRange(k)}</div></article>`;
+      return `<article class="ecard" data-level="${lvl}"><div class="top"><span style="color:var(--color-teal)">${ICONS[m.icon]}</span><b>${m.label}</b>${_evBtn('env.' + k)}${pillHtml(lvl)}</div><div class="v">${v}<small>${m.unit}</small></div><svg class="chart" viewBox="0 0 280 54" width="100%" height="54" role="img" aria-label="Trend of ${m.label}: latest ${v} ${m.unit}">${chartInner({ rows: State.envHistory.slice(-120), key: k, W: 280, H: 54, L: 2, R: 2, T: 4, B: 4, th, labels: false })}</svg><div class="q">Reference: ${this.envRange(k)}${e.sources?.[k] ? ' · source: ' + e.sources[k] : ''}</div></article>`;
     }).join('') : '<div class="empty" style="grid-column:1/-1">No environment data in this source.</div>');
     const rad = e?.radiation; setText($('#env-dose'), rad == null ? '' : `At ${rad.toFixed(1)} µSv/h the equivalent dose is about ${(rad * 24 / 1000).toFixed(2)} mSv per day. Typical ISS crew exposure is 0.2–0.5 mSv per day, with a NASA career limit of 600 mSv.`);
     setHtml($('#env-mini'), e ? Object.keys(ENV_META).map(k => { const m = ENV_META[k], lvl = ee.metrics[k] || 'nodata'; return `<div class="envrow" data-level="${lvl}"><i class="lvdot"></i><b>${m.label}</b><span class="mono">${e[k] == null ? '--' : Number(e[k]).toFixed(m.dec)} ${m.unit}</span></div>`; }).join('') : '<div class="empty">No environment data.</div>');
@@ -476,12 +476,12 @@ export const UI = {
         ${groups.map(g => `<div class="group-title">${g}</div><div class="alist">${Object.entries(EVIDENCE).filter(([k, e]) => e.group === g).map(([k, e]) => `<div class="evrow"><div class="top"><b>${esc(e.label)}</b>${_basisPill(e.basis)}</div><p>${esc(e.note)}</p>${e.refs.length ? `<ul class="apa" data-i18n="off">${apaItems(e.refs)}</ul>` : ''}</div>`).join('')}</div>`).join('')}
       </section>
       <section class="panel" aria-labelledby="h-prov"><h3 id="h-prov"><span class="grow">Data provenance</span></h3>
-        <p>The heart rate, heart rate variability and sleep you see come from real recordings of healthy adults in public datasets (MMASH, and a small sample of BIDSleep), not from astronauts. The cabin temperature, humidity and CO₂ are real ISS values from NASA OSDR. The other metrics and the check-in history are not measured there. The sources below back the ranges and rules.</p>
+        <p>Real and simulated data are shown together. Heart rate, heart rate variability and sleep come from real recordings of healthy adults in public datasets (MMASH, and a small sample of BIDSleep), not from astronauts, and the cabin temperature, humidity and CO₂ are real ISS values from NASA OSDR. Everything else is simulated: blood oxygen, blood pressure, body temperature, breathing, the cabin oxygen, pressure and radiation, the devices, the exercise and the check-in history. Each card says whether its value is real or simulated. The sources below back the ranges and rules.</p>
         <div class="group-title">Real data sources</div>
         <ul class="links">${REAL_SOURCES.map(r => `<li><a href="${r.url}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a> <span class="tag">${esc(r.note)}</span></li>`).join('')}</ul></section>
       <section class="panel" aria-labelledby="h-notes"><h3 id="h-notes"><span class="grow">Notices</span></h3>
         <ul class="links plain"><li>${esc(C.app)} is an independent prototype made for the ${esc(C.event)}. It is not affiliated with, endorsed by or sponsored by NASA.</li>
-        <li>The readings come from public datasets of healthy adults, not from astronauts, and can be switched to simulated data in Advanced. Nothing here is a medical diagnosis or advice.</li>
+        <li>The readings combine public datasets of healthy adults, not astronauts, with simulated values, and can be switched to simulated only in Advanced. Nothing here is a medical diagnosis or advice.</li>
         <li>Tesai is open source under the MIT license.</li>
         <li>Fonts: Plus Jakarta Sans and JetBrains Mono, under the SIL Open Font License 1.1.</li></ul></section>`);
     $$('#about-body [data-evslot-static]').forEach(el => { el.outerHTML = _evBtn('data.simulated'); });
@@ -516,9 +516,9 @@ export const UI = {
     this.renderSystemLive();
   },
   renderSystemLive() {
-    const d = State.provider?.describe() || {}, canInject = State.demo && d.kind === 'SimulatedProvider';
+    const d = State.provider?.describe() || {}, canInject = State.demo && (d.kind === 'SimulatedProvider' || d.kind === 'HybridProvider');
     $$('#inject-buttons button').forEach(b => { b.disabled = !canInject; });
-    setText($('#source-status'), State.sourceNote || (d.kind === 'SimulatedProvider' ? 'Using simulated data with seed ' + CONFIG.seed + '.' : d.kind === 'DatasetProvider' ? `Replaying real data: ${d.datasets.map(x => x.id.toUpperCase() + (x.sample ? ' (sample)' : '')).join(', ')}. Healthy adults, not astronauts.` : d.kind === 'FileProvider' ? `Replaying ${d.readings} readings from ${d.file}. Unverified data.` : 'Remote source active.'));
+    setText($('#source-status'), State.sourceNote || (d.kind === 'SimulatedProvider' ? 'Using simulated data with seed ' + CONFIG.seed + '.' : d.kind === 'HybridProvider' ? `Real and simulated data together. Real: ${d.datasets.map(x => x.id.toUpperCase() + (x.sample ? ' (sample)' : '')).join(', ')} (healthy adults, not astronauts). Everything they do not measure is simulated (seed ${CONFIG.seed}).` : d.kind === 'FileProvider' ? `Replaying ${d.readings} readings from ${d.file}. Unverified data.` : 'Remote source active.'));
     setText($('#provider-info'), JSON.stringify(d, null, 2));
   },
   async importFile(file) {

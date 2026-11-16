@@ -17,7 +17,7 @@ import { RulesEngine, GROUPS } from './rules.js';
 import { SimulatedProvider } from './providers/simulated.js';
 import { RemoteProvider }    from './providers/remote.js';
 import { FileProvider }      from './providers/file.js';
-import { DatasetProvider }   from './providers/dataset.js';
+import { HybridProvider }    from './providers/hybrid.js';
 import { showToast, closeToastFor } from './ui/toasts.js';
 import { UI } from './ui/ui.js';
 import { Visor } from './ui/visor.js';
@@ -31,7 +31,7 @@ export function setFileBundle(bundle, name) { fileBundle = bundle; fileName = na
 
 /* ===== Provider factory ===== */
 function createProvider(kind) {
-  if (kind === 'dataset') return DatasetProvider.load(['data/mmash.json', 'data/bidsleep.json', 'data/osdr-eda.json']);   // real datasets; falls back to the simulation if a file is missing
+  if (kind === 'dataset') return HybridProvider.load(['data/mmash.json', 'data/bidsleep.json', 'data/osdr-eda.json']);   // real datasets; falls back to the simulation if a file is missing
   if (kind === 'remote') return new RemoteProvider();
   if (kind === 'file') {
     if (!fileBundle) throw new Error('No file loaded. Use "Import data" in the advanced view (#/advanced).');
