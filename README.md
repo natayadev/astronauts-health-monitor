@@ -1,8 +1,4 @@
 <p align="center">
-  <a href="https://higia.pages.dev/"><b>https://higia.pages.dev/</b></a>
-</p>
-
-<p align="center">
   <img src="assets/banner.png" alt="Tesai App - Health monitoring software for astronauts on space missions. NASA Space Apps Challenge 2026, Equipo Higía" width="100%">
 </p>
 
@@ -15,6 +11,10 @@
 NASA Space Apps Challenge 2026 · *Create Health Monitoring Software for Astronauts on Space Missions*<br>
 Team Higía · Buenos Aires, Argentina
 
+<a href="https://higia.pages.dev/"><img alt="Live demo: higia.pages.dev" src="https://img.shields.io/badge/Live_demo-higia.pages.dev-1F8A84?style=for-the-badge&logo=cloudflare&logoColor=white"></a>
+<a href="https://youtu.be/NimyUX2ECR8"><img alt="30-second video" src="https://img.shields.io/badge/Video-0%3A30-E62117?style=for-the-badge&logo=youtube&logoColor=white"></a>
+<a href="https://youtu.be/NKw8A0TgpqQ"><img alt="Full presentation" src="https://img.shields.io/badge/Presentation-2%3A49-E62117?style=for-the-badge&logo=youtube&logoColor=white"></a>
+
 <a href="https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/"><img alt="Evento" src="assets/badges/evento.svg" height="26"></a>
 <img alt="Desafío" src="assets/badges/desafio.svg" height="26">
 <img alt="Dificultad" src="assets/badges/dificultad.svg" height="26">
@@ -24,18 +24,34 @@ Team Higía · Buenos Aires, Argentina
 
 </div>
 
-![Tesai simulation: a first-person Mars walk with the crew's vital signs on the helmet visor](docs/screenshots/simulation.jpg)
+<p align="center">
+  <a href="https://higia.pages.dev/simulacion/"><img src="docs/screenshots/simulation.jpg" alt="Tesai simulation: a first-person Mars walk with the crew's vital signs on the helmet visor" width="100%"></a>
+  <br><sub>The simulation: a first-person Mars walk with the crew's vital signs on the helmet visor.</sub>
+</p>
+
+## Contents
+
+1. [Videos](#videos) · [The problem](#the-problem) · [Our solution](#our-solution)
+2. [The simulation](#the-simulation) · [The Visor and the second doctor](#the-visor-and-the-second-doctor)
+3. [How it fits together](#how-it-fits-together) · [The app, screen by screen](#the-app-screen-by-screen)
+4. [Every number shows its basis](#every-number-shows-its-basis)
+5. [Run it locally](#run-it-locally) · [Security and privacy](#security-and-privacy) · [Tech stack](#tech-stack) · [Project structure](#project-structure)
+6. [Use of AI](#use-of-ai) · [NASA data used](#nasa-data-used) · [Third-party material](#third-party-material) · [Limits](#limits) · [Team](#team) · [License](#license) · [Disclaimer](#disclaimer)
 
 ## Videos
 
 <table>
   <tr>
-    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai in 30 seconds (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">Tesai in 30 seconds (0:30)</a></b><br>Our video for NASA, in English.</td>
-    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/presentacion.webp" alt="The full presentation (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">The full presentation (2:49)</a></b><br>In Spanish with subtitles.</td>
+    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai in 30 seconds (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">Tesai in 30 seconds (0:30)</a></b><br><sub>Our video for NASA, in English.</sub></td>
+    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/presentacion.webp" alt="The full presentation (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">The full presentation (2:49)</a></b><br><sub>In Spanish with subtitles.</sub></td>
   </tr>
 </table>
 
 Try it live at **[higia.pages.dev](https://higia.pages.dev/)**: the simulation and the dashboard run in the browser, no install needed.
+
+<p align="center">
+  <a href="https://higia.pages.dev/"><img src="docs/screenshots/landing.jpg" alt="The Tesai landing page: a second doctor inside your visor, with buttons to start the simulation or open the dashboard" width="88%"></a>
+</p>
 
 ## The problem
 
@@ -50,17 +66,96 @@ On the way to Mars, a message to Earth can take up to about 20 minutes each way.
 
 Tesai is a second doctor inside the visor. It shows the whole crew's vital signs, sleep, activity and cabin environment, guides you step by step when something changes, and is honest about every number. You can live it in a first-person simulation and explore it in a full prototype.
 
-- **Immersive simulation:** three first-person emergencies (Mars EVA, pressurized rover, ship in transit) where you are the first doctor and Tesai guides you by voice. It runs in the browser; move with WASD, look with the mouse, act with E.
-- **Health twin:** a body figure with six vital signs, each compared with the person's own baseline as well as a reference range.
-- **Cabin environment:** CO₂, oxygen, pressure, temperature, humidity and radiation, with ranges from NASA-STD-3001.
-- **Private daily check-in:** five 0–10 scales (sleep quality, mood, calm, mental sharpness, connection with the crew). It stays on the device, never raises alerts, never earns points, and is compared only with the person's own history.
-- **Alerts that do not cry wolf:** one alert per condition, persistence before raising, noisy readings ignored, sensor problems kept apart, "Partial data" instead of "Normal".
-- **Evidence on every number:** a "!" button next to every limit, goal and rule (based on a source, adapted, or a team design value), with APA references.
-- **Delay-tolerant ground link:** critical alerts that nobody acknowledges are escalated through a simulated link to Earth.
-- **Visor and second doctor:** the simulation's view brought into the prototype. Your own vitals and the cabin, every crew member's biomonitor with ECG, a situation notice, a step-by-step guide for each alert, and the delay to Earth. A "Try a situation" panel triggers simulated events.
-- **Built-in audio:** a tone when an alert opens and, for critical alerts, a voice that reads the situation aloud in English or Spanish.
+| | |
+|---|---|
+| 🎮 **Immersive simulation** | Three first-person emergencies (Mars EVA, pressurized rover, ship in transit) where you are the first doctor and Tesai guides you by voice. It runs in the browser; move with WASD, look with the mouse, act with E |
+| 🧍 **Health twin** | A body figure with six vital signs, each compared with the person's own baseline as well as a reference range |
+| 🌬️ **Cabin environment** | CO₂, oxygen, pressure, temperature, humidity and radiation, with ranges from NASA-STD-3001 |
+| 📝 **Private daily check-in** | Five 0–10 scales (sleep quality, mood, calm, mental sharpness, connection with the crew). It stays on the device, never raises alerts, never earns points, and is compared only with the person's own history |
+| 🔔 **Alerts that do not cry wolf** | One alert per condition, persistence before raising, noisy readings ignored, sensor problems kept apart, "Partial data" instead of "Normal" |
+| ❗ **Evidence on every number** | A "!" button next to every limit, goal and rule (based on a source, adapted, or a team design value), with APA references |
+| 📡 **Delay-tolerant ground link** | Critical alerts that nobody acknowledges are escalated through a simulated link to Earth |
+| 🪖 **Visor and second doctor** | The simulation's view brought into the prototype. Your own vitals and the cabin, every crew member's biomonitor with ECG, a situation notice, a step-by-step guide for each alert, and the delay to Earth. A "Try a situation" panel triggers simulated events |
+| 🔊 **Built-in audio** | A tone when an alert opens and, for critical alerts, a voice that reads the situation aloud in English or Spanish |
 
+> [!NOTE]
 > **Status (15 Nov 2026):** all screens work in the browser. By default the prototype replays real public recordings: heart rate, heart rate variability and sleep of six healthy adults (PhysioNet MMASH and a small BIDSleep sample; **not astronauts**) and real ISS cabin temperature, humidity and CO₂ from NASA OSDR. What those datasets did not measure shows "no data". The simulated source (four fictional crew members) is one click away in Advanced, and the screenshots and the Visor video were recorded with it. Tesai is a hackathon prototype, **not a medical device**. Thresholds are illustrative.
+
+## The simulation
+
+This is the way in: it runs in the browser, with nothing to install. You pick a scenario and a crewmate collapses. You are the first doctor, because Earth takes up to 20 minutes to find out.
+
+| Scenario | What happens | What you have to do |
+|---|---|---|
+| **Mars EVA** | Ana collapses mid-walk and regolith covers the visor | Reach the rover's AED; with the suit on, CPR is not possible |
+| **Pressurized rover** | Luis slumps over the controls | Tesai stops the rover and alerts everyone; AED and guided CPR inside the cabin |
+| **Ship in transit** | Day 96 on the way to Mars, Mei loses consciousness in microgravity | Strap her to the stretcher before resuscitating her |
+
+On the helmet visor you see your own data and the affected person's biomonitor. The second doctor tells you what to do and sets the CPR rhythm by voice, while the alert to Earth goes out on its own, with its delay. At the end, a summary shows how long you took, the CPR quality and which devices were alerted. It is played with WASD, the mouse and the E key.
+
+## The Visor and the second doctor
+
+The Visor brings what you see in the simulation into the prototype: the view through the helmet, with the whole crew's vital signs projected on the glass.
+
+<p align="center">
+  <img src="docs/screenshots/visor.jpg" alt="Tesai Visor: Amara's heart rate rises, the notice appears and the second doctor sets out the steps" width="88%">
+</p>
+
+- **Your visor:** your pulse, SpO₂, blood pressure, breathing and temperature, plus cabin CO₂, oxygen and pressure.
+- **Biomonitors:** the rest of the crew, each with their ECG and status. Status always comes with a word as well as a color.
+- **Situation notice:** when something changes, it appears in the center with who and what, and a tone plays. For critical ones, a voice reads the situation.
+- **Second doctor:** a step-by-step guide for that alert. It can be read aloud, advanced, sent to Earth and acknowledged.
+- **Link to Earth:** the one-way delay and whether the alert has gone out. It is simulated: nothing is transmitted.
+- **Try a situation:** under the visor, a panel triggers a simulated event (tachycardia, low oxygen, fever, high blood pressure or high CO₂) for any crew member. It works with the simulated source (Advanced → Active source).
+
+## How it fits together
+
+```mermaid
+flowchart LR
+  subgraph Sources["Data providers"]
+    DS["Real datasets<br/>MMASH, BIDSleep, NASA OSDR"]
+    SIM["Simulator<br/>seeded, circadian, events"]
+    FILE["CSV / JSON import<br/>labeled 'unverified'"]
+    API["Remote API<br/>skeleton"]
+  end
+
+  subgraph App["Tesai (browser, no build step)"]
+    NORM["Normalizer<br/>one schema"]
+    RULES["Rules engine<br/>levels, baselines, persistence"]
+    STATE["State<br/>alert lifecycle, missions"]
+    CHK["Daily check-in<br/>private, local storage"]
+    EV["Evidence<br/>basis + APA for every number"]
+    UI["Overview · Visor · Biometrics · Check-in · History · About"]
+  end
+
+  GROUND["Link to Earth<br/>simulated, delay-tolerant"]
+
+  DS --> NORM
+  SIM --> NORM
+  FILE --> NORM
+  API -.-> NORM
+  NORM --> RULES --> STATE --> UI
+  CHK --> UI
+  EV --> UI
+  STATE -. unacknowledged critical .-> GROUND
+```
+
+The rules engine does not know where the data comes from, and the daily check-in never feeds it.
+
+## The app, screen by screen
+
+The interface has an **EN | ES** button to switch language, the same on the landing page, the simulation and the prototype.
+
+<table>
+  <tr>
+    <td width="50%" valign="top"><img src="docs/screenshots/overview.jpg" alt="Tesai overview: the astronaut with six vital signs connected to the body, with simulated data" width="100%"><br><b>Overview</b><br><sub>The health twin with six vital signs, the overall status and a suggested next step, the daily missions and a compact cabin view. Tapping a vital sign opens its recent history beside the body.</sub></td>
+    <td width="50%" valign="top"><img src="docs/screenshots/biometrics.jpg" alt="Biometrics: vital-sign cards with trends and reading quality, and the cabin environment" width="100%"><br><b>Biometrics</b><br><sub>One card per vital sign with its trend and reading quality, six cabin metrics with their reference ranges, sleep and activity, and the devices that take the readings, which can be exploded into parts. Every card has its "!" button.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><img src="docs/screenshots/checkin.jpg" alt="Daily check-in: 0 to 10 scales, who sees this, and the comparison with one's own history" width="100%"><br><b>Check-in</b><br><sub>A short check on how you are today. Every scale goes from 0 (worst) to 10 (best), with labeled ends and the period stated. Tension (no names; with the crew or with mission control) and symptoms are optional. The "Who sees this" panel shows before answering. The last 14 days are compared with what is usual for the same person. If headache or a stuffy nose is reported, the recent cabin CO₂ appears beside it, converted to mmHg, without claiming one causes the other.</sub></td>
+    <td width="50%" valign="top"><img src="docs/screenshots/evidence.jpg" alt="Evidence window: the basis of a value, a short note and the references" width="100%"><br><b>Evidence</b><br><sub>Every limit, goal and rule opens a window with its basis, a short note and its references.</sub><br><br><b>Alerts, History and About</b><br><sub>Alerts open from the bell, with a lifecycle (active, acknowledged, snoozed, resolved), priorities and the simulated link to Earth. History shows each vital sign with its status bands and baseline, signal quality, missions and streak. About lists the evidence for each value, each with its references, and where the data comes from.</sub></td>
+  </tr>
+</table>
 
 ## Every number shows its basis
 
@@ -73,12 +168,6 @@ Tesai is a second doctor inside the visor. It shows the whole crew's vital signs
 | No real data source | Simulated | The simulated source, the check-in history before today |
 
 Research summary: [`docs/research-summary.md`](docs/research-summary.md).
-
-## Tech stack
-
-HTML, CSS (design tokens, `color-mix`), JavaScript ES modules, SVG charts. No framework and no bundler. Plus Jakarta Sans and JetBrains Mono (SIL OFL), served locally.
-
-The simulation uses three.js 0.170.0 (MIT), included in the repo, plus the Web Speech API for the voice and Web Audio for the tones. No npm and no build step.
 
 ## Run it locally
 
@@ -94,6 +183,39 @@ Then open `http://localhost:8765/` (landing), `/simulacion/` (simulation) or `/t
 ## Security and privacy
 
 Nothing leaves the browser: no server, accounts or database, and the Earth link is simulated. The check-in stays in `localStorage`. No page has inline scripts, so `vercel.json` sets a Content Security Policy with `script-src 'self'` plus `nosniff`, frame, referrer, permissions and HSTS headers. Imported CSV or JSON files are treated as untrusted and normalized before display, and no API key lives in the client.
+
+## Tech stack
+
+HTML, CSS (design tokens, `color-mix`), JavaScript ES modules, SVG charts. No framework and no bundler. Plus Jakarta Sans and JetBrains Mono (SIL OFL), served locally.
+
+The simulation uses three.js 0.170.0 (MIT), included in the repo, plus the Web Speech API for the voice and Web Audio for the tones. No npm and no build step.
+
+## Project structure
+
+<details>
+<summary>Folder map</summary>
+
+```text
+.
+├── src/                 The Tesai site, the only thing that is published (see src/README.md)
+│   ├── index.html       Landing: the problem, the app, how it works, sensors, videos, entry points and team
+│   ├── shared/          Colors, fonts, buttons, language and top bar shared by the three pages
+│   ├── assets/          Images, logo, fonts, the Visor screenshots and video, and the video thumbnails
+│   ├── simulacion/      Immersive simulation: index.html, styles.css, js/ (texts, 3D scene, loop) and vendor/three.js
+│   └── tesai/           The Tesai app (see src/tesai/README.md and ARCHITECTURE.md)
+│       ├── index.html
+│       ├── styles/      base → layout → components → responsive
+│       └── js/          config, rules, state, check-in, twin, Visor, audio, evidence, i18n, providers, ui
+├── tools/twin/          Generator for the twin drawing (writes src/tesai/js/twin/art.js)
+├── react/astronaut/     The twin as React components, alongside the site version
+├── docs/                Research summary, human-factors rationale, AI use and screenshots
+├── data/                Data and sources
+├── assets/              README banner, badges and team picture
+├── vercel.json          Publishes src/, caching and security headers
+└── ARCHITECTURE.md      Module map, data flow, alert system and deployment
+```
+
+</details>
 
 ## Use of AI
 
@@ -126,7 +248,14 @@ Full list: [`data/README.md`](data/README.md).
 
 ## Team
 
-**Team Higía:** [Ezequiel Alfaro](https://github.com/EzeAlfaro), [Sebastian Garay](https://github.com/SGGaray), [Nataya Flores](https://github.com/natayadev), Mateo Capararo.
+<table>
+  <tr>
+    <td align="center" width="25%"><a href="https://github.com/EzeAlfaro"><img src="https://github.com/EzeAlfaro.png?size=160" width="96" alt=""><br><b>Ezequiel Alfaro</b></a><br><sub>@EzeAlfaro</sub></td>
+    <td align="center" width="25%"><a href="https://github.com/SGGaray"><img src="https://github.com/SGGaray.png?size=160" width="96" alt=""><br><b>Sebastian Garay</b></a><br><sub>@SGGaray</sub></td>
+    <td align="center" width="25%"><a href="https://github.com/natayadev"><img src="https://github.com/natayadev.png?size=160" width="96" alt=""><br><b>Nataya Flores</b></a><br><sub>@natayadev</sub></td>
+    <td align="center" width="25%"><img src="assets/team/mateo.svg" width="96" alt=""><br><b>Mateo Capararo</b><br><sub>&nbsp;</sub></td>
+  </tr>
+</table>
 
 ## License
 
@@ -146,6 +275,14 @@ Supplementary documents `ARCHITECTURE.md` and `docs/psicologia-social.md` are wr
 
 **Un gemelo de salud para tripulaciones espaciales que dice cuánto confiar en cada número.**
 
+<div align="center">
+
+<a href="https://higia.pages.dev/"><img alt="Live demo: higia.pages.dev" src="https://img.shields.io/badge/Live_demo-higia.pages.dev-1F8A84?style=for-the-badge&logo=cloudflare&logoColor=white"></a>
+<a href="https://youtu.be/NimyUX2ECR8"><img alt="30-second video" src="https://img.shields.io/badge/Video-0%3A30-E62117?style=for-the-badge&logo=youtube&logoColor=white"></a>
+<a href="https://youtu.be/NKw8A0TgpqQ"><img alt="Full presentation" src="https://img.shields.io/badge/Presentation-2%3A49-E62117?style=for-the-badge&logo=youtube&logoColor=white"></a>
+
+</div>
+
 ## Contenido
 
 1. [Los videos](#los-videos) · [El problema](#el-problema)
@@ -162,12 +299,16 @@ Supplementary documents `ARCHITECTURE.md` and `docs/psicologia-social.md` are wr
 
 <table>
   <tr>
-    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai en 30 segundos (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">Tesai en 30 segundos (0:30)</a></b><br>El video para la NASA, en inglés.</td>
-    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/presentacion.webp" alt="La presentación completa (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">La presentación completa (2:49)</a></b><br>En español, con subtítulos.</td>
+    <td width="50%" align="center"><a href="https://youtu.be/NimyUX2ECR8"><img src="src/assets/videos/nasa-30s.webp" alt="Tesai en 30 segundos (0:30)" width="100%"></a><br><b><a href="https://youtu.be/NimyUX2ECR8">Tesai en 30 segundos (0:30)</a></b><br><sub>El video para la NASA, en inglés.</sub></td>
+    <td width="50%" align="center"><a href="https://youtu.be/NKw8A0TgpqQ"><img src="src/assets/videos/presentacion.webp" alt="La presentación completa (2:49)" width="100%"></a><br><b><a href="https://youtu.be/NKw8A0TgpqQ">La presentación completa (2:49)</a></b><br><sub>En español, con subtítulos.</sub></td>
   </tr>
 </table>
 
 Probalo en vivo en **[higia.pages.dev](https://higia.pages.dev/)**: la simulación y el dashboard andan en el navegador, sin instalar nada.
+
+<p align="center">
+  <a href="https://higia.pages.dev/"><img src="docs/screenshots/landing.jpg" alt="La web de Tesai: un segundo médico dentro de tu visor, con botones para iniciar la simulación o abrir el dashboard" width="88%"></a>
+</p>
 
 ## El problema
 
@@ -194,6 +335,7 @@ Tesai es un segundo médico dentro del visor. Muestra los signos vitales de toda
 | ❗ **Evidencia en cada número** | Un botón "!" junto a cada límite, meta y regla: si sale de una fuente, si es una adaptación o si es un valor de diseño del equipo, con referencias APA |
 | 📡 **Enlace con Tierra tolerante a demoras** | Los avisos críticos que nadie reconoce se escalan por un enlace simulado con la Tierra |
 
+> [!NOTE]
 > **Estado (15 de noviembre de 2026):** todas las pantallas funcionan en el navegador. Por defecto el prototipo reproduce grabaciones públicas reales: frecuencia cardíaca, variabilidad cardíaca y sueño de seis adultos sanos (PhysioNet MMASH y una muestra chica de BIDSleep; **no son astronautas**) y temperatura, humedad y CO₂ reales de la cabina de la ISS, de NASA OSDR. Lo que esos datasets no midieron aparece como "sin datos". La fuente simulada (cuatro tripulantes ficticios) está a un clic en Avanzado, y las capturas y el video del Visor se grabaron con ella. Tesai es un prototipo de hackathon, **no un dispositivo médico**. Los umbrales son ilustrativos.
 
 ## La simulación
@@ -212,7 +354,9 @@ En el visor del casco ves tus propios datos y el biomonitor de la persona afecta
 
 El Visor lleva lo mismo que se ve en la simulación al prototipo: la vista a través del casco, con los signos vitales de toda la tripulación proyectados en el vidrio.
 
-![Visor de Tesai: la frecuencia cardíaca de Amara sube, aparece el aviso y el segundo doctor marca los pasos](docs/screenshots/visor.jpg)
+<p align="center">
+  <img src="docs/screenshots/visor.jpg" alt="Visor de Tesai: la frecuencia cardíaca de Amara sube, aparece el aviso y el segundo doctor marca los pasos" width="88%">
+</p>
 
 - **Tu visor:** tu pulso, SpO₂, presión, respiración y temperatura, más el CO₂, el oxígeno y la presión de la cabina.
 - **Biomonitores:** el resto de la tripulación, cada uno con su ECG y su estado. El estado siempre va con palabra además de color.
@@ -316,12 +460,15 @@ HTML, CSS (tokens de diseño, `color-mix`), JavaScript con ES modules y gráfico
 
 ## Estructura del proyecto
 
+<details>
+<summary>Mapa de carpetas</summary>
+
 ```text
 .
 ├── src/                 El sitio de Tesai, lo único que se publica (ver src/README.md)
-│   ├── index.html       Web central: el problema, la app, cómo funciona, sensores, accesos y equipo
+│   ├── index.html       Web central: el problema, la app, cómo funciona, sensores, videos, accesos y equipo
 │   ├── shared/          Colores, tipografías, botones, idioma y barra superior comunes a las tres páginas
-│   ├── assets/          Imágenes, logo, tipografías y las capturas y el video del Visor
+│   ├── assets/          Imágenes, logo, tipografías, las capturas y el video del Visor y las miniaturas de los videos
 │   ├── simulacion/      Simulación inmersiva: index.html, styles.css, js/ (textos, escena 3D, bucle) y vendor/three.js
 │   └── tesai/           La app Tesai (ver src/tesai/README.md y ARCHITECTURE.md)
 │       ├── index.html
@@ -331,11 +478,12 @@ HTML, CSS (tokens de diseño, `color-mix`), JavaScript con ES modules y gráfico
 ├── react/astronaut/     El gemelo como componentes React, en paralelo a la versión del sitio
 ├── docs/                Resumen de la investigación, fundamento de factores humanos, uso de IA y capturas
 ├── data/                Datos y fuentes
-├── assets/              Banner e insignias del README
+├── assets/              Banner, insignias e imagen del equipo del README
 ├── vercel.json          Publicación de src/, caché y cabeceras de seguridad
 └── ARCHITECTURE.md      Mapa de módulos, flujo de datos, sistema de avisos y despliegue
 ```
 
+</details>
 
 ## Uso de IA
 
@@ -376,7 +524,14 @@ Lista completa: [`data/README.md`](data/README.md).
 
 ## Equipo
 
-**Equipo Higía:** [Ezequiel Alfaro](https://github.com/EzeAlfaro), [Sebastian Garay](https://github.com/SGGaray), [Nataya Flores](https://github.com/natayadev), Mateo Capararo.
+<table>
+  <tr>
+    <td align="center" width="25%"><a href="https://github.com/EzeAlfaro"><img src="https://github.com/EzeAlfaro.png?size=160" width="96" alt=""><br><b>Ezequiel Alfaro</b></a><br><sub>@EzeAlfaro</sub></td>
+    <td align="center" width="25%"><a href="https://github.com/SGGaray"><img src="https://github.com/SGGaray.png?size=160" width="96" alt=""><br><b>Sebastian Garay</b></a><br><sub>@SGGaray</sub></td>
+    <td align="center" width="25%"><a href="https://github.com/natayadev"><img src="https://github.com/natayadev.png?size=160" width="96" alt=""><br><b>Nataya Flores</b></a><br><sub>@natayadev</sub></td>
+    <td align="center" width="25%"><img src="assets/team/mateo.svg" width="96" alt=""><br><b>Mateo Capararo</b><br><sub>&nbsp;</sub></td>
+  </tr>
+</table>
 
 ## Licencia
 
