@@ -1,6 +1,6 @@
 # Data and sources · Datos y fuentes
 
-**Tesai does not ingest any dataset.** Every reading in the app (vital signs, cabin environment, sleep, activity, devices and the check-in history before today) is synthetic, generated in the browser by `src/tesai/js/providers/simulated.js` and `src/tesai/js/checkin.js` with a fixed seed, and labeled as simulated on screen. No real personal or health data is committed or collected.
+**Tesai replays real datasets by default:** heart rate, heart rate variability and sleep from PhysioNet MMASH (four participants) and a small sample of BIDSleep (one night of two participants), all healthy adults and not astronauts, plus real ISS cabin temperature, humidity and CO₂ from the NASA OSDR Environmental Data App. They are converted by the scripts in `tools/datasets/` into `src/tesai/data/*.json`. What those datasets did not measure is empty, and the app shows "no data" for it. The simulated source is still there (Advanced → Active source). The check-in history before today and the goals are not from any dataset.
 
 The team found no public dataset of daily, individual, in-flight astronaut vital signs. Individual astronaut medical data exists in NASA repositories, but it is restricted and available only on request, with consent and an attributability review. Aggregated results are published in papers.
 
@@ -22,9 +22,14 @@ What the app does use from real sources are **limits, ranges and design decision
 | Institute of Medicine (2001), *Safe Passage* | Report | Under-reporting of symptoms by astronauts (check-in privacy) | https://doi.org/10.17226/10218 | National Academies terms; cited, not copied | Nov 2026 |
 | MedlinePlus, StatPearls, American Heart Association | Clinical references | Earth adult reference ranges for vital signs | See `src/tesai/js/evidence.js` | Publisher terms | Nov 2026 |
 
-## Real data sources to explore (not used)
+## Real datasets
 
-Listed in the app's About page: NASA OSDR (Inspiration4 datasets, environmental data), PhysioNet (MMASH, BIDSleep; not astronauts), SOMA, data.nasa.gov and NASA APIs.
+| Dataset | Status | Terms |
+|---|---|---|
+| PhysioNet MMASH (heart rate, HRV, sleep, activity; 22 healthy adults) | **In use**: 4 participants, heart rate and HRV per minute (`build_mmash.py`) | ODbL 1.0: attribution and the same license for the adapted excerpt |
+| PhysioNet BIDSleep (Apple Watch heart rate and EEG sleep stages; 47 adults, 253 nights, 27.9 GB) | **In use as a small sample**: one night of two participants, heart rate and sleep only, about 250 KB downloaded (`build_bidsleep.py`) | Open Data Commons Attribution License 1.0 |
+| NASA OSDR Environmental Data App (ISS cabin telemetry) | **In use**: mission RR-9, three days, temperature, humidity and CO₂ every 5 minutes (`build_osdr_eda.py`). Radiation is not used: the EDA gives absorbed dose in mGy/day and Tesai shows dose equivalent in µSv/h | U.S. Government work (NASA OSDR) |
+| data.nasa.gov and NASA APIs | Listed only: general open data, no daily in-flight vitals | U.S. Government work |
 
 ## Third-party assets
 

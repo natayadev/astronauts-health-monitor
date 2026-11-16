@@ -11,6 +11,17 @@
 /* eslint-disable key-spacing */
 /*I18N-DATA-START*/
 const ES_DICT = {
+"Real data: MMASH, BIDSleep and OSDR (default)": "Datos reales: MMASH, BIDSleep y OSDR (por defecto)",
+"Real data: MMASH (default)": "Datos reales: MMASH, BIDSleep y OSDR (por defecto)",
+"Wrist heart rate and EEG sleep stages of 47 adults (not astronauts). A small sample is in use: one night of two participants": "Frecuencia cardíaca de muñeca y etapas de sueño por EEG de 47 adultos (no astronautas). Se usa una muestra pequeña: una noche de dos participantes",
+"ISS cabin temperature, humidity and CO₂. In use for the cabin environment (radiation not included)": "Temperatura, humedad y CO₂ de la cabina de la ISS. En uso para el ambiente de la cabina (sin radiación)",
+"Heart rate, actigraphy and sleep of 22 healthy adults (not astronauts). In use for the default readings": "Frecuencia cardíaca, actigrafía y sueño de 22 adultos sanos (no astronautas). En uso para las lecturas por defecto",
+"Heart rate and heart rate variability come from real recordings of healthy adults in the public MMASH dataset (four of the 22 participants), averaged per minute; variability is computed as RMSSD over two minutes. Two more participants come from a small sample of the BIDSleep dataset (one night each, heart rate and sleep only). None of them are astronauts. The cabin temperature, humidity and CO₂ are real ISS values from NASA OSDR (mission RR-9, three days, every 5 minutes). Blood oxygen, blood pressure, body temperature, breathing, cabin oxygen, cabin pressure and radiation are not in those datasets and show no data. The check-in history and the goals do not come from them. A simulated source is available in Advanced.": "La frecuencia cardíaca y la variabilidad cardíaca vienen de grabaciones reales de adultos sanos del dataset público MMASH (cuatro de los 22 participantes), promediadas por minuto; la variabilidad se calcula como RMSSD en dos minutos. Otros dos participantes salen de una muestra pequeña del dataset BIDSleep (una noche cada uno, solo frecuencia cardíaca y sueño). Ninguno es astronauta. La temperatura, la humedad y el CO₂ de la cabina son valores reales de la ISS de NASA OSDR (misión RR-9, tres días, cada 5 minutos). El oxígeno en sangre, la presión arterial, la temperatura corporal, la respiración, el oxígeno y la presión de la cabina y la radiación no están en esos datasets y muestran sin datos. El historial del chequeo y las metas no vienen de ellos. En Avanzado hay una fuente simulada disponible.",
+"The readings come from public datasets of healthy adults, not from astronauts, and can be switched to simulated data in Advanced. Nothing here is a medical diagnosis or advice.": "Las lecturas vienen de datasets públicos de adultos sanos, no de astronautas, y se pueden cambiar a datos simulados en Avanzado. Nada de esto es un diagnóstico ni un consejo médico.",
+"The heart rate, heart rate variability and sleep you see come from real recordings of healthy adults in public datasets (MMASH, and a small sample of BIDSleep), not from astronauts. The cabin temperature, humidity and CO₂ are real ISS values from NASA OSDR. The other metrics and the check-in history are not measured there. The sources below back the ranges and rules.": "La frecuencia cardíaca, la variabilidad cardíaca y el sueño que ves vienen de grabaciones reales de adultos sanos de datasets públicos (MMASH y una muestra pequeña de BIDSleep), no de astronautas. La temperatura, la humedad y el CO₂ de la cabina son valores reales de la ISS de NASA OSDR. Las demás métricas y el historial del chequeo no se miden ahí. Las fuentes de abajo respaldan los rangos y las reglas.",
+"Heart rate, actigraphy and sleep of 22 healthy adults (not astronauts). In use for the default readings": "Frecuencia cardíaca, actigrafía y sueño de 22 adultos sanos (no astronautas). En uso para las lecturas por defecto",
+"Data behind the readings": "Datos detrás de las lecturas",
+"Team design value": "Valor de diseño del equipo",
 "delayed": "demorada",
 "Oxygen (ppO₂)": "Oxígeno (ppO₂)",
 "View alert": "Ver alerta",
@@ -55,10 +66,8 @@ const ES_DICT = {
 "CO₂ spike": "Pico de CO₂",
 "Disconnect sensor": "Desconectar sensor",
 "Exercise session": "Sesión de ejercicio",
-"All the data you see is simulated. No reading belongs to a real person, and nothing here is a medical diagnosis or advice.": "Todos los datos que ves son simulados. Ninguna lectura pertenece a una persona real y nada de esto es un diagnóstico ni un consejo médico.",
 "Tesai is an independent prototype made for the NASA Space Apps Challenge 2026. It is not affiliated with, endorsed by or sponsored by NASA.": "Tesai es un prototipo independiente hecho para el NASA Space Apps Challenge 2026. No está afiliado a la NASA ni cuenta con su aval ni patrocinio.",
 "Notices": "Avisos legales",
-"Every reading in the app is simulated. The crew members, their personal baselines and the events are invented. The sources below back the ranges and rules, not the readings. Tesai is built so real datasets can replace the simulated ones. These are the datasets the team plans to integrate.": "Todas las lecturas de la app son simuladas. Los tripulantes, sus líneas base personales y los eventos son inventados. Las fuentes de abajo respaldan los rangos y las reglas, no las lecturas. Tesai está pensado para que datasets reales reemplacen a los simulados. Estos son los datasets que el equipo planea integrar.",
 "Data provenance": "Procedencia de los datos",
 "Every number in Tesai is tagged with where it comes from. \"Based on a source\" means the value follows a published one. \"Adapted\" means it starts from a source but Tesai changed it, and the note says how. \"Team design value\" means the team chose it and no published source was found. \"No real data source\" marks simulated data.": "Cada número de Tesai indica de dónde sale. \"Basado en una fuente\" significa que el valor sigue uno publicado. \"Adaptado\" significa que parte de una fuente pero Tesai lo cambió, y la nota dice cómo. \"Valor de diseño del equipo\" significa que lo eligió el equipo y no se encontró una fuente publicada. \"Sin fuente de datos reales\" marca los datos simulados.",
 "Evidence by data point": "Respaldo de cada dato",
@@ -80,7 +89,6 @@ const ES_DICT = {
 "The 2 L per day water guideline is an illustrative value. No source was found in the team's research.": "La guía de 2 L de agua por día es un valor ilustrativo. No se encontró una fuente en la investigación del equipo.",
 "Symptoms next to cabin CO₂": "Síntomas junto al CO₂ de la cabina",
 "Sleep goal (7 h)": "Meta de sueño (7 h)",
-"Simulated readings": "Lecturas simuladas",
 "Sensor battery and signal limits": "Límites de batería y señal de los sensores",
 "Respiration limits": "Límites de respiración",
 "Radiation limits": "Límites de radiación",
@@ -520,6 +528,7 @@ const ES_DICT = {
 const ES_COUNT = { Active: 'Activas', Snoozed: 'Pospuestas', Acknowledged: 'Reconocidas', Resolved: 'Resueltas', All: 'Todas' };
 
 const ES_PATTERNS = [
+["^Replaying real data: (.+)\\. Healthy adults, not astronauts\\.$", "Reproduciendo datos reales: $1. Adultos sanos, no astronautas."],
 ["^Reference: (.+)$","Referencia: $1"],
 ["^Reference: up to (.+)$","Referencia: hasta $1"],
 ["^(\\d+) min to go to complete \"Daily training\"\\.$","Faltan $1 min para completar \"Entrenamiento diario\"."],

@@ -58,7 +58,7 @@ export const SCHEMA = {
 };
 
 export const CONFIG = {
-  dataSource: 'simulated',
+  dataSource: 'dataset',
   seed: 2026,
   tickMs: 2000,
   historyWindowMin: 30,

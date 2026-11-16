@@ -242,15 +242,8 @@ export const UI = {
     const ms = Date.now() - new Date(CONFIG.missionStart), d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000) % 24, m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60;
     setText($('#db-met'), `${d} d ${pad(h)}:${pad(m)}:${pad(s)}`);
   },
-  renderSourceBadge() {
-    const b = $('#badge-source'), d = State.provider?.describe() || {};
-    if (d.source === 'real') { b.className = 'src real'; const file = d.kind === 'FileProvider'; setHtml(b, `<span aria-hidden="true">●</span><span class="lg">${file ? 'FILE DATA · UNVERIFIED' : 'API DATA · UNVERIFIED'}</span><span class="sm">UNVERIFIED</span>`); b.title = 'This data comes from outside and has not been verified by Tesai.'; }
-    else { b.className = 'src'; setHtml(b, ''); b.title = ''; }
-    b.hidden = d.source !== 'real';
-    const live = $('#live'), isFile = d.kind === 'FileProvider';
-    setText($('#live-label'), isFile ? 'Replaying' : 'Live'); setText($('#live-rate'), (1000 / CONFIG.tickMs).toFixed(1) + ' Hz');
-    live.dataset.state = State.provider ? 'live' : 'paused';
-  },
+  // The top bar no longer shows the data source or the replay rate; the source is in Advanced.
+  renderSourceBadge() {},
   renderBadges() {
     const act = activeAlerts(), n = act.length, top = act[0], lv = !top ? '' : top.level === 'info' ? 'normal' : top.level;
     const bc = $('#bell-count'); setText(bc, n ? String(n) : ''); if (lv) bc.dataset.level = lv; else delete bc.dataset.level;
@@ -480,15 +473,15 @@ export const UI = {
         <p><a href="../simulacion/">Open the simulation</a></p></section>
       <section class="panel" aria-labelledby="h-evid"><h3 id="h-evid"><span class="grow">Evidence by data point</span></h3>
         <p class="note">Every number in Tesai is tagged with where it comes from. "Based on a source" means the value follows a published one. "Adapted" means it starts from a source but Tesai changed it, and the note says how. "Team design value" means the team chose it and no published source was found. "No real data source" marks simulated data.</p>
-        ${groups.map(g => `<div class="group-title">${g}</div><div class="alist">${Object.entries(EVIDENCE).filter(([k, e]) => e.group === g).map(([k, e]) => `<div class="evrow"><div class="top"><b>${esc(e.label)}</b>${_basisPill(e.basis)}${_evBtn(k)}</div><p>${esc(e.note)}</p>${e.refs.length ? `<ul class="apa" data-i18n="off">${apaItems(e.refs)}</ul>` : '<div class="cites">No published source found.</div>'}</div>`).join('')}</div>`).join('')}
+        ${groups.map(g => `<div class="group-title">${g}</div><div class="alist">${Object.entries(EVIDENCE).filter(([k, e]) => e.group === g).map(([k, e]) => `<div class="evrow"><div class="top"><b>${esc(e.label)}</b>${_basisPill(e.basis)}</div><p>${esc(e.note)}</p>${e.refs.length ? `<ul class="apa" data-i18n="off">${apaItems(e.refs)}</ul>` : ''}</div>`).join('')}</div>`).join('')}
       </section>
       <section class="panel" aria-labelledby="h-prov"><h3 id="h-prov"><span class="grow">Data provenance</span></h3>
-        <p>Every reading in the app is simulated. The crew members, their personal baselines and the events are invented. The sources below back the ranges and rules, not the readings. Tesai is built so real datasets can replace the simulated ones. These are the datasets the team plans to integrate.</p>
+        <p>The heart rate, heart rate variability and sleep you see come from real recordings of healthy adults in public datasets (MMASH, and a small sample of BIDSleep), not from astronauts. The cabin temperature, humidity and CO₂ are real ISS values from NASA OSDR. The other metrics and the check-in history are not measured there. The sources below back the ranges and rules.</p>
         <div class="group-title">Real data sources</div>
         <ul class="links">${REAL_SOURCES.map(r => `<li><a href="${r.url}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a> <span class="tag">${esc(r.note)}</span></li>`).join('')}</ul></section>
       <section class="panel" aria-labelledby="h-notes"><h3 id="h-notes"><span class="grow">Notices</span></h3>
         <ul class="links plain"><li>${esc(C.app)} is an independent prototype made for the ${esc(C.event)}. It is not affiliated with, endorsed by or sponsored by NASA.</li>
-        <li>All the data you see is simulated. No reading belongs to a real person, and nothing here is a medical diagnosis or advice.</li>
+        <li>The readings come from public datasets of healthy adults, not from astronauts, and can be switched to simulated data in Advanced. Nothing here is a medical diagnosis or advice.</li>
         <li>Tesai is open source under the MIT license.</li>
         <li>Fonts: Plus Jakarta Sans and JetBrains Mono, under the SIL Open Font License 1.1.</li></ul></section>`);
     $$('#about-body [data-evslot-static]').forEach(el => { el.outerHTML = _evBtn('data.simulated'); });
@@ -523,7 +516,7 @@ export const UI = {
   renderSystemLive() {
     const d = State.provider?.describe() || {}, canInject = State.demo && d.kind === 'SimulatedProvider';
     $$('#inject-buttons button').forEach(b => { b.disabled = !canInject; });
-    setText($('#source-status'), State.sourceNote || (d.kind === 'SimulatedProvider' ? 'Using simulated data with seed ' + CONFIG.seed + '.' : d.kind === 'FileProvider' ? `Replaying ${d.readings} readings from ${d.file}. Unverified data.` : 'Remote source active.'));
+    setText($('#source-status'), State.sourceNote || (d.kind === 'SimulatedProvider' ? 'Using simulated data with seed ' + CONFIG.seed + '.' : d.kind === 'DatasetProvider' ? `Replaying real data: ${d.datasets.map(x => x.id.toUpperCase() + (x.sample ? ' (sample)' : '')).join(', ')}. Healthy adults, not astronauts.` : d.kind === 'FileProvider' ? `Replaying ${d.readings} readings from ${d.file}. Unverified data.` : 'Remote source active.'));
     setText($('#provider-info'), JSON.stringify(d, null, 2));
   },
   async importFile(file) {

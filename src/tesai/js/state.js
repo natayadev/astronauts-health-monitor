@@ -34,7 +34,7 @@ export const State = {
     try {
       localStorage.setItem(CONFIG.storageKey, JSON.stringify({
         gam: this.gam, sound: this.sound, demo: this.demo, motion: this.motion,
-        seed: CONFIG.seed, tickMs: CONFIG.tickMs, dataSource: CONFIG.dataSource, lang: this.lang
+        seed: CONFIG.seed, tickMs: CONFIG.tickMs, dataSource: CONFIG.dataSource, dsv: 2, lang: this.lang
       }));
       localStorage.setItem('tesai.lang', this.lang);
     } catch (e) { /* storage unavailable */ }
@@ -50,7 +50,7 @@ export const State = {
       if (s.motion) this.motion = s.motion;
       if (s.seed)   CONFIG.seed = s.seed;
       if (s.tickMs) CONFIG.tickMs = s.tickMs;
-      if (s.dataSource && s.dataSource !== 'file') CONFIG.dataSource = s.dataSource;
+      if (s.dsv === 2 && s.dataSource && s.dataSource !== 'file') CONFIG.dataSource = s.dataSource;   // a choice saved before the real data existed is ignored once
       if (s.lang === 'es' || s.lang === 'en') this.lang = s.lang;
     } catch (e) { /* corrupt storage */ }
     shared();

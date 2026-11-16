@@ -55,13 +55,7 @@
         <button class="tab" data-view="about"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>About</button>
       </div>
       <div class="spacer"></div>
-      <span class="src" id="badge-source" role="status"></span>
       <tesai-lang></tesai-lang>
-      <div class="live" id="live" data-state="live">
-        <span class="ping" aria-hidden="true"></span>
-        <span id="live-label">Live</span>
-        <span class="tag" id="live-rate">0,5 Hz</span>
-      </div>
       <button class="btn icon-btn" id="btn-audio" type="button" aria-pressed="true" aria-label="Audio on" title="Audio on">
         <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
       </button>
@@ -433,7 +427,8 @@
           <label class="fld">
             <span>Active source</span>
             <select id="set-source">
-              <option value="simulated">Simulated (default)</option>
+              <option value="dataset">Real data: MMASH, BIDSleep and OSDR (default)</option>
+              <option value="simulated">Simulated</option>
               <option value="remote">Remote (API, not connected yet)</option>
               <option value="file">Imported file</option>
             </select>
