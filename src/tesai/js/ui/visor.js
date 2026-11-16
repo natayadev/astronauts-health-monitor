@@ -194,7 +194,7 @@ export const Visor = {
   },
 
   simHtml() {
-    if (!State.demo || State.provider?.describe?.().source !== 'simulated') return '';
+    if (!State.demo || !['simulated', 'mixed'].includes(State.provider?.describe?.().source)) return '';
     const who = V.simWho && State.crew.some(c => c.id === V.simWho) ? V.simWho : (State.selectedId || State.crew[0]?.id);
     V.simWho = who;
     return `<section class="panel vz-simp" aria-labelledby="vz-sim-h">

@@ -25,10 +25,10 @@ const EVENT_EFFECTS = {
 };
 
 export class SimulatedProvider extends DataProvider {
-  constructor({ seed = CONFIG.seed, tickMs = CONFIG.tickMs } = {}) {
+  constructor({ seed = CONFIG.seed, tickMs = CONFIG.tickMs, crew = CREW_SEED } = {}) {
     super(); this.kind = 'SimulatedProvider'; this.sourceTag = 'simulated';
     this.seed = seed; this.tickMs = tickMs; this.rng = makeRng(seed);
-    this.crew = CREW_SEED.map(c => ({ ...c, baseline: { ...c.baseline } }));
+    this.crew = crew.map(c => ({ ...c, baseline: { ...c.baseline } }));
     this.sim = {}; this.events = []; this.subs = new Map(); this.timer = null;
     this.manual = {};
     const r = this.rng;
@@ -45,7 +45,8 @@ export class SimulatedProvider extends DataProvider {
       };
     }
     // One device starts with a low battery to trigger the recharge reminder on startup
-    this.sim['ast-02'].devices[1].battery = 14;
+    if (this.sim['ast-02']) this.sim['ast-02'].devices[1].battery = 14;
+    else if (this.crew[1]) this.sim[this.crew[1].id].devices[1].battery = 14;
     this.env = { co2: 1800 + r() * 500, oxygen: 21.3, temp: 22.5, humidity: 45, pressure: 101.2, radiation: 12 };
     this.envAr = { co2: 0, oxygen: 0, temp: 0, humidity: 0, pressure: 0, radiation: 0 };
     this.history = {}; this._preloadHistory();
